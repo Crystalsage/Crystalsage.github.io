@@ -35,10 +35,8 @@
       <pubDate>Mon, 26 Apr 2021 23:12:25 +0530</pubDate>
       
       <guid>https://crystalsage.github.io/posts/fp/</guid>
-      <description>This is Bourbon&amp;rsquo;s new website! Hello!
- Eggs Eggs Basket  #!/usr/bin/env python import numpy as np import matplotlib.pyplot as plot time = np.arange(0,10,0.1); amplitude = np.floor(time) plot.plot(time,amplitude) plot.title(&amp;#34;Floor function&amp;#34;) plot.xlabel(&amp;#34;Time&amp;#34;) plot.ylabel(&amp;#34;Amplitude = floor(time)&amp;#34;) plot.grid(True, which=&amp;#39;both&amp;#39;) plot.axhline(y = 0, color=&amp;#39;k&amp;#39;) plot.show() </description>
-      <content>&lt;h1 id=&#34;this-is-bourbons-new-website&#34;&gt;This is Bourbon&amp;rsquo;s new website!&lt;/h1&gt;
-&lt;p&gt;Hello!&lt;/p&gt;
+      <description>Hello!  Eggs Eggs Basket  #!/usr/bin/env python import numpy as np import matplotlib.pyplot as plot time = np.arange(0,10,0.1); amplitude = np.floor(time) plot.plot(time,amplitude) plot.title(&amp;#34;Floor function&amp;#34;) plot.xlabel(&amp;#34;Time&amp;#34;) plot.ylabel(&amp;#34;Amplitude = floor(time)&amp;#34;) plot.grid(True, which=&amp;#39;both&amp;#39;) plot.axhline(y = 0, color=&amp;#39;k&amp;#39;) plot.show() </description>
+      <content>&lt;h1 id=&#34;hello&#34;&gt;Hello!&lt;/h1&gt;
 &lt;ul&gt;
 &lt;li&gt;Eggs&lt;/li&gt;
 &lt;li&gt;Eggs&lt;/li&gt;
