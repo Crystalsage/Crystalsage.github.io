@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+    <title>247CTF writeup :: Bourbon&#39;s website</title>
+  
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Hello" />
+<meta name="keywords" content="" />
+<meta name="robots" content="noodp" />
+<link rel="canonical" href="https://crystalsage.github.io/posts/fp/" />
+
+
+
+
+<link rel="stylesheet" href="https://crystalsage.github.io/assets/style.css">
+
+  <link rel="stylesheet" href="https://crystalsage.github.io/assets/green.css">
+
+
+
+
+
+
+<link rel="apple-touch-icon" href="https://crystalsage.github.io/img/apple-touch-icon-192x192.png">
+
+  <link rel="shortcut icon" href="https://crystalsage.github.io/img/favicon/green.png">
+
+
+
+<meta name="twitter:card" content="summary" />
+
+  
+    <meta name="twitter:site" content="bourbon" />
+  
+    <meta name="twitter:creator" content="" />
+
+
+
+<meta property="og:locale" content="en" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="247CTF writeup">
+<meta property="og:description" content="Hello" />
+<meta property="og:url" content="https://crystalsage.github.io/posts/fp/" />
+<meta property="og:site_name" content="Bourbon&#39;s website" />
+
+  
+    <meta property="og:image" content="https://crystalsage.github.io/img/favicon/green.png">
+  
+
+<meta property="og:image:width" content="2048">
+<meta property="og:image:height" content="1024">
+
+
+  <meta property="article:published_time" content="2021-04-26 23:12:25 &#43;0530 IST" />
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+<body class="green">
+
+
+<div class="container center headings--one-size">
+
+  <header class="header">
+  <div class="header__inner">
+    <div class="header__logo">
+      <a href="/">
+  <div class="logo">
+    /home/bourbon
+  </div>
+</a>
+
+    </div>
+    
+      <div class="menu-trigger">menu</div>
+    
+  </div>
+  
+    <nav class="menu">
+  <ul class="menu__inner menu__inner--desktop">
+    
+      
+        
+          <li><a href="/about">About</a></li>
+        
+      
+      
+    
+
+    
+  </ul>
+
+  <ul class="menu__inner menu__inner--mobile">
+    
+      
+        <li><a href="/about">About</a></li>
+      
+    
+    
+  </ul>
+</nav>
+
+  
+</header>
+
+
+  <div class="content">
+    
+<div class="post">
+  <h1 class="post-title">
+    <a href="https://crystalsage.github.io/posts/fp/">247CTF writeup</a></h1>
+  <div class="post-meta">
+    
+      <span class="post-date">
+        2021-04-26 
+      </span>
+    
+    
+  </div>
+
+  
+
+  
+
+  
+
+  <div class="post-content"><div>
+        <h1 id="this-is-bourbons-new-website">This is Bourbon&rsquo;s new website!<a href="#this-is-bourbons-new-website" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<p>Hello!</p>
+<ul>
+<li>Eggs</li>
+<li>Eggs</li>
+<li>Basket</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e">#!/usr/bin/env python</span>
+
+<span style="color:#f92672">import</span> numpy <span style="color:#f92672">as</span> np
+<span style="color:#f92672">import</span> matplotlib.pyplot <span style="color:#f92672">as</span> plot
+
+time <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>arange(<span style="color:#ae81ff">0</span>,<span style="color:#ae81ff">10</span>,<span style="color:#ae81ff">0.1</span>);
+amplitude <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>floor(time)
+plot<span style="color:#f92672">.</span>plot(time,amplitude)
+
+plot<span style="color:#f92672">.</span>title(<span style="color:#e6db74">&#34;Floor function&#34;</span>)
+plot<span style="color:#f92672">.</span>xlabel(<span style="color:#e6db74">&#34;Time&#34;</span>)
+plot<span style="color:#f92672">.</span>ylabel(<span style="color:#e6db74">&#34;Amplitude = floor(time)&#34;</span>)
+plot<span style="color:#f92672">.</span>grid(True, which<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;both&#39;</span>)
+plot<span style="color:#f92672">.</span>axhline(y <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>, color<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;k&#39;</span>)
+plot<span style="color:#f92672">.</span>show()
+</code></pre></div>
+      </div></div>
+
+  
+  
+  
+
+  
+
+</div>
+
+  </div>
+
+  
+    <footer class="footer">
+  <div class="footer__inner">
+    
+      <div class="copyright copyright--user">
+        <span>Licensed to Bourbon</span>
+    
+        <span>:: Theme made by <a href="https://twitter.com/panr">panr</a></span>
+      </div>
+  </div>
+</footer>
+
+<script src="https://crystalsage.github.io/assets/main.js"></script>
+<script src="https://crystalsage.github.io/assets/prism.js"></script>
+
+
+
+
+
+
+
+  
+</div>
+
+</body>
+</html>
