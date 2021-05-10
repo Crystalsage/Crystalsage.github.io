@@ -14,14 +14,16 @@
       <pubDate>Thu, 29 Apr 2021 22:51:47 +0530</pubDate>
       
       <guid>https://crystalsage.github.io/about/</guid>
-      <description>Hello Welcome to my blog. This website aims to be a technical blog documenting my adventures in programming and security, as well as a place to dump any of my notes.
- Name: Bourbon Twitter: @brownbourbon   A chain no stronger than its weakest link - Thomas Reid
- </description>
+      <description>Hello I am Bourbon. I am passionate programmer, computer security enthusiast and I love computers! I play CTFs regularly and have a big interest in security research. I have a liking for cryptography and reverse engineering.
+Welcome to my blog. This website aims to be a technical blog documenting any interesting stuff about computers and IT security.
+ Name: Bourbon Twitter: @brownbourbon Discord: Bourbon#0902   A chain no stronger than its weakest link - Thomas Reid</description>
       <content>&lt;h2 id=&#34;hello&#34;&gt;&lt;strong&gt;Hello&lt;/strong&gt;&lt;/h2&gt;
-&lt;p&gt;Welcome to my blog. This website aims to be a technical blog documenting my adventures in programming and security, as well as a place to dump any of my notes.&lt;/p&gt;
+&lt;p&gt;I am Bourbon. I am passionate programmer, computer security enthusiast and I love computers! I play CTFs regularly and have a big interest in security research. I have a liking for cryptography and reverse engineering.&lt;/p&gt;
+&lt;p&gt;Welcome to my blog. This website aims to be a technical blog documenting any interesting stuff about computers and IT security.&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Name: Bourbon&lt;/li&gt;
 &lt;li&gt;Twitter: &lt;a href=&#34;https://twitter.com/brownbourbon&#34;&gt;@brownbourbon&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Discord: Bourbon#0902&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
 &lt;p&gt;A chain no stronger than its weakest link - Thomas Reid&lt;/p&gt;
@@ -30,33 +32,18 @@
     </item>
     
     <item>
-      <title>247CTF writeup</title>
+      <title>Beginning</title>
       <link>https://crystalsage.github.io/posts/fp/</link>
       <pubDate>Mon, 26 Apr 2021 23:12:25 +0530</pubDate>
       
       <guid>https://crystalsage.github.io/posts/fp/</guid>
-      <description>Hello!  Eggs Eggs Basket  #!/usr/bin/env python import numpy as np import matplotlib.pyplot as plot time = np.arange(0,10,0.1); amplitude = np.floor(time) plot.plot(time,amplitude) plot.title(&amp;#34;Floor function&amp;#34;) plot.xlabel(&amp;#34;Time&amp;#34;) plot.ylabel(&amp;#34;Amplitude = floor(time)&amp;#34;) plot.grid(True, which=&amp;#39;both&amp;#39;) plot.axhline(y = 0, color=&amp;#39;k&amp;#39;) plot.show() </description>
+      <description>Hello! This is my first post ever, With many to come.
+fn main(){ println!(&amp;#34;Stupendous!&amp;#34;); } </description>
       <content>&lt;h1 id=&#34;hello&#34;&gt;Hello!&lt;/h1&gt;
-&lt;ul&gt;
-&lt;li&gt;Eggs&lt;/li&gt;
-&lt;li&gt;Eggs&lt;/li&gt;
-&lt;li&gt;Basket&lt;/li&gt;
-&lt;/ul&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#!/usr/bin/env python&lt;/span&gt;
-
-&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; numpy &lt;span style=&#34;color:#f92672&#34;&gt;as&lt;/span&gt; np
-&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; matplotlib.pyplot &lt;span style=&#34;color:#f92672&#34;&gt;as&lt;/span&gt; plot
-
-time &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; np&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;arange(&lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;,&lt;span style=&#34;color:#ae81ff&#34;&gt;10&lt;/span&gt;,&lt;span style=&#34;color:#ae81ff&#34;&gt;0.1&lt;/span&gt;);
-amplitude &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; np&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;floor(time)
-plot&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;plot(time,amplitude)
-
-plot&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;title(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Floor function&amp;#34;&lt;/span&gt;)
-plot&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;xlabel(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Time&amp;#34;&lt;/span&gt;)
-plot&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;ylabel(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Amplitude = floor(time)&amp;#34;&lt;/span&gt;)
-plot&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;grid(True, which&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;both&amp;#39;&lt;/span&gt;)
-plot&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;axhline(y &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;, color&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;k&amp;#39;&lt;/span&gt;)
-plot&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;show()
+&lt;p&gt;This is my first post ever, With many to come.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-rust&#34; data-lang=&#34;rust&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;fn&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;main&lt;/span&gt;(){
+  println&lt;span style=&#34;color:#f92672&#34;&gt;!&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Stupendous!&amp;#34;&lt;/span&gt;);
+}
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content>
     </item>
     
