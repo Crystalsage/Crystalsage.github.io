@@ -9,19 +9,130 @@
     <copyright>Licensed to Bourbon</copyright>
     <lastBuildDate>Mon, 26 Apr 2021 23:12:25 +0530</lastBuildDate><atom:link href="https://crystalsage.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Beginning</title>
+      <title>ls clone using getdents syscall</title>
       <link>https://crystalsage.github.io/posts/fp/</link>
       <pubDate>Mon, 26 Apr 2021 23:12:25 +0530</pubDate>
       
       <guid>https://crystalsage.github.io/posts/fp/</guid>
-      <description>Hello! This is my first post ever, With many to come.
-fn main(){ println!(&amp;#34;Stupendous!&amp;#34;); } </description>
-      <content>&lt;h1 id=&#34;hello&#34;&gt;Hello!&lt;/h1&gt;
-&lt;p&gt;This is my first post ever, With many to come.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-rust&#34; data-lang=&#34;rust&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;fn&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;main&lt;/span&gt;(){
-  println&lt;span style=&#34;color:#f92672&#34;&gt;!&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Stupendous!&amp;#34;&lt;/span&gt;);
-}
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content>
+      <description>Introduction In this short post, we&amp;rsquo;re building a barebones,toy implementation of the ls-like directory listing program in x86-64 assembly. We achieve this by using the getdents syscall.
+getdents() syscall The getdents syscall takes in 3 parameters. So the prototype of the syscall looks like: ssize_t getdents(int fd, void *dirp, size_t count), where:
+ fd : is the file descriptor of the directory (which is also just another file in Unix) dirp : is where all the dirent structs are copied during the syscall.</description>
+      <content>&lt;h1 id=&#34;introduction&#34;&gt;Introduction&lt;/h1&gt;
+&lt;p&gt;In this short post, we&amp;rsquo;re building a barebones,toy implementation of the &lt;code&gt;ls&lt;/code&gt;-like directory listing program in x86-64 assembly. We achieve this by using the &lt;code&gt;getdents&lt;/code&gt; syscall.&lt;/p&gt;
+&lt;h1 id=&#34;getdents-syscall&#34;&gt;getdents() syscall&lt;/h1&gt;
+&lt;p&gt;The &lt;code&gt;getdents&lt;/code&gt; syscall takes in 3 parameters. So the prototype of the syscall looks like:
+&lt;code&gt;ssize_t getdents(int fd, void *dirp, size_t count)&lt;/code&gt;, where:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;fd&lt;/code&gt; : is the &lt;em&gt;file descriptor&lt;/em&gt; of the directory (which is also just another file in Unix)&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;dirp&lt;/code&gt; : is where all the &lt;code&gt;dirent&lt;/code&gt; structs are copied during the syscall.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;count&lt;/code&gt; : is the size of the buffer that &lt;code&gt;dirp&lt;/code&gt; points to.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&#34;dirent-structs&#34;&gt;Dirent structs&lt;/h2&gt;
+&lt;p&gt;A &lt;em&gt;dirent&lt;/em&gt; or &lt;em&gt;linux_dirent&lt;/em&gt; struct is defined as follows.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;struct&lt;/span&gt; linux_dirent {
+       &lt;span style=&#34;color:#66d9ef&#34;&gt;unsigned&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;long&lt;/span&gt;  d_ino;     &lt;span style=&#34;color:#75715e&#34;&gt;/* File inode*/&lt;/span&gt;
+       &lt;span style=&#34;color:#66d9ef&#34;&gt;unsigned&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;long&lt;/span&gt;  d_off;     &lt;span style=&#34;color:#75715e&#34;&gt;/* Offset of the next linux_dirent */&lt;/span&gt;
+       &lt;span style=&#34;color:#66d9ef&#34;&gt;unsigned&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;short&lt;/span&gt; d_reclen;  &lt;span style=&#34;color:#75715e&#34;&gt;/* Size of the current dirent struct*/&lt;/span&gt;
+       &lt;span style=&#34;color:#66d9ef&#34;&gt;char&lt;/span&gt;           d_name[];  &lt;span style=&#34;color:#75715e&#34;&gt;// The filename of the file
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
+       &lt;span style=&#34;color:#66d9ef&#34;&gt;char&lt;/span&gt;           pad;       &lt;span style=&#34;color:#75715e&#34;&gt;// Zero padding byte
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;       &lt;span style=&#34;color:#66d9ef&#34;&gt;char&lt;/span&gt;           d_type;    &lt;span style=&#34;color:#75715e&#34;&gt;// File types such as block devices, named pipes, sockets etc.
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;   }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;So anytime we call the &lt;code&gt;getdents&lt;/code&gt; syscall, we are populating with &lt;code&gt;dirent&lt;/code&gt; structures, the buffer that &lt;code&gt;dirp&lt;/code&gt; points to. Notice how the struct also involves the filename of the file that the struct is for. We can use this for directory listing!&lt;/p&gt;
+&lt;h1 id=&#34;the-program&#34;&gt;The program&lt;/h1&gt;
+&lt;p&gt;The program that we are building lists the directory contents of the &lt;em&gt;current&lt;/em&gt; directory. We allocate a 512 bytes buffer for storing the dirent structs. (Which is sufficient for a toy implementation)&lt;/p&gt;
+&lt;p&gt;Based on the info above, we define the &lt;code&gt;.bss&lt;/code&gt; and the &lt;code&gt;.data&lt;/code&gt; sections as follows:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-nasm&#34; data-lang=&#34;nasm&#34;&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;SECTION&lt;/span&gt; .data]
+dirname: &lt;span style=&#34;color:#66d9ef&#34;&gt;db&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;.&amp;#39;&lt;/span&gt;
+
+&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;SECTION&lt;/span&gt; .bss]
+msgbuf:
+	&lt;span style=&#34;color:#66d9ef&#34;&gt;resb&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;512&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Then in the &lt;code&gt;.text&lt;/code&gt; section, we write the actual program, which consists of 2 functions called &lt;code&gt;main&lt;/code&gt; and &lt;code&gt;next_dirent&lt;/code&gt;. We populate the &lt;code&gt;msgbuf&lt;/code&gt; in the &lt;code&gt;main&lt;/code&gt; function and then process the dirent structs in the &lt;code&gt;next_dirent&lt;/code&gt; function, which handles the buffer struct by struct.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;main&lt;/code&gt; function goes like:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-asm&#34; data-lang=&#34;asm&#34;&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;SECTION&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;.text&lt;/span&gt;]
+&lt;span style=&#34;color:#a6e22e&#34;&gt;extern&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;puts&lt;/span&gt;
+&lt;span style=&#34;color:#a6e22e&#34;&gt;global&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;main&lt;/span&gt;
+
+main:
+	&lt;span style=&#34;color:#75715e&#34;&gt;;Setup
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;push&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;rbp&lt;/span&gt;
+	&lt;span style=&#34;color:#a6e22e&#34;&gt;mov&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;rbp&lt;/span&gt;, &lt;span style=&#34;color:#66d9ef&#34;&gt;rsp&lt;/span&gt;
+	&lt;span style=&#34;color:#a6e22e&#34;&gt;and&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;rsp&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;0xfffffffffffffff0&lt;/span&gt;
+
+	&lt;span style=&#34;color:#75715e&#34;&gt;;Open the current directory using the open() syscall
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;mov&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;rax&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;
+	&lt;span style=&#34;color:#a6e22e&#34;&gt;mov&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;rdi&lt;/span&gt;, &lt;span style=&#34;color:#66d9ef&#34;&gt;dirname&lt;/span&gt;
+	&lt;span style=&#34;color:#a6e22e&#34;&gt;mov&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;rsi&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;0x10000&lt;/span&gt;
+	&lt;span style=&#34;color:#a6e22e&#34;&gt;syscall&lt;/span&gt;
+
+	&lt;span style=&#34;color:#75715e&#34;&gt;;getdents(fd, buf, 64) syscall
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;mov&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;rdi&lt;/span&gt;, &lt;span style=&#34;color:#66d9ef&#34;&gt;rax&lt;/span&gt;  &lt;span style=&#34;color:#75715e&#34;&gt;;The open syscall returns the fd for the current directory
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#66d9ef&#34;&gt;mov&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;rax&lt;/span&gt;,&lt;span style=&#34;color:#ae81ff&#34;&gt;78&lt;/span&gt;
+	&lt;span style=&#34;color:#a6e22e&#34;&gt;mov&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;rsi&lt;/span&gt;, &lt;span style=&#34;color:#66d9ef&#34;&gt;msgbuf&lt;/span&gt;
+	&lt;span style=&#34;color:#a6e22e&#34;&gt;mov&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;rdx&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;512&lt;/span&gt;
+	&lt;span style=&#34;color:#a6e22e&#34;&gt;syscall&lt;/span&gt;
+	&lt;span style=&#34;color:#a6e22e&#34;&gt;xchg&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;rax&lt;/span&gt;,&lt;span style=&#34;color:#66d9ef&#34;&gt;rdx&lt;/span&gt;  &lt;span style=&#34;color:#75715e&#34;&gt;;Syscall returns total size, save it somewhere safe
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
+	&lt;span style=&#34;color:#75715e&#34;&gt;;setup registers for loop
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;xor&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;rcx&lt;/span&gt;, &lt;span style=&#34;color:#66d9ef&#34;&gt;rcx&lt;/span&gt;
+	&lt;span style=&#34;color:#a6e22e&#34;&gt;xor&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;rbx&lt;/span&gt;, &lt;span style=&#34;color:#66d9ef&#34;&gt;rbx&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Now that we have the structs we need in the &lt;code&gt;msgbuf&lt;/code&gt;, we can iterate over them. Heading into the &lt;code&gt;next_dirent&lt;/code&gt; function:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-asm&#34; data-lang=&#34;asm&#34;&gt;next_dirent:
+	&lt;span style=&#34;color:#75715e&#34;&gt;;We move to the 0th position of msgbuf every loop
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#75715e&#34;&gt;;and absolute position of every struct from it
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;mov&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;rax&lt;/span&gt;, &lt;span style=&#34;color:#66d9ef&#34;&gt;msgbuf&lt;/span&gt;
+	&lt;span style=&#34;color:#a6e22e&#34;&gt;add&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;rax&lt;/span&gt;, &lt;span style=&#34;color:#66d9ef&#34;&gt;rcx&lt;/span&gt;		
+
+	&lt;span style=&#34;color:#75715e&#34;&gt;;Grab the length of current struct
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#75715e&#34;&gt;;i.e reclen with offset adjustments
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#66d9ef&#34;&gt;add&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;rax&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;0x10&lt;/span&gt;
+	&lt;span style=&#34;color:#a6e22e&#34;&gt;movzx&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;bx&lt;/span&gt;, &lt;span style=&#34;color:#66d9ef&#34;&gt;byte&lt;/span&gt; [&lt;span style=&#34;color:#66d9ef&#34;&gt;rax&lt;/span&gt;]
+
+	&lt;span style=&#34;color:#75715e&#34;&gt;;puts modifies state of registers so save
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#75715e&#34;&gt;;them on the stack
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;push&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;rcx&lt;/span&gt;
+	&lt;span style=&#34;color:#a6e22e&#34;&gt;push&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;rdx&lt;/span&gt;
+
+	&lt;span style=&#34;color:#75715e&#34;&gt;;Grab filename from its offset and print it
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#75715e&#34;&gt;;to stdout
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;add&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;rax&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;0x2&lt;/span&gt;
+	&lt;span style=&#34;color:#a6e22e&#34;&gt;mov&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;rdi&lt;/span&gt;, &lt;span style=&#34;color:#66d9ef&#34;&gt;rax&lt;/span&gt;
+	&lt;span style=&#34;color:#a6e22e&#34;&gt;call&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;puts&lt;/span&gt;
+
+	&lt;span style=&#34;color:#75715e&#34;&gt;;Restore register states
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;pop&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;rdx&lt;/span&gt;				
+	&lt;span style=&#34;color:#66d9ef&#34;&gt;pop&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;rcx&lt;/span&gt;
+
+	&lt;span style=&#34;color:#75715e&#34;&gt;;Move to next struct if
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#75715e&#34;&gt;;index(curr_struct) &amp;lt; total structs
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;add&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;cx&lt;/span&gt;, &lt;span style=&#34;color:#66d9ef&#34;&gt;bx&lt;/span&gt;			
+	&lt;span style=&#34;color:#66d9ef&#34;&gt;cmp&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;cx&lt;/span&gt;, &lt;span style=&#34;color:#66d9ef&#34;&gt;dx&lt;/span&gt;			
+	&lt;span style=&#34;color:#66d9ef&#34;&gt;jl&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;next_dirent&lt;/span&gt;
+
+	&lt;span style=&#34;color:#75715e&#34;&gt;;Leave
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#a6e22e&#34;&gt;mov&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;rsp&lt;/span&gt;, &lt;span style=&#34;color:#66d9ef&#34;&gt;rbp&lt;/span&gt;
+	&lt;span style=&#34;color:#a6e22e&#34;&gt;pop&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;rbp&lt;/span&gt;
+	&lt;span style=&#34;color:#a6e22e&#34;&gt;ret&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Offset calculation is:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The struct size sits at &lt;code&gt;struct_index + 8*2 = 0x10&lt;/code&gt; bytes. 2 &lt;code&gt;unsigned long&lt;/code&gt;s are considered for.&lt;/li&gt;
+&lt;li&gt;The filename sits at &lt;code&gt;struct_index + 8*2 + 2 = 0x12)&lt;/code&gt; bytes. 1 &lt;code&gt;unsigned short&lt;/code&gt; is considered for. Note that we just add &lt;code&gt;0x2&lt;/code&gt; to the struct size offset when outputting the filename.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;results&#34;&gt;Results&lt;/h1&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;/home/bourbon/test&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; λ ls
+file1.txt  file2.txt  main
+&lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;/home/bourbon/test&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; λ ./main
+.
+file2.txt
+main
+..
+file1.txt
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Thus we get a barebones directory listing.&lt;/p&gt;
+&lt;p&gt;The compile script and code is available : &lt;a href=&#34;https://github.com/CrystalSage/Direntries&#34;&gt;Here&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id=&#34;ps&#34;&gt;P.S&lt;/h1&gt;
+&lt;p&gt;I originally intended to write some malware in assembly with this, but got sidetracked and this was made ;)&lt;/p&gt;
+</content>
     </item>
     
   </channel>
