@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>/home/bourbon</title>
+    <link>https://crystalsage.github.io/</link>
+    <description>Recent content on /home/bourbon</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>Licensed to Bourbon</copyright>
+    <lastBuildDate>Thu, 13 Jan 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://crystalsage.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Swallow</title>
+      <link>https://crystalsage.github.io/posts/swallow/</link>
+      <pubDate>Thu, 13 Jan 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://crystalsage.github.io/posts/swallow/</guid>
+      <description>Throughout the discussion, C-x means Control + x keychord.
+Introduction Window swallowing is a mechanism in tiling window managers, by which a GUI application&amp;rsquo;s window can replace the terminal window in-place, when the application is called from the terminal.
+This avoids congestion in tiling WMs, and is a much preferred solution than zooming into the said GUI window (Also called monocle mode in some WMs)
+For instance, consider a scenario where I want to spawn VLC from my terminal.</description>
+      <content>&lt;p&gt;Throughout the discussion, &lt;code&gt;C-x&lt;/code&gt; means Control + x keychord.&lt;/p&gt;
+&lt;h1 id=&#34;introduction&#34;&gt;Introduction&lt;/h1&gt;
+&lt;p&gt;Window swallowing is a mechanism in tiling window managers, by which a GUI application&amp;rsquo;s window can replace the terminal window in-place, when the application is called from the terminal.&lt;/p&gt;
+&lt;p&gt;This avoids congestion in tiling WMs, and is a much preferred solution than zooming into the said GUI window (Also called &lt;em&gt;monocle mode&lt;/em&gt; in some WMs)&lt;/p&gt;
+&lt;p&gt;For instance, consider a scenario where I want to spawn VLC from my terminal. After I call VLC with &lt;code&gt;vlc ./video.mp4&lt;/code&gt;, I get a VLC window on my screen. But now, there&amp;rsquo;s a leftover terminal window that does nothing, and you can&amp;rsquo;t close it because it&amp;rsquo;s the parent window of VLC.&lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+&lt;p&gt;The following diagram illustrates the difference without and with swallowing, respectively:
+&lt;img src=&#34;https://crystalsage.github.io/swallow.png&#34; alt=&#34;Swallow_VLC&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Popular WMs such as DWM, BSPWM and i3 have patches available for swallowing a window. However, I prefer a native solution over patches. As a bonus, the solution that I was able to come up with is also universal.&lt;/p&gt;
+&lt;h1 id=&#34;my-solution&#34;&gt;My solution&lt;/h1&gt;
+&lt;p&gt;My solution, whether if inefficient or dumb, most importantly works and has never failed me.&lt;/p&gt;
+&lt;p&gt;I combine a BASH script + a Fish shell function (alias) + a Fish shell keyboard shortcut that swallows a window. Code explained below. Please don&amp;rsquo;t mind the names.&lt;/p&gt;
+&lt;h2 id=&#34;bash-script-rbgsh&#34;&gt;Bash script: &lt;code&gt;rbg.sh&lt;/code&gt;&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#!/bin/sh
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
+$@ &amp;amp;
+disown
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This is just doing automatically the stuff that would require manual efforts. The first line takes in the entire &lt;code&gt;argv&lt;/code&gt;, symbolized with &lt;code&gt;@&lt;/code&gt; variable, puts it in background with &lt;code&gt;&amp;amp;&lt;/code&gt; and disowns it.&lt;/p&gt;
+&lt;p&gt;The script is meant to be placed in one of the directories in your &lt;code&gt;$PATH&lt;/code&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;fish-function-sdffish&#34;&gt;Fish function: &lt;code&gt;sdf.fish&lt;/code&gt;&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; sdf
+  rbg $argv &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; exit
+end
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Which calls the &lt;code&gt;rbg&lt;/code&gt; binary with your command.&lt;/p&gt;
+&lt;p&gt;This function allows us to wrap over the &lt;code&gt;rbg.sh&lt;/code&gt; script as well as close the actual terminal window. This only exists because I couldn&amp;rsquo;t find a way to both exit the BASH script and close the terminal window without messing with Xorg tools.&lt;/p&gt;
+&lt;h2 id=&#34;fish-shortcut-goes-in-configfish&#34;&gt;Fish shortcut: goes in &lt;code&gt;config.fish&lt;/code&gt;&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;bind &lt;span style=&#34;color:#ae81ff&#34;&gt;\c&lt;/span&gt;s &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;fish_commandline_prepend sdf&amp;#39;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Which just prepends &lt;code&gt;sdf&lt;/code&gt; to your command in the terminal. Note that typing &lt;code&gt;sdf &amp;lt;command&amp;gt;&lt;/code&gt; is kind of awkward and feels unnatural (I always forget to do it), so typing the command first and prepending is the most natural flow.&lt;/p&gt;
+&lt;h1 id=&#34;results&#34;&gt;Results&lt;/h1&gt;
+&lt;p&gt;Now, when I type &lt;code&gt;vlc ./video.mp4&lt;/code&gt; and press &lt;code&gt;C-s&lt;/code&gt; the resulting command becomes &lt;code&gt;sdf vlc ./video.mp4&lt;/code&gt;, which successfully swallows the terminal when executed. It&amp;rsquo;s instantaneous with really no lag.&lt;/p&gt;
+&lt;section class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
+&lt;hr&gt;
+&lt;ol&gt;
+&lt;li id=&#34;fn:1&#34; role=&#34;doc-endnote&#34;&gt;
+&lt;p&gt;You can close the window by putting the process to background, disowning it and then closing the terminal. The problem with this approach is that it is slow and just doesn&amp;rsquo;t feel right.&amp;#160;&lt;a href=&#34;#fnref:1&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/section&gt;
+</content>
+    </item>
+    
+    <item>
+      <title>ls clone using getdents syscall</title>
+      <link>https://crystalsage.github.io/posts/fp/</link>
+      <pubDate>Mon, 15 Nov 2021 18:20:39 +0530</pubDate>
+      
+      <guid>https://crystalsage.github.io/posts/fp/</guid>
+      <description>Introduction In this short post, we’re building a barebones,toy implementation of the ls-like directory listing program in x86-64 assembly. We achieve this by using the getdents syscall.
+getdents() syscall The getdents syscall takes in 3 parameters. So the prototype of the syscall looks like: ssize_t getdents(int fd, void *dirp, size_t count), where:
+ fd : is the file descriptor of the directory (which is also just another file in Unix) dirp : is where all the dirent structs are copied during the syscall.</description>
+      <content>&lt;h1 id=&#34;introduction&#34;&gt;Introduction&lt;/h1&gt;
+&lt;p&gt;In this short post, we’re building a barebones,toy implementation of the &lt;code&gt;ls&lt;/code&gt;-like directory listing program in x86-64 assembly. We achieve this by using the &lt;code&gt;getdents&lt;/code&gt; syscall.&lt;/p&gt;
+&lt;h1 id=&#34;getdents-syscall&#34;&gt;getdents() syscall&lt;/h1&gt;
+&lt;p&gt;The &lt;code&gt;getdents&lt;/code&gt; syscall takes in 3 parameters. So the prototype of the syscall looks like: &lt;code&gt;ssize_t getdents(int fd, void *dirp, size_t count)&lt;/code&gt;, where:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;fd&lt;/code&gt; : is the file descriptor of the directory (which is also just another file in Unix)&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;dirp&lt;/code&gt; : is where all the &lt;code&gt;dirent&lt;/code&gt; structs are copied during the syscall.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;count&lt;/code&gt; : is the size of the buffer that &lt;code&gt;dirp&lt;/code&gt; points to.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h1 id=&#34;dirent-structs&#34;&gt;Dirent structs&lt;/h1&gt;
+&lt;p&gt;A &lt;em&gt;dirent&lt;/em&gt; or &lt;em&gt;linux_dirent&lt;/em&gt; struct is defined as follows.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-c++&#34; data-lang=&#34;c++&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;struct&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;linux_dirent&lt;/span&gt; {
+       &lt;span style=&#34;color:#66d9ef&#34;&gt;unsigned&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;long&lt;/span&gt;  d_ino;     &lt;span style=&#34;color:#75715e&#34;&gt;/* File inode*/&lt;/span&gt;
+       &lt;span style=&#34;color:#66d9ef&#34;&gt;unsigned&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;long&lt;/span&gt;  d_off;     &lt;span style=&#34;color:#75715e&#34;&gt;/* Offset of the next linux_dirent */&lt;/span&gt;
+       &lt;span style=&#34;color:#66d9ef&#34;&gt;unsigned&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;short&lt;/span&gt; d_reclen;  &lt;span style=&#34;color:#75715e&#34;&gt;/* Size of the current dirent struct*/&lt;/span&gt;
+       &lt;span style=&#34;color:#66d9ef&#34;&gt;char&lt;/span&gt;           d_name[];  &lt;span style=&#34;color:#75715e&#34;&gt;// The filename of the file
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
+       &lt;span style=&#34;color:#66d9ef&#34;&gt;char&lt;/span&gt;           pad;       &lt;span style=&#34;color:#75715e&#34;&gt;// Zero padding byte
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;       &lt;span style=&#34;color:#66d9ef&#34;&gt;char&lt;/span&gt;           d_type;    &lt;span style=&#34;color:#75715e&#34;&gt;// File types such as block devices, named pipes, sockets etc.
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;   }
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;So anytime we call the &lt;code&gt;getdents&lt;/code&gt; syscall, we are populating with &lt;code&gt;dirent&lt;/code&gt; structures, the buffer that &lt;code&gt;dirp&lt;/code&gt; points to. Notice how the struct also involves the filename of the file that the struct is for. We can use this for directory listing!&lt;/p&gt;
+&lt;h1 id=&#34;the-program&#34;&gt;The program&lt;/h1&gt;
+&lt;p&gt;The program that we are building lists the directory contents of the current directory. We allocate a 512 bytes buffer for storing the dirent structs. (Which is sufficient for a toy implementation)&lt;/p&gt;
+&lt;p&gt;Based on the info above, we define the &lt;code&gt;.bss&lt;/code&gt; and the &lt;code&gt;.data&lt;/code&gt; sections as follows:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code class=&#34;language-x86asm&#34; data-lang=&#34;x86asm&#34;&gt;[SECTION .data]
+dirname: db &#39;.&#39;
+
+[SECTION .bss]
+msgbuf:
+	resb 512
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Then in the &lt;code&gt;.text&lt;/code&gt; section, we write the actual program, which consists of 2 functions called &lt;code&gt;main&lt;/code&gt; and &lt;code&gt;next_dirent&lt;/code&gt;. We populate the &lt;code&gt;msgbuf&lt;/code&gt; in the &lt;code&gt;main&lt;/code&gt; function and then process the dirent structs in the &lt;code&gt;next_dirent&lt;/code&gt; function, which handles the buffer struct by struct.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;main&lt;/code&gt; function goes like:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code class=&#34;language-x86asm&#34; data-lang=&#34;x86asm&#34;&gt;[SECTION .text]
+extern puts
+global main
+
+main:
+	;Setup
+	push rbp
+	mov rbp, rsp
+	and rsp, 0xfffffffffffffff0
+
+	;Open the current directory using the open() syscall
+	mov rax, 2
+	mov rdi, dirname
+	mov rsi, 0x10000
+	syscall
+
+	;getdents(fd, buf, 64) syscall
+	mov rdi, rax  ;The open syscall returns the fd for the current directory
+	mov rax,78
+	mov rsi, msgbuf
+	mov rdx, 512
+	syscall
+	xchg rax,rdx  ;Syscall returns total size, save it somewhere safe
+
+	;setup registers for loop
+	xor rcx, rcx
+	xor rbx, rbx
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Now that we have the structs we need in the &lt;code&gt;msgbuf&lt;/code&gt;, we can iterate over them. Heading into the &lt;code&gt;next_dirent&lt;/code&gt; function:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code class=&#34;language-x86asm&#34; data-lang=&#34;x86asm&#34;&gt;next_dirent:
+	;We move to the 0th position of msgbuf every loop
+	;and absolute position of every struct from it
+	mov rax, msgbuf
+	add rax, rcx		
+
+	;Grab the length of current struct
+	;i.e reclen with offset adjustments
+	add rax, 0x10
+	movzx bx, byte [rax]
+
+	;puts modifies state of registers so save
+	;them on the stack
+	push rcx
+	push rdx
+
+	;Grab filename from its offset and print it
+	;to stdout
+	add rax, 0x2
+	mov rdi, rax
+	call puts
+
+	;Restore register states
+	pop rdx				
+	pop rcx
+
+	;Move to next struct if
+	;index(curr_struct) &amp;lt; total structs
+	add cx, bx			
+	cmp cx, dx			
+	jl next_dirent
+
+	;Leave
+	mov rsp, rbp
+	pop rbp
+	ret
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Offset calculation is:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The struct size sits at &lt;code&gt;struct_index + 8*2 = 0x10&lt;/code&gt; bytes. 2 &lt;code&gt;unsigned long&lt;/code&gt;s are considered for.&lt;/li&gt;
+&lt;li&gt;The filename sits at &lt;code&gt;struct_index + 8*2 + 2 = 0x12&lt;/code&gt;bytes. 1 &lt;code&gt;unsigned short&lt;/code&gt; is considered for. Note that we just add &lt;code&gt;0x2&lt;/code&gt; to the struct size offset when outputting the filename.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;results&#34;&gt;Results&lt;/h1&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&amp;gt;&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&amp;gt; ls
+file1.txt  file2.txt  main
+&amp;gt;&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&amp;gt; ./main
+.
+file2.txt
+main
+..
+file1.txt
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Thus we get a barebones directory listing.&lt;/p&gt;
+&lt;p&gt;The compile script and code is available : &lt;a href=&#34;https://github.com/CrystalSage/Direntries&#34;&gt;Here&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id=&#34;ps&#34;&gt;P.S&lt;/h1&gt;
+&lt;p&gt;I originally intended to write some malware in assembly with this, but got sidetracked and this was made ;)&lt;/p&gt;
+</content>
+    </item>
+    
+    <item>
+      <title>Setup</title>
+      <link>https://crystalsage.github.io/setup/</link>
+      <pubDate>Mon, 15 Nov 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://crystalsage.github.io/setup/</guid>
+      <description>All technologies are cool
+This page describes the setup that I use in my desktop experience while describing the decisions that were made while selecting the components. It is irregularly updated.
+OS: Arch Linux Arch is a fantastic Linux distribution that&amp;rsquo;s pretty lean and mean for all sorts of use cases. It&amp;rsquo;s primary advantage to me is the fact that I have to perform least amount of configuration, in the case where I ever need to reinstall my system.</description>
+      <content>&lt;p&gt;&lt;strong&gt;All technologies are cool&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;This page describes the setup that I use in my desktop experience while describing the decisions that were made while selecting the components.  It is irregularly updated.&lt;/p&gt;
+&lt;h1 id=&#34;os-arch-linux&#34;&gt;OS: Arch Linux&lt;/h1&gt;
+&lt;p&gt;&lt;a href=&#34;https://archlinux.org/&#34;&gt;Arch&lt;/a&gt; is a fantastic Linux distribution that&amp;rsquo;s pretty lean and mean for all sorts of use cases. It&amp;rsquo;s primary advantage to me is the fact that I have to perform least amount of configuration, in the case where I ever need to reinstall my system. Quite fortunately, it has rarely broken down on me.&lt;/p&gt;
+&lt;h1 id=&#34;desktop&#34;&gt;Desktop&lt;/h1&gt;
+&lt;h2 id=&#34;wm-bspwm&#34;&gt;WM: BSPWM&lt;/h2&gt;
+&lt;p&gt;BSPWM is the most vanilla WM experience you can get, in my opinion. I do not care much for the modularity aspect of it. I love i3 as well, but prefer to stick with BSPWM, because it feels more stable.&lt;/p&gt;
+&lt;p&gt;I have a very terminal oriented workflow and prefer to do everything in terminal. 1 window per workspace works for me.&lt;/p&gt;
+&lt;p&gt;Some components that I use along with BSPWM:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Component&lt;/th&gt;
+&lt;th&gt;Software&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;Bar&lt;/td&gt;
+&lt;td&gt;polybar&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Terminal&lt;/td&gt;
+&lt;td&gt;alacritty + fish shell + tmux&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Notifications&lt;/td&gt;
+&lt;td&gt;dunst&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Image viewer&lt;/td&gt;
+&lt;td&gt;feh&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Music&lt;/td&gt;
+&lt;td&gt;mpd + ncmpcpp&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;PDFs&lt;/td&gt;
+&lt;td&gt;zathura&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Email&lt;/td&gt;
+&lt;td&gt;Neomutt&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id=&#34;text-editor-neovim&#34;&gt;Text editor: Neovim&lt;/h2&gt;
+&lt;p&gt;Vim fits my terminal oriented workflow really well. I use NeoVim&amp;rsquo;s built-in LSP.&lt;/p&gt;
+&lt;h2 id=&#34;writing&#34;&gt;Writing&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Assignments and other academic material&lt;/strong&gt; &lt;br&gt;
+$\LaTeX$ is my personal favorite. I use the VimTeX plugin + Zathura. It produces very clean and beautiful PDFs that are otherwise very missed.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Notes&lt;/strong&gt; &lt;br&gt;
+Casual notes are preferred while learning stuff. I take such notes in Markdown. Simple and universal.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;em&gt;Obiter dictum&lt;/em&gt;: I love both markdown and Org-mode. I alternate between them from time to time, preferring markdown for smaller files and Org-mode when I want to build a knowledge base. However, I have not fully switched to Emacs and I prefer other tools for other functions.&lt;/p&gt;
+</content>
+    </item>
+    
+  </channel>
+</rss>

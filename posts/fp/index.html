@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+    <title>ls clone using getdents syscall :: /home/bourbon</title>
+  
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="This post focuses on building a small,minimal directory listing utility with the getdents syscall in x86asm" />
+<meta name="keywords" content="" />
+<meta name="robots" content="noodp" />
+<link rel="canonical" href="https://crystalsage.github.io/posts/fp/" />
+
+
+
+
+<link rel="stylesheet" href="https://crystalsage.github.io/assets/style.css">
+
+  <link rel="stylesheet" href="https://crystalsage.github.io/assets/green.css">
+
+
+
+
+
+
+<link rel="apple-touch-icon" href="https://crystalsage.github.io/img/apple-touch-icon-192x192.png">
+
+  <link rel="shortcut icon" href="https://crystalsage.github.io/favicon.png">
+
+
+
+<meta name="twitter:card" content="summary" />
+
+  
+    <meta name="twitter:site" content="" />
+  
+    <meta name="twitter:creator" content="" />
+
+
+
+<meta property="og:locale" content="en" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="ls clone using getdents syscall">
+<meta property="og:description" content="This post focuses on building a small,minimal directory listing utility with the getdents syscall in x86asm" />
+<meta property="og:url" content="https://crystalsage.github.io/posts/fp/" />
+<meta property="og:site_name" content="/home/bourbon" />
+
+  <meta property="og:image" content="https://crystalsage.github.io">
+
+<meta property="og:image:width" content="2048">
+<meta property="og:image:height" content="1024">
+
+
+  <meta property="article:published_time" content="2021-11-15 18:20:39 &#43;0530 IST" />
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+<body class="green">
+
+
+<div class="container center headings--one-size">
+
+  <header class="header">
+  <div class="header__inner">
+    <div class="header__logo">
+      <a href="/">
+  <div class="logo">
+    /home/bourbon
+  </div>
+</a>
+
+    </div>
+    
+      <div class="menu-trigger">menu</div>
+    
+  </div>
+  
+    <nav class="menu">
+  <ul class="menu__inner menu__inner--desktop">
+    
+      
+        
+          <li><a href="/about">About</a></li>
+        
+      
+        
+          <li><a href="/setup">Setup</a></li>
+        
+      
+      
+    
+
+    
+  </ul>
+
+  <ul class="menu__inner menu__inner--mobile">
+    
+      
+        <li><a href="/about">About</a></li>
+      
+    
+      
+        <li><a href="/setup">Setup</a></li>
+      
+    
+    
+  </ul>
+</nav>
+
+  
+</header>
+
+
+  <div class="content">
+    
+<div class="post">
+  <h1 class="post-title">
+    <a href="https://crystalsage.github.io/posts/fp/">ls clone using getdents syscall</a></h1>
+  <div class="post-meta">
+    
+      <span class="post-date">
+        2021-11-15
+        
+      </span>
+    
+    
+    
+  </div>
+
+  
+  
+
+
+  
+
+  <div class="post-content"><div>
+        <h1 id="introduction">Introduction<a href="#introduction" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<p>In this short post, we’re building a barebones,toy implementation of the <code>ls</code>-like directory listing program in x86-64 assembly. We achieve this by using the <code>getdents</code> syscall.</p>
+<h1 id="getdents-syscall">getdents() syscall<a href="#getdents-syscall" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<p>The <code>getdents</code> syscall takes in 3 parameters. So the prototype of the syscall looks like: <code>ssize_t getdents(int fd, void *dirp, size_t count)</code>, where:</p>
+<ol>
+<li><code>fd</code> : is the file descriptor of the directory (which is also just another file in Unix)</li>
+<li><code>dirp</code> : is where all the <code>dirent</code> structs are copied during the syscall.</li>
+<li><code>count</code> : is the size of the buffer that <code>dirp</code> points to.</li>
+</ol>
+<h1 id="dirent-structs">Dirent structs<a href="#dirent-structs" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<p>A <em>dirent</em> or <em>linux_dirent</em> struct is defined as follows.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">linux_dirent</span> {
+       <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span>  d_ino;     <span style="color:#75715e">/* File inode*/</span>
+       <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span>  d_off;     <span style="color:#75715e">/* Offset of the next linux_dirent */</span>
+       <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">short</span> d_reclen;  <span style="color:#75715e">/* Size of the current dirent struct*/</span>
+       <span style="color:#66d9ef">char</span>           d_name[];  <span style="color:#75715e">// The filename of the file
+</span><span style="color:#75715e"></span>
+       <span style="color:#66d9ef">char</span>           pad;       <span style="color:#75715e">// Zero padding byte
+</span><span style="color:#75715e"></span>       <span style="color:#66d9ef">char</span>           d_type;    <span style="color:#75715e">// File types such as block devices, named pipes, sockets etc.
+</span><span style="color:#75715e"></span>   }
+
+</code></pre></div><p>So anytime we call the <code>getdents</code> syscall, we are populating with <code>dirent</code> structures, the buffer that <code>dirp</code> points to. Notice how the struct also involves the filename of the file that the struct is for. We can use this for directory listing!</p>
+<h1 id="the-program">The program<a href="#the-program" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<p>The program that we are building lists the directory contents of the current directory. We allocate a 512 bytes buffer for storing the dirent structs. (Which is sufficient for a toy implementation)</p>
+<p>Based on the info above, we define the <code>.bss</code> and the <code>.data</code> sections as follows:</p>
+<pre tabindex="0"><code class="language-x86asm" data-lang="x86asm">[SECTION .data]
+dirname: db '.'
+
+[SECTION .bss]
+msgbuf:
+	resb 512
+</code></pre><p>Then in the <code>.text</code> section, we write the actual program, which consists of 2 functions called <code>main</code> and <code>next_dirent</code>. We populate the <code>msgbuf</code> in the <code>main</code> function and then process the dirent structs in the <code>next_dirent</code> function, which handles the buffer struct by struct.</p>
+<p>The <code>main</code> function goes like:</p>
+<pre tabindex="0"><code class="language-x86asm" data-lang="x86asm">[SECTION .text]
+extern puts
+global main
+
+main:
+	;Setup
+	push rbp
+	mov rbp, rsp
+	and rsp, 0xfffffffffffffff0
+
+	;Open the current directory using the open() syscall
+	mov rax, 2
+	mov rdi, dirname
+	mov rsi, 0x10000
+	syscall
+
+	;getdents(fd, buf, 64) syscall
+	mov rdi, rax  ;The open syscall returns the fd for the current directory
+	mov rax,78
+	mov rsi, msgbuf
+	mov rdx, 512
+	syscall
+	xchg rax,rdx  ;Syscall returns total size, save it somewhere safe
+
+	;setup registers for loop
+	xor rcx, rcx
+	xor rbx, rbx
+</code></pre><p>Now that we have the structs we need in the <code>msgbuf</code>, we can iterate over them. Heading into the <code>next_dirent</code> function:</p>
+<pre tabindex="0"><code class="language-x86asm" data-lang="x86asm">next_dirent:
+	;We move to the 0th position of msgbuf every loop
+	;and absolute position of every struct from it
+	mov rax, msgbuf
+	add rax, rcx		
+
+	;Grab the length of current struct
+	;i.e reclen with offset adjustments
+	add rax, 0x10
+	movzx bx, byte [rax]
+
+	;puts modifies state of registers so save
+	;them on the stack
+	push rcx
+	push rdx
+
+	;Grab filename from its offset and print it
+	;to stdout
+	add rax, 0x2
+	mov rdi, rax
+	call puts
+
+	;Restore register states
+	pop rdx				
+	pop rcx
+
+	;Move to next struct if
+	;index(curr_struct) &lt; total structs
+	add cx, bx			
+	cmp cx, dx			
+	jl next_dirent
+
+	;Leave
+	mov rsp, rbp
+	pop rbp
+	ret
+</code></pre><p>Offset calculation is:</p>
+<ul>
+<li>The struct size sits at <code>struct_index + 8*2 = 0x10</code> bytes. 2 <code>unsigned long</code>s are considered for.</li>
+<li>The filename sits at <code>struct_index + 8*2 + 2 = 0x12</code>bytes. 1 <code>unsigned short</code> is considered for. Note that we just add <code>0x2</code> to the struct size offset when outputting the filename.</li>
+</ul>
+<h1 id="results">Results<a href="#results" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">&gt;<span style="color:#f92672">=</span>&gt; ls
+file1.txt  file2.txt  main
+&gt;<span style="color:#f92672">=</span>&gt; ./main
+.
+file2.txt
+main
+..
+file1.txt
+</code></pre></div><p>Thus we get a barebones directory listing.</p>
+<p>The compile script and code is available : <a href="https://github.com/CrystalSage/Direntries">Here</a></p>
+<h1 id="ps">P.S<a href="#ps" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<p>I originally intended to write some malware in assembly with this, but got sidetracked and this was made ;)</p>
+
+      </div></div>
+
+  
+  
+<div class="pagination">
+    <div class="pagination__title">
+        <span class="pagination__title-h">Read other posts</span>
+        <hr />
+    </div>
+    <div class="pagination__buttons">
+        
+        <span class="button previous">
+            <a href="https://crystalsage.github.io/posts/swallow/">
+                <span class="button__icon">←</span>
+                <span class="button__text">Swallow</span>
+            </a>
+        </span>
+        
+        
+    </div>
+</div>
+
+  
+
+  
+
+</div>
+
+  </div>
+
+  
+    <footer class="footer">
+  <div class="footer__inner">
+    
+      <div class="copyright copyright--user">
+        <span>Licensed to Bourbon</span>
+    
+        <span>:: Theme made by <a href="https://twitter.com/panr">panr</a></span>
+      </div>
+  </div>
+</footer>
+
+
+
+<script src="https://crystalsage.github.io/assets/main.js"></script>
+<script src="https://crystalsage.github.io/assets/prism.js"></script>
+<script type="text/javascript"
+  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\[','\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+           extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    }
+  });
+  </script>
+
+
+
+
+
+
+  
+</div>
+
+</body>
+</html>

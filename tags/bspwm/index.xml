@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>bspwm on /home/bourbon</title>
+    <link>https://crystalsage.github.io/tags/bspwm/</link>
+    <description>Recent content in bspwm on /home/bourbon</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>Licensed to Bourbon</copyright>
+    <lastBuildDate>Thu, 13 Jan 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://crystalsage.github.io/tags/bspwm/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Swallow</title>
+      <link>https://crystalsage.github.io/posts/swallow/</link>
+      <pubDate>Thu, 13 Jan 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://crystalsage.github.io/posts/swallow/</guid>
+      <description>Throughout the discussion, C-x means Control + x keychord.
+Introduction Window swallowing is a mechanism in tiling window managers, by which a GUI application&amp;rsquo;s window can replace the terminal window in-place, when the application is called from the terminal.
+This avoids congestion in tiling WMs, and is a much preferred solution than zooming into the said GUI window (Also called monocle mode in some WMs)
+For instance, consider a scenario where I want to spawn VLC from my terminal.</description>
+      <content>&lt;p&gt;Throughout the discussion, &lt;code&gt;C-x&lt;/code&gt; means Control + x keychord.&lt;/p&gt;
+&lt;h1 id=&#34;introduction&#34;&gt;Introduction&lt;/h1&gt;
+&lt;p&gt;Window swallowing is a mechanism in tiling window managers, by which a GUI application&amp;rsquo;s window can replace the terminal window in-place, when the application is called from the terminal.&lt;/p&gt;
+&lt;p&gt;This avoids congestion in tiling WMs, and is a much preferred solution than zooming into the said GUI window (Also called &lt;em&gt;monocle mode&lt;/em&gt; in some WMs)&lt;/p&gt;
+&lt;p&gt;For instance, consider a scenario where I want to spawn VLC from my terminal. After I call VLC with &lt;code&gt;vlc ./video.mp4&lt;/code&gt;, I get a VLC window on my screen. But now, there&amp;rsquo;s a leftover terminal window that does nothing, and you can&amp;rsquo;t close it because it&amp;rsquo;s the parent window of VLC.&lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+&lt;p&gt;The following diagram illustrates the difference without and with swallowing, respectively:
+&lt;img src=&#34;https://crystalsage.github.io/swallow.png&#34; alt=&#34;Swallow_VLC&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Popular WMs such as DWM, BSPWM and i3 have patches available for swallowing a window. However, I prefer a native solution over patches. As a bonus, the solution that I was able to come up with is also universal.&lt;/p&gt;
+&lt;h1 id=&#34;my-solution&#34;&gt;My solution&lt;/h1&gt;
+&lt;p&gt;My solution, whether if inefficient or dumb, most importantly works and has never failed me.&lt;/p&gt;
+&lt;p&gt;I combine a BASH script + a Fish shell function (alias) + a Fish shell keyboard shortcut that swallows a window. Code explained below. Please don&amp;rsquo;t mind the names.&lt;/p&gt;
+&lt;h2 id=&#34;bash-script-rbgsh&#34;&gt;Bash script: &lt;code&gt;rbg.sh&lt;/code&gt;&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#!/bin/sh
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
+$@ &amp;amp;
+disown
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This is just doing automatically the stuff that would require manual efforts. The first line takes in the entire &lt;code&gt;argv&lt;/code&gt;, symbolized with &lt;code&gt;@&lt;/code&gt; variable, puts it in background with &lt;code&gt;&amp;amp;&lt;/code&gt; and disowns it.&lt;/p&gt;
+&lt;p&gt;The script is meant to be placed in one of the directories in your &lt;code&gt;$PATH&lt;/code&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;fish-function-sdffish&#34;&gt;Fish function: &lt;code&gt;sdf.fish&lt;/code&gt;&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; sdf
+  rbg $argv &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; exit
+end
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Which calls the &lt;code&gt;rbg&lt;/code&gt; binary with your command.&lt;/p&gt;
+&lt;p&gt;This function allows us to wrap over the &lt;code&gt;rbg.sh&lt;/code&gt; script as well as close the actual terminal window. This only exists because I couldn&amp;rsquo;t find a way to both exit the BASH script and close the terminal window without messing with Xorg tools.&lt;/p&gt;
+&lt;h2 id=&#34;fish-shortcut-goes-in-configfish&#34;&gt;Fish shortcut: goes in &lt;code&gt;config.fish&lt;/code&gt;&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;bind &lt;span style=&#34;color:#ae81ff&#34;&gt;\c&lt;/span&gt;s &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;fish_commandline_prepend sdf&amp;#39;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Which just prepends &lt;code&gt;sdf&lt;/code&gt; to your command in the terminal. Note that typing &lt;code&gt;sdf &amp;lt;command&amp;gt;&lt;/code&gt; is kind of awkward and feels unnatural (I always forget to do it), so typing the command first and prepending is the most natural flow.&lt;/p&gt;
+&lt;h1 id=&#34;results&#34;&gt;Results&lt;/h1&gt;
+&lt;p&gt;Now, when I type &lt;code&gt;vlc ./video.mp4&lt;/code&gt; and press &lt;code&gt;C-s&lt;/code&gt; the resulting command becomes &lt;code&gt;sdf vlc ./video.mp4&lt;/code&gt;, which successfully swallows the terminal when executed. It&amp;rsquo;s instantaneous with really no lag.&lt;/p&gt;
+&lt;section class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
+&lt;hr&gt;
+&lt;ol&gt;
+&lt;li id=&#34;fn:1&#34; role=&#34;doc-endnote&#34;&gt;
+&lt;p&gt;You can close the window by putting the process to background, disowning it and then closing the terminal. The problem with this approach is that it is slow and just doesn&amp;rsquo;t feel right.&amp;#160;&lt;a href=&#34;#fnref:1&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/section&gt;
+</content>
+    </item>
+    
+  </channel>
+</rss>
