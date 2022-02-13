@@ -21,15 +21,16 @@ In this 3-part series, we will see my method of approaching these challenges and
 amazing (We find that the two things are often mutually exclusive in many CTFs).
 The challenges were easy, but not lame. The UI was fantastic. I was impressed
 by the CTF infrastructure. It is not easy to host a CTF this well.&lt;/p&gt;
-&lt;p&gt;You can register and play this CTF. It&amp;rsquo;s open to everyone.&lt;/p&gt;
+&lt;p&gt;You can &lt;a href=&#34;https://tinyurl.com/2t6kwcxe&#34;&gt;register&lt;/a&gt; and
+&lt;a href=&#34;https://tinyurl.com/ms95pajv&#34;&gt;play&lt;/a&gt; this CTF. It&amp;rsquo;s open to everyone.&lt;/p&gt;
 &lt;p&gt;In this 3-part series, we will see my method of approaching these challenges
 and how I solved them. The 9 challenges are divided into 3 posts.
 &lt;img src=&#34;https://crystalsage.github.io/ctf.jpg&#34; alt=&#34;Some&#34;&gt;&lt;/p&gt;
-&lt;p&gt;A basic idea in solving a CTF is that the name of the challenge often gives
-a huge hint to you. After that, you just need to keep your mind open to all
+&lt;p&gt;A basic idea in solving a CTF challenge is that the name of the challenge
+often gives a hint to you. After that, you just need to keep your mind open to all
 the possibilities and think your way through. Keep the name in the back of
 your mind but don&amp;rsquo;t let it bias your thinking. Keep an open approach to any
-challenge to aim to solve.&lt;/p&gt;
+challenge which you&amp;rsquo;re aiming to solve.&lt;/p&gt;
 &lt;h1 id=&#34;what-lies-within&#34;&gt;What Lies Within&lt;/h1&gt;
 &lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/whatlieswithin.png&#34; alt=&#34;challenge&#34;&gt;
 From the challenge&amp;rsquo;s name and some experience, we can immediately guess that the
@@ -42,7 +43,7 @@ would be a mad task to scroll down and find our flag in this haystack. So, we
 can find our flag by using &lt;code&gt;grep&lt;/code&gt;. We can grep for the flag&amp;rsquo;s format since we
 definitely know it&amp;rsquo;s a part of the flag.&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/whatlieswithin-flag.png&#34; alt=&#34;flag&#34;&gt;&lt;/p&gt;
-&lt;p&gt;The flag! $\blacksquare$&lt;/p&gt;
+&lt;p&gt;The flag! &lt;code&gt;csi-ctf{Let&#39;s_go_to_the_subway_for_lunch}&lt;/code&gt; $\blacksquare$&lt;/p&gt;
 &lt;hr&gt;
 &lt;h1 id=&#34;luminous-hunt&#34;&gt;Luminous Hunt&lt;/h1&gt;
 &lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/lh-chall.png&#34; alt=&#34;lh-chall&#34;&gt;
@@ -50,16 +51,18 @@ In this challenge, we are again, starting with an image. And, the name gives
 us a hint about this being related to light.&lt;/p&gt;
 &lt;p&gt;My initial guess was that the image contained the flag, but it&amp;rsquo;s too small to
 see. I &lt;em&gt;really&lt;/em&gt; zoomed in on the image to see if there was a tiny flag somewhere
-in there, but nope. Thanks creators! (This is actually a pretty common thing in CTFs!)&lt;/p&gt;
+in there, but nope. Thanks creators for not doing this!
+(This is actually a pretty common thing in CTFs!)&lt;/p&gt;
 &lt;p&gt;Next, I tried putting this image in an image editor and analyzed its RGB
 channels. The flag if  hidden in one of the three channels, is only visible
 in that particular channel. But no.&lt;/p&gt;
 &lt;p&gt;I was out of my typical ideas when I enlarged the image a bit and noticed that
 the blackboard looked too black. Something seemed off about it. So, keeping the
 challenge name and the weird blackboard color in mind, I decided to brighten
-up the image, which gives us our flag, hidden in the darkness of the blackboard.&lt;/p&gt;
+up the image, and play around with the contrast, which gives us our flag,
+hidden in the darkness of the blackboard.&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/lh-brighten.png&#34; alt=&#34;lh-brighten&#34;&gt;&lt;/p&gt;
-&lt;p&gt;It&amp;rsquo;s still pretty hard to read, but we can make out &lt;code&gt;csi-ctf{CPL-CSI}&lt;/code&gt;, which
+&lt;p&gt;It&amp;rsquo;s still somewhat hard to read, but we can make out &lt;code&gt;csi-ctf{CPL-CSI}&lt;/code&gt;, which
 is our flag. $\blacksquare$&lt;/p&gt;
 &lt;hr&gt;
 &lt;h1 id=&#34;a-tribute&#34;&gt;A Tribute&lt;/h1&gt;
