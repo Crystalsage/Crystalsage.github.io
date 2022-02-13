@@ -7,7 +7,85 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>Licensed to Bourbon</copyright>
-    <lastBuildDate>Thu, 13 Jan 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://crystalsage.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 13 Feb 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://crystalsage.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>CSI-CTF Writeup (Part-1)</title>
+      <link>https://crystalsage.github.io/posts/ctf-1/</link>
+      <pubDate>Sun, 13 Feb 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://crystalsage.github.io/posts/ctf-1/</guid>
+      <description>I recently won 1st place at the CSI-CTF 2022. The CTF was basic, but still amazing (We find that the two things are often mutually exclusive in many CTFs). The challenges were easy, but not lame. The UI was fantastic. I was impressed by the CTF infrastructure. It is not easy to host a CTF this well.
+You can register and play this CTF. It&amp;rsquo;s open to everyone.
+In this 3-part series, we will see my method of approaching these challenges and how I solved them.</description>
+      <content>&lt;p&gt;I recently won 1st place at the CSI-CTF 2022. The CTF was basic, but still
+amazing (We find that the two things are often mutually exclusive in many CTFs).
+The challenges were easy, but not lame. The UI was fantastic. I was impressed
+by the CTF infrastructure. It is not easy to host a CTF this well.&lt;/p&gt;
+&lt;p&gt;You can register and play this CTF. It&amp;rsquo;s open to everyone.&lt;/p&gt;
+&lt;p&gt;In this 3-part series, we will see my method of approaching these challenges
+and how I solved them. The 9 challenges are divided into 3 posts.
+&lt;img src=&#34;https://crystalsage.github.io/ctf.jpg&#34; alt=&#34;Some&#34;&gt;&lt;/p&gt;
+&lt;p&gt;A basic idea in solving a CTF is that the name of the challenge often gives
+a huge hint to you. After that, you just need to keep your mind open to all
+the possibilities and think your way through. Keep the name in the back of
+your mind but don&amp;rsquo;t let it bias your thinking. Keep an open approach to any
+challenge to aim to solve.&lt;/p&gt;
+&lt;h1 id=&#34;what-lies-within&#34;&gt;What Lies Within&lt;/h1&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/whatlieswithin.png&#34; alt=&#34;challenge&#34;&gt;
+From the challenge&amp;rsquo;s name and some experience, we can immediately guess that the
+image has data inside it. The most preliminary test you can do to weed out easy
+challenges is to run &lt;code&gt;strings&lt;/code&gt; on the image. &lt;code&gt;strings&lt;/code&gt; will yield us the plaintext
+strings inside the file.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/whatlieswithin-strings.png&#34; alt=&#34;wlw-strings&#34;&gt;&lt;/p&gt;
+&lt;p&gt;As you can see, it returns us all of the plaintext things inside the image. It
+would be a mad task to scroll down and find our flag in this haystack. So, we
+can find our flag by using &lt;code&gt;grep&lt;/code&gt;. We can grep for the flag&amp;rsquo;s format since we
+definitely know it&amp;rsquo;s a part of the flag.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/whatlieswithin-flag.png&#34; alt=&#34;flag&#34;&gt;&lt;/p&gt;
+&lt;p&gt;The flag! $\blacksquare$&lt;/p&gt;
+&lt;hr&gt;
+&lt;h1 id=&#34;luminous-hunt&#34;&gt;Luminous Hunt&lt;/h1&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/lh-chall.png&#34; alt=&#34;lh-chall&#34;&gt;
+In this challenge, we are again, starting with an image. And, the name gives
+us a hint about this being related to light.&lt;/p&gt;
+&lt;p&gt;My initial guess was that the image contained the flag, but it&amp;rsquo;s too small to
+see. I &lt;em&gt;really&lt;/em&gt; zoomed in on the image to see if there was a tiny flag somewhere
+in there, but nope. Thanks creators! (This is actually a pretty common thing in CTFs!)&lt;/p&gt;
+&lt;p&gt;Next, I tried putting this image in an image editor and analyzed its RGB
+channels. The flag if  hidden in one of the three channels, is only visible
+in that particular channel. But no.&lt;/p&gt;
+&lt;p&gt;I was out of my typical ideas when I enlarged the image a bit and noticed that
+the blackboard looked too black. Something seemed off about it. So, keeping the
+challenge name and the weird blackboard color in mind, I decided to brighten
+up the image, which gives us our flag, hidden in the darkness of the blackboard.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/lh-brighten.png&#34; alt=&#34;lh-brighten&#34;&gt;&lt;/p&gt;
+&lt;p&gt;It&amp;rsquo;s still pretty hard to read, but we can make out &lt;code&gt;csi-ctf{CPL-CSI}&lt;/code&gt;, which
+is our flag. $\blacksquare$&lt;/p&gt;
+&lt;hr&gt;
+&lt;h1 id=&#34;a-tribute&#34;&gt;A Tribute&lt;/h1&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/at-chall.png&#34; alt=&#34;at-chall&#34;&gt;
+We are given a GitHub page which tells us to find the name of a person. This
+obviously is an OSINT challenge, right? No! There&amp;rsquo;s a twist here.&lt;/p&gt;
+&lt;p&gt;If you find out the person&amp;rsquo;s name, and try to submit it as a flag, the
+submission gets denied.&lt;/p&gt;
+&lt;p&gt;If you take a look around the page, you&amp;rsquo;ll see that the repository&amp;rsquo;s commit
+history is pretty interesting. It contains some strings that could be useful
+to us.
+&lt;img src=&#34;https://crystalsage.github.io/ctf/at-commits.png&#34; alt=&#34;at-commits&#34;&gt;
+The letters look jumbled but they are still readable. This is probably encoded
+with some cipher. If you&amp;rsquo;ve had any sort of experience with ciphers, you&amp;rsquo;ve
+probably heard of the Caesar cipher, AKA rot-n cipher. One of the strings of
+the commit messages must be our encoded flag.&lt;/p&gt;
+&lt;p&gt;If you patiently try out some/all of these, you&amp;rsquo;ll find out that the 4th commit
+message from the top is actually our flag, with rot-18 encoding.
+&lt;img src=&#34;https://crystalsage.github.io/ctf/at-flag.png&#34; alt=&#34;at-flag&#34;&gt;&lt;/p&gt;
+&lt;p&gt;The flag is &lt;code&gt;csi-ctf{congratulations_the_flag_is_jira}&lt;/code&gt; $\blacksquare$&lt;/p&gt;
+&lt;hr style=&#34;border:2px solid gray&#34;&gt; &lt;/hr&gt;
+This series is to be continued in the part 2 and 3 where we&#39;ll solve more
+challenges...
+</content>
+    </item>
+    
     <item>
       <title>Swallow</title>
       <link>https://crystalsage.github.io/posts/swallow/</link>

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+    <title>CSI-CTF Writeup (Part-1) :: /home/bourbon</title>
+  
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="The 1st part of the 3-part writeup for CSI-CTF 2022" />
+<meta name="keywords" content="" />
+<meta name="robots" content="noodp" />
+<link rel="canonical" href="https://crystalsage.github.io/posts/ctf-1/" />
+
+
+
+
+<link rel="stylesheet" href="https://crystalsage.github.io/assets/style.css">
+
+  <link rel="stylesheet" href="https://crystalsage.github.io/assets/green.css">
+
+
+
+
+
+
+<link rel="apple-touch-icon" href="https://crystalsage.github.io/img/apple-touch-icon-192x192.png">
+
+  <link rel="shortcut icon" href="https://crystalsage.github.io/favicon.png">
+
+
+
+<meta name="twitter:card" content="summary" />
+
+  
+    <meta name="twitter:site" content="" />
+  
+    <meta name="twitter:creator" content="" />
+
+
+
+<meta property="og:locale" content="en" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="CSI-CTF Writeup (Part-1)">
+<meta property="og:description" content="The 1st part of the 3-part writeup for CSI-CTF 2022" />
+<meta property="og:url" content="https://crystalsage.github.io/posts/ctf-1/" />
+<meta property="og:site_name" content="/home/bourbon" />
+
+  
+    <meta property="og:image" content="https://crystalsage.github.io/favicon.png">
+  
+
+<meta property="og:image:width" content="2048">
+<meta property="og:image:height" content="1024">
+
+
+  <meta property="article:published_time" content="2022-02-13 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+<body class="green">
+
+
+<div class="container center headings--one-size">
+
+  <header class="header">
+  <div class="header__inner">
+    <div class="header__logo">
+      <a href="/">
+  <div class="logo">
+    /home/bourbon
+  </div>
+</a>
+
+    </div>
+    
+      <div class="menu-trigger">menu</div>
+    
+  </div>
+  
+    <nav class="menu">
+  <ul class="menu__inner menu__inner--desktop">
+    
+      
+        
+          <li><a href="/about">About</a></li>
+        
+      
+        
+          <li><a href="/setup">Setup</a></li>
+        
+      
+      
+    
+
+    
+  </ul>
+
+  <ul class="menu__inner menu__inner--mobile">
+    
+      
+        <li><a href="/about">About</a></li>
+      
+    
+      
+        <li><a href="/setup">Setup</a></li>
+      
+    
+    
+  </ul>
+</nav>
+
+  
+</header>
+
+
+  <div class="content">
+    
+<div class="post">
+  <h1 class="post-title">
+    <a href="https://crystalsage.github.io/posts/ctf-1/">CSI-CTF Writeup (Part-1)</a></h1>
+  <div class="post-meta">
+    
+      <span class="post-date">
+        2022-02-13
+        
+      </span>
+    
+    
+    
+  </div>
+
+  
+  
+
+
+  
+
+  <div class="post-content"><div>
+        <p>I recently won 1st place at the CSI-CTF 2022. The CTF was basic, but still
+amazing (We find that the two things are often mutually exclusive in many CTFs).
+The challenges were easy, but not lame. The UI was fantastic. I was impressed
+by the CTF infrastructure. It is not easy to host a CTF this well.</p>
+<p>You can register and play this CTF. It&rsquo;s open to everyone.</p>
+<p>In this 3-part series, we will see my method of approaching these challenges
+and how I solved them. The 9 challenges are divided into 3 posts.
+<img src="/ctf.jpg" alt="Some"></p>
+<p>A basic idea in solving a CTF is that the name of the challenge often gives
+a huge hint to you. After that, you just need to keep your mind open to all
+the possibilities and think your way through. Keep the name in the back of
+your mind but don&rsquo;t let it bias your thinking. Keep an open approach to any
+challenge to aim to solve.</p>
+<h1 id="what-lies-within">What Lies Within<a href="#what-lies-within" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<p><img src="/ctf/whatlieswithin.png" alt="challenge">
+From the challenge&rsquo;s name and some experience, we can immediately guess that the
+image has data inside it. The most preliminary test you can do to weed out easy
+challenges is to run <code>strings</code> on the image. <code>strings</code> will yield us the plaintext
+strings inside the file.</p>
+<p><img src="/ctf/whatlieswithin-strings.png" alt="wlw-strings"></p>
+<p>As you can see, it returns us all of the plaintext things inside the image. It
+would be a mad task to scroll down and find our flag in this haystack. So, we
+can find our flag by using <code>grep</code>. We can grep for the flag&rsquo;s format since we
+definitely know it&rsquo;s a part of the flag.</p>
+<p><img src="/ctf/whatlieswithin-flag.png" alt="flag"></p>
+<p>The flag! $\blacksquare$</p>
+<hr>
+<h1 id="luminous-hunt">Luminous Hunt<a href="#luminous-hunt" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<p><img src="/ctf/lh-chall.png" alt="lh-chall">
+In this challenge, we are again, starting with an image. And, the name gives
+us a hint about this being related to light.</p>
+<p>My initial guess was that the image contained the flag, but it&rsquo;s too small to
+see. I <em>really</em> zoomed in on the image to see if there was a tiny flag somewhere
+in there, but nope. Thanks creators! (This is actually a pretty common thing in CTFs!)</p>
+<p>Next, I tried putting this image in an image editor and analyzed its RGB
+channels. The flag if  hidden in one of the three channels, is only visible
+in that particular channel. But no.</p>
+<p>I was out of my typical ideas when I enlarged the image a bit and noticed that
+the blackboard looked too black. Something seemed off about it. So, keeping the
+challenge name and the weird blackboard color in mind, I decided to brighten
+up the image, which gives us our flag, hidden in the darkness of the blackboard.</p>
+<p><img src="/ctf/lh-brighten.png" alt="lh-brighten"></p>
+<p>It&rsquo;s still pretty hard to read, but we can make out <code>csi-ctf{CPL-CSI}</code>, which
+is our flag. $\blacksquare$</p>
+<hr>
+<h1 id="a-tribute">A Tribute<a href="#a-tribute" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<p><img src="/ctf/at-chall.png" alt="at-chall">
+We are given a GitHub page which tells us to find the name of a person. This
+obviously is an OSINT challenge, right? No! There&rsquo;s a twist here.</p>
+<p>If you find out the person&rsquo;s name, and try to submit it as a flag, the
+submission gets denied.</p>
+<p>If you take a look around the page, you&rsquo;ll see that the repository&rsquo;s commit
+history is pretty interesting. It contains some strings that could be useful
+to us.
+<img src="/ctf/at-commits.png" alt="at-commits">
+The letters look jumbled but they are still readable. This is probably encoded
+with some cipher. If you&rsquo;ve had any sort of experience with ciphers, you&rsquo;ve
+probably heard of the Caesar cipher, AKA rot-n cipher. One of the strings of
+the commit messages must be our encoded flag.</p>
+<p>If you patiently try out some/all of these, you&rsquo;ll find out that the 4th commit
+message from the top is actually our flag, with rot-18 encoding.
+<img src="/ctf/at-flag.png" alt="at-flag"></p>
+<p>The flag is <code>csi-ctf{congratulations_the_flag_is_jira}</code> $\blacksquare$</p>
+<hr style="border:2px solid gray"> </hr>
+This series is to be continued in the part 2 and 3 where we'll solve more
+challenges...
+
+      </div></div>
+
+  
+  
+<div class="pagination">
+    <div class="pagination__title">
+        <span class="pagination__title-h">Read other posts</span>
+        <hr />
+    </div>
+    <div class="pagination__buttons">
+        
+        
+        <span class="button next">
+            <a href="https://crystalsage.github.io/posts/swallow/">
+                <span class="button__text">Swallow</span>
+                <span class="button__icon">→</span>
+            </a>
+        </span>
+        
+    </div>
+</div>
+
+  
+
+  
+
+</div>
+
+  </div>
+
+  
+    <footer class="footer">
+  <div class="footer__inner">
+    
+      <div class="copyright copyright--user">
+        <span>Licensed to Bourbon</span>
+    
+        <span>:: Theme made by <a href="https://twitter.com/panr">panr</a></span>
+      </div>
+  </div>
+</footer>
+
+
+
+<script src="https://crystalsage.github.io/assets/main.js"></script>
+<script src="https://crystalsage.github.io/assets/prism.js"></script>
+<script type="text/javascript"
+  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\[','\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+           extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    }
+  });
+  </script>
+
+
+
+
+
+
+  
+</div>
+
+</body>
+</html>
