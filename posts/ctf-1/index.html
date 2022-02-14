@@ -155,7 +155,7 @@ by the CTF infrastructure. It is not easy to host a CTF this well.</p>
 <p>In this 3-part series, we will see my method of approaching these challenges
 and how I solved them. The 9 challenges are divided into 3 posts.
 <img src="/ctf.jpg" alt="Some"></p>
-<p>A basic idea in solving a CTF challenge is that the name of the challenge
+<p>A tip for solving easy CTF challenges is that the name of the challenge
 often gives a hint to you. After that, you just need to keep your mind open to all
 the possibilities and think your way through. Keep the name in the back of
 your mind but don&rsquo;t let it bias your thinking. Keep an open approach to any
@@ -163,13 +163,13 @@ challenge which you&rsquo;re aiming to solve.</p>
 <h1 id="what-lies-within">What Lies Within<a href="#what-lies-within" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
 <p><img src="/ctf/whatlieswithin.png" alt="challenge">
 From the challenge&rsquo;s name and some experience, we can immediately guess that the
-image has data inside it. The most preliminary test you can do to weed out easy
-challenges is to run <code>strings</code> on the image. <code>strings</code> will yield us the plaintext
-strings inside the file.</p>
+image has data inside it. The most preliminary test you can do to weed out
+some easy challenges is to run <code>strings</code> on the image. <code>strings</code> will yield us
+the plaintext strings inside the file.</p>
 <p><img src="/ctf/whatlieswithin-strings.png" alt="wlw-strings"></p>
 <p>As you can see, it returns us all of the plaintext things inside the image. It
 would be a mad task to scroll down and find our flag in this haystack. So, we
-can find our flag by using <code>grep</code>. We can grep for the flag&rsquo;s format since we
+can find our flag using <code>grep</code>. We can grep for the flag&rsquo;s format since we
 definitely know it&rsquo;s a part of the flag.</p>
 <p><img src="/ctf/whatlieswithin-flag.png" alt="flag"></p>
 <p>The flag! <code>csi-ctf{Let's_go_to_the_subway_for_lunch}</code> $\blacksquare$</p>
@@ -183,7 +183,7 @@ see. I <em>really</em> zoomed in on the image to see if there was a tiny flag so
 in there, but nope. Thanks creators for not doing this!
 (This is actually a pretty common thing in CTFs!)</p>
 <p>Next, I tried putting this image in an image editor and analyzed its RGB
-channels. The flag if  hidden in one of the three channels, is only visible
+channels. The flag, if  hidden in one of the three channels, is only visible
 in that particular channel. But no.</p>
 <p>I was out of my typical ideas when I enlarged the image a bit and noticed that
 the blackboard looked too black. Something seemed off about it. So, keeping the
