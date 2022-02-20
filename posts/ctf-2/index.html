@@ -154,8 +154,8 @@
 and how I solved them. The 9 challenges are divided into 3 posts.</p>
 <h1 id="attack-on-bank">Attack on Bank<a href="#attack-on-bank" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
 <p><img src="/ctf/AOB.png" alt="here"></p>
-<p>The challenge description gives us info about the encrypted text. (Also notice
-how ECB abbreviation gives us a hint about 128-bit AES-ECB being the cryptosystem.
+<p>The challenge description gives us info about the encrypted text (Also notice
+how ECB abbreviation gives us a hint about 128-bit AES-ECB being the cryptosystem).
 We also get an unique ID for the bank, which should be the decryption key, if my guess is correct.</p>
 <p>The link given in the challenge leads us to a Paste(bin) where we can find some encrypted text, encoded in base64: <code>Keg7B3p7TENwcvdk2zsy+NXVQzMnMxg6ik2xO0M6A3c=</code></p>
 <p>Cool. This is easy. We can use what we assume to be the key as the key, and

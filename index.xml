@@ -17,7 +17,7 @@
       <description>This is the part 2 of the 3-part series for the CSI-CTF writeup. Click Here to read the 1st part.
 You can register and play this CTF. It&amp;rsquo;s open to everyone.
 In this 3-part series, we will see my method of approaching these challenges and how I solved them. The 9 challenges are divided into 3 posts.
-Attack on Bank The challenge description gives us info about the encrypted text. (Also notice how ECB abbreviation gives us a hint about 128-bit AES-ECB being the cryptosystem.</description>
+Attack on Bank The challenge description gives us info about the encrypted text (Also notice how ECB abbreviation gives us a hint about 128-bit AES-ECB being the cryptosystem).</description>
       <content>&lt;p&gt;This is the part 2 of the 3-part series for the CSI-CTF writeup. Click
 &lt;a href=&#34;https://crystalsage.github.io/posts/ctf-1/&#34;&gt;Here&lt;/a&gt; to read the 1st part.&lt;/p&gt;
 &lt;p&gt;You can &lt;a href=&#34;https://tinyurl.com/2t6kwcxe&#34;&gt;register&lt;/a&gt; and
@@ -26,8 +26,8 @@ Attack on Bank The challenge description gives us info about the encrypted text.
 and how I solved them. The 9 challenges are divided into 3 posts.&lt;/p&gt;
 &lt;h1 id=&#34;attack-on-bank&#34;&gt;Attack on Bank&lt;/h1&gt;
 &lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/AOB.png&#34; alt=&#34;here&#34;&gt;&lt;/p&gt;
-&lt;p&gt;The challenge description gives us info about the encrypted text. (Also notice
-how ECB abbreviation gives us a hint about 128-bit AES-ECB being the cryptosystem.
+&lt;p&gt;The challenge description gives us info about the encrypted text (Also notice
+how ECB abbreviation gives us a hint about 128-bit AES-ECB being the cryptosystem).
 We also get an unique ID for the bank, which should be the decryption key, if my guess is correct.&lt;/p&gt;
 &lt;p&gt;The link given in the challenge leads us to a Paste(bin) where we can find some encrypted text, encoded in base64: &lt;code&gt;Keg7B3p7TENwcvdk2zsy+NXVQzMnMxg6ik2xO0M6A3c=&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;Cool. This is easy. We can use what we assume to be the key as the key, and
