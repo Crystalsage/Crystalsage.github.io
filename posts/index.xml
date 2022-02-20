@@ -7,7 +7,85 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>Licensed to Bourbon</copyright>
-    <lastBuildDate>Sun, 13 Feb 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://crystalsage.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 20 Feb 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://crystalsage.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>CSI-CTF Writeup (Part-2)</title>
+      <link>https://crystalsage.github.io/posts/ctf-2/</link>
+      <pubDate>Sun, 20 Feb 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://crystalsage.github.io/posts/ctf-2/</guid>
+      <description>This is the part 2 of the 3-part series for the CSI-CTF writeup. Click Here to read the 1st part.
+You can register and play this CTF. It&amp;rsquo;s open to everyone.
+In this 3-part series, we will see my method of approaching these challenges and how I solved them. The 9 challenges are divided into 3 posts.
+Attack on Bank The challenge description gives us info about the encrypted text. (Also notice how ECB abbreviation gives us a hint about AES-ECB being the cryptosystem being used with 128 bits.</description>
+      <content>&lt;p&gt;This is the part 2 of the 3-part series for the CSI-CTF writeup. Click
+&lt;a href=&#34;https://crystalsage.github.io/posts/ctf-1/&#34;&gt;Here&lt;/a&gt; to read the 1st part.&lt;/p&gt;
+&lt;p&gt;You can &lt;a href=&#34;https://tinyurl.com/2t6kwcxe&#34;&gt;register&lt;/a&gt; and
+&lt;a href=&#34;https://tinyurl.com/ms95pajv&#34;&gt;play&lt;/a&gt; this CTF. It&amp;rsquo;s open to everyone.&lt;/p&gt;
+&lt;p&gt;In this 3-part series, we will see my method of approaching these challenges
+and how I solved them. The 9 challenges are divided into 3 posts.&lt;/p&gt;
+&lt;h1 id=&#34;attack-on-bank&#34;&gt;Attack on Bank&lt;/h1&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/AOB.png&#34; alt=&#34;here&#34;&gt;&lt;/p&gt;
+&lt;p&gt;The challenge description gives us info about the encrypted text. (Also notice
+how ECB abbreviation gives us a hint about AES-ECB being the cryptosystem being
+used with 128 bits. We also get an unique ID for the bank, which should be the decryption key, if my guess is correct.&lt;/p&gt;
+&lt;p&gt;The link given in the challenge leads us to a Paste(bin) where we can find some encrypted text, encoded in base64: &lt;code&gt;Keg7B3p7TENwcvdk2zsy+NXVQzMnMxg6ik2xO0M6A3c=&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Cool. This is easy. We can use what we assume to be the key as the key, and
+decrypt the text. I used my favorite tool, &lt;a href=&#34;https://gchq.github.io/CyberChef/&#34;&gt;CyberChef&lt;/a&gt;
+for this.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/aob-flag.png&#34; alt=&#34;aob-flag&#34;&gt;&lt;/p&gt;
+&lt;p&gt;We first decoded the base64 encoded plaintext, and decrypted the text using the
+key, and a blank IV. This gets us our flag! &lt;code&gt;csi-ctf{pR0videncE_$4ys_He110}&lt;/code&gt;&lt;/p&gt;
+&lt;h1 id=&#34;js-nerds&#34;&gt;JS Nerds&lt;/h1&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/jsn.png&#34; alt=&#34;jsn&#34;&gt;&lt;/p&gt;
+&lt;p&gt;We get login page right off the bat. I was initially thrown off by the obvious
+hints such as towards a Blind SQL injection. &lt;em&gt;You can&amp;rsquo;t see me&lt;/em&gt; is really
+suggestive. To test this, I used typical payloads such as &lt;code&gt;&#39; OR 1=1 --&lt;/code&gt; and friends. But this yielded nothing even after 5-6 minutes of trying, so I eventually gave up on this.&lt;/p&gt;
+&lt;p&gt;If we visit this page&amp;rsquo;s source, we can find a file at the bottom named
+&lt;code&gt;index.js&lt;/code&gt; referenced in there. This &lt;code&gt;index.js&lt;/code&gt; file contains some Javascript
+code.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;checkData&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;event&lt;/span&gt;) {
+    &lt;span style=&#34;color:#a6e22e&#34;&gt;console&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;log&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;click&amp;#34;&lt;/span&gt;);
+    &lt;span style=&#34;color:#a6e22e&#34;&gt;event&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;preventDefault&lt;/span&gt;();
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;x&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; document.&lt;span style=&#34;color:#a6e22e&#34;&gt;forms&lt;/span&gt;[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;login-form&amp;#34;&lt;/span&gt;][&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;username&amp;#34;&lt;/span&gt;].&lt;span style=&#34;color:#a6e22e&#34;&gt;value&lt;/span&gt;;
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;p&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; document.&lt;span style=&#34;color:#a6e22e&#34;&gt;forms&lt;/span&gt;[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;login-form&amp;#34;&lt;/span&gt;][&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;password&amp;#34;&lt;/span&gt;].&lt;span style=&#34;color:#a6e22e&#34;&gt;value&lt;/span&gt;;
+    &lt;span style=&#34;color:#75715e&#34;&gt;// oh no! Client side validation always fails! thank god I have encrypted it!
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#a6e22e&#34;&gt;x&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;===&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;John&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;||&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;SHA1&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;p&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;b89356ff6151527e89c4f3e3d30c8e6586c63962&amp;#34;&lt;/span&gt;) {;
+    } &lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt; {
+        &lt;span style=&#34;color:#a6e22e&#34;&gt;alert&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Invalid username or password&amp;#34;&lt;/span&gt;);
+    }
+
+};
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Oh. We get the username and SHA-1 hash for our password. So I guess we have
+to crack SHA-1 now. We can do this using a tool such as hashcat and crack this
+password using a wordlist. But I didn&amp;rsquo;t happen to have my machine with me,
+so I had to use &lt;a href=&#34;https://crackstation.net/&#34;&gt;crackstation&lt;/a&gt; to do this. Fortunately,
+crackstation had this hash in their database, which reveals the password to be
+&lt;code&gt;adminz&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/jsn-hash.png&#34; alt=&#34;jsn-hash&#34;&gt;&lt;/p&gt;
+&lt;p&gt;We can log in to the site with our credentials now to get the flag.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/jsn-flag.png&#34; alt=&#34;jsn-flag&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Bread! &lt;code&gt;csi-ctf{eXploIted_wEb}&lt;/code&gt;&lt;/p&gt;
+&lt;h1 id=&#34;computer-engineering&#34;&gt;Computer Engineering&lt;/h1&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/ce1.png&#34; alt=&#34;ce-1&#34;&gt;&lt;/p&gt;
+&lt;p&gt;We get another Github page. Except this time, there are no commits. We do
+notice the 6 branches though.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/ce2.png&#34; alt=&#34;ce-2&#34;&gt;&lt;/p&gt;
+&lt;p&gt;There are 6 branches, let&amp;rsquo;s visit the CS one first. There are 3 commits in
+there, of which one gives us the flag.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/ce3.png&#34; alt=&#34;ce-3&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Flag! &lt;code&gt;csi-ctf{this_is_the_flag_codecocomo}&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;This challenge was really more of a &amp;ldquo;click 50 times to get the flag&amp;rdquo; challenge. These types of challenges where flags are hidden in commit histories and branches are really disliked &lt;strong&gt;in CTFs&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;However&lt;/strong&gt;, every often, some company get pwned or a bug hunter gets rewarded
+handsomely because he found an internal API key or SSH key in a Github
+commit history, which was accidentally pushed to the repo. So, it&amp;rsquo;s not unrealistic
+at all. There&amp;rsquo;s a thing to be learned here.&lt;/p&gt;
+&lt;hr style=&#34;border:2px solid gray&#34;&gt; &lt;/hr&gt;
+This series is to be continued in part 3 where we&#39;ll solve more
+challenges...
+</content>
+    </item>
+    
     <item>
       <title>CSI-CTF Writeup (Part-1)</title>
       <link>https://crystalsage.github.io/posts/ctf-1/</link>
