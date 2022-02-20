@@ -17,7 +17,7 @@
       <description>This is the part 2 of the 3-part series for the CSI-CTF writeup. Click Here to read the 1st part.
 You can register and play this CTF. It&amp;rsquo;s open to everyone.
 In this 3-part series, we will see my method of approaching these challenges and how I solved them. The 9 challenges are divided into 3 posts.
-Attack on Bank The challenge description gives us info about the encrypted text. (Also notice how ECB abbreviation gives us a hint about AES-ECB being the cryptosystem being used with 128 bits.</description>
+Attack on Bank The challenge description gives us info about the encrypted text. (Also notice how ECB abbreviation gives us a hint about 128-bit AES-ECB being the cryptosystem.</description>
       <content>&lt;p&gt;This is the part 2 of the 3-part series for the CSI-CTF writeup. Click
 &lt;a href=&#34;https://crystalsage.github.io/posts/ctf-1/&#34;&gt;Here&lt;/a&gt; to read the 1st part.&lt;/p&gt;
 &lt;p&gt;You can &lt;a href=&#34;https://tinyurl.com/2t6kwcxe&#34;&gt;register&lt;/a&gt; and
@@ -27,8 +27,8 @@ and how I solved them. The 9 challenges are divided into 3 posts.&lt;/p&gt;
 &lt;h1 id=&#34;attack-on-bank&#34;&gt;Attack on Bank&lt;/h1&gt;
 &lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/AOB.png&#34; alt=&#34;here&#34;&gt;&lt;/p&gt;
 &lt;p&gt;The challenge description gives us info about the encrypted text. (Also notice
-how ECB abbreviation gives us a hint about AES-ECB being the cryptosystem being
-used with 128 bits. We also get an unique ID for the bank, which should be the decryption key, if my guess is correct.&lt;/p&gt;
+how ECB abbreviation gives us a hint about 128-bit AES-ECB being the cryptosystem.
+We also get an unique ID for the bank, which should be the decryption key, if my guess is correct.&lt;/p&gt;
 &lt;p&gt;The link given in the challenge leads us to a Paste(bin) where we can find some encrypted text, encoded in base64: &lt;code&gt;Keg7B3p7TENwcvdk2zsy+NXVQzMnMxg6ik2xO0M6A3c=&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;Cool. This is easy. We can use what we assume to be the key as the key, and
 decrypt the text. I used my favorite tool, &lt;a href=&#34;https://gchq.github.io/CyberChef/&#34;&gt;CyberChef&lt;/a&gt;
@@ -39,8 +39,10 @@ key, and a blank IV. This gets us our flag! &lt;code&gt;csi-ctf{pR0videncE_$4ys_
 &lt;h1 id=&#34;js-nerds&#34;&gt;JS Nerds&lt;/h1&gt;
 &lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/jsn.png&#34; alt=&#34;jsn&#34;&gt;&lt;/p&gt;
 &lt;p&gt;We get login page right off the bat. I was initially thrown off by the obvious
-hints such as towards a Blind SQL injection. &lt;em&gt;You can&amp;rsquo;t see me&lt;/em&gt; is really
-suggestive. To test this, I used typical payloads such as &lt;code&gt;&#39; OR 1=1 --&lt;/code&gt; and friends. But this yielded nothing even after 5-6 minutes of trying, so I eventually gave up on this.&lt;/p&gt;
+hints towards a Blind SQL injection. &lt;em&gt;You can&amp;rsquo;t see me&lt;/em&gt; is really
+suggestive. To test this if there&amp;rsquo;s any SQLi involved at all,
+I used typical payloads such as &lt;code&gt;&#39; OR 1=1 --&lt;/code&gt; and friends.
+But this yielded nothing even after 5-6 minutes of trying, so I eventually gave up on this.&lt;/p&gt;
 &lt;p&gt;If we visit this page&amp;rsquo;s source, we can find a file at the bottom named
 &lt;code&gt;index.js&lt;/code&gt; referenced in there. This &lt;code&gt;index.js&lt;/code&gt; file contains some Javascript
 code.&lt;/p&gt;
@@ -56,7 +58,7 @@ code.&lt;/p&gt;
     }
 
 };
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Oh. We get the username and SHA-1 hash for our password. So I guess we have
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Oh. We get the username and SHA-1 hash of our password. So I guess we have
 to crack SHA-1 now. We can do this using a tool such as hashcat and crack this
 password using a wordlist. But I didn&amp;rsquo;t happen to have my machine with me,
 so I had to use &lt;a href=&#34;https://crackstation.net/&#34;&gt;crackstation&lt;/a&gt; to do this. Fortunately,
@@ -68,10 +70,10 @@ crackstation had this hash in their database, which reveals the password to be
 &lt;p&gt;Bread! &lt;code&gt;csi-ctf{eXploIted_wEb}&lt;/code&gt;&lt;/p&gt;
 &lt;h1 id=&#34;computer-engineering&#34;&gt;Computer Engineering&lt;/h1&gt;
 &lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/ce1.png&#34; alt=&#34;ce-1&#34;&gt;&lt;/p&gt;
-&lt;p&gt;We get another Github page. Except this time, there are no commits. We do
-notice the 6 branches though.&lt;/p&gt;
+&lt;p&gt;We get another Github page. Except this time, there is nothing in
+the 6 commits. We do notice the 6 branches though.&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/ce2.png&#34; alt=&#34;ce-2&#34;&gt;&lt;/p&gt;
-&lt;p&gt;There are 6 branches, let&amp;rsquo;s visit the CS one first. There are 3 commits in
+&lt;p&gt;There are 6 branches, let&amp;rsquo;s visit CS first. There are 3 commits in
 there, one of which gives us the flag.&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/ce3.png&#34; alt=&#34;ce-3&#34;&gt;&lt;/p&gt;
 &lt;p&gt;Flag! &lt;code&gt;csi-ctf{this_is_the_flag_codecocomo}&lt;/code&gt;.&lt;/p&gt;

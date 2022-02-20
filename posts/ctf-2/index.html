@@ -155,8 +155,8 @@ and how I solved them. The 9 challenges are divided into 3 posts.</p>
 <h1 id="attack-on-bank">Attack on Bank<a href="#attack-on-bank" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
 <p><img src="/ctf/AOB.png" alt="here"></p>
 <p>The challenge description gives us info about the encrypted text. (Also notice
-how ECB abbreviation gives us a hint about AES-ECB being the cryptosystem being
-used with 128 bits. We also get an unique ID for the bank, which should be the decryption key, if my guess is correct.</p>
+how ECB abbreviation gives us a hint about 128-bit AES-ECB being the cryptosystem.
+We also get an unique ID for the bank, which should be the decryption key, if my guess is correct.</p>
 <p>The link given in the challenge leads us to a Paste(bin) where we can find some encrypted text, encoded in base64: <code>Keg7B3p7TENwcvdk2zsy+NXVQzMnMxg6ik2xO0M6A3c=</code></p>
 <p>Cool. This is easy. We can use what we assume to be the key as the key, and
 decrypt the text. I used my favorite tool, <a href="https://gchq.github.io/CyberChef/">CyberChef</a>
@@ -167,8 +167,10 @@ key, and a blank IV. This gets us our flag! <code>csi-ctf{pR0videncE_$4ys_He110}
 <h1 id="js-nerds">JS Nerds<a href="#js-nerds" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
 <p><img src="/ctf/jsn.png" alt="jsn"></p>
 <p>We get login page right off the bat. I was initially thrown off by the obvious
-hints such as towards a Blind SQL injection. <em>You can&rsquo;t see me</em> is really
-suggestive. To test this, I used typical payloads such as <code>' OR 1=1 --</code> and friends. But this yielded nothing even after 5-6 minutes of trying, so I eventually gave up on this.</p>
+hints towards a Blind SQL injection. <em>You can&rsquo;t see me</em> is really
+suggestive. To test this if there&rsquo;s any SQLi involved at all,
+I used typical payloads such as <code>' OR 1=1 --</code> and friends.
+But this yielded nothing even after 5-6 minutes of trying, so I eventually gave up on this.</p>
 <p>If we visit this page&rsquo;s source, we can find a file at the bottom named
 <code>index.js</code> referenced in there. This <code>index.js</code> file contains some Javascript
 code.</p>
@@ -184,7 +186,7 @@ code.</p>
     }
 
 };
-</code></pre></div><p>Oh. We get the username and SHA-1 hash for our password. So I guess we have
+</code></pre></div><p>Oh. We get the username and SHA-1 hash of our password. So I guess we have
 to crack SHA-1 now. We can do this using a tool such as hashcat and crack this
 password using a wordlist. But I didn&rsquo;t happen to have my machine with me,
 so I had to use <a href="https://crackstation.net/">crackstation</a> to do this. Fortunately,
@@ -196,10 +198,10 @@ crackstation had this hash in their database, which reveals the password to be
 <p>Bread! <code>csi-ctf{eXploIted_wEb}</code></p>
 <h1 id="computer-engineering">Computer Engineering<a href="#computer-engineering" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
 <p><img src="/ctf/ce1.png" alt="ce-1"></p>
-<p>We get another Github page. Except this time, there are no commits. We do
-notice the 6 branches though.</p>
+<p>We get another Github page. Except this time, there is nothing in
+the 6 commits. We do notice the 6 branches though.</p>
 <p><img src="/ctf/ce2.png" alt="ce-2"></p>
-<p>There are 6 branches, let&rsquo;s visit the CS one first. There are 3 commits in
+<p>There are 6 branches, let&rsquo;s visit CS first. There are 3 commits in
 there, one of which gives us the flag.</p>
 <p><img src="/ctf/ce3.png" alt="ce-3"></p>
 <p>Flag! <code>csi-ctf{this_is_the_flag_codecocomo}</code>.</p>
