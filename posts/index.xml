@@ -72,14 +72,17 @@ crackstation had this hash in their database, which reveals the password to be
 notice the 6 branches though.&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/ce2.png&#34; alt=&#34;ce-2&#34;&gt;&lt;/p&gt;
 &lt;p&gt;There are 6 branches, let&amp;rsquo;s visit the CS one first. There are 3 commits in
-there, of which one gives us the flag.&lt;/p&gt;
+there, one of which gives us the flag.&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/ce3.png&#34; alt=&#34;ce-3&#34;&gt;&lt;/p&gt;
 &lt;p&gt;Flag! &lt;code&gt;csi-ctf{this_is_the_flag_codecocomo}&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;This challenge was really more of a &amp;ldquo;click 50 times to get the flag&amp;rdquo; challenge. These types of challenges where flags are hidden in commit histories and branches are really disliked &lt;strong&gt;in CTFs&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;This challenge was really more of a &amp;ldquo;click 50 times to get the flag&amp;rdquo; challenge.
+These types of challenges where flags are hidden in commit histories and
+branches are not included &lt;strong&gt;in CTFs&lt;/strong&gt; due to them having less of a problem
+solving aspect to them.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;However&lt;/strong&gt;, every often, some company get pwned or a bug hunter gets rewarded
 handsomely because he found an internal API key or SSH key in a Github
-commit history, which was accidentally pushed to the repo. So, it&amp;rsquo;s not unrealistic
-at all. There&amp;rsquo;s a thing to be learned here.&lt;/p&gt;
+commit history, which was accidentally pushed to the repo. So, it&amp;rsquo;s not
+unrealistic at all. There&amp;rsquo;s a lesson to be learned here.&lt;/p&gt;
 &lt;hr style=&#34;border:2px solid gray&#34;&gt; &lt;/hr&gt;
 This series is to be continued in part 3 where we&#39;ll solve more
 challenges...
