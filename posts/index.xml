@@ -1,452 +1,447 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
-    <title>Posts on /home/bourbon</title>
-    <link>https://crystalsage.github.io/posts/</link>
-    <description>Recent content in Posts on /home/bourbon</description>
-    <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language>
-    <copyright>Licensed to Bourbon</copyright>
-    <lastBuildDate>Wed, 23 Feb 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://crystalsage.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>CSI-CTF Writeup (Part-3)</title>
-      <link>https://crystalsage.github.io/posts/ctf-3/</link>
-      <pubDate>Wed, 23 Feb 2022 00:00:00 +0000</pubDate>
-      
-      <guid>https://crystalsage.github.io/posts/ctf-3/</guid>
-      <description>This is the 3rd and final part of the 3-part series for the CSI-CTF writeup. Click here to read 1st part or 2nd part.
+    <channel>
+        <title>Posts on Bourbon&#39;s Blog</title>
+        <link>localhost/posts/</link>
+        <description>Recent content in Posts on Bourbon&#39;s Blog</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en-us</language>
+        <copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
+        <lastBuildDate>Wed, 23 Feb 2022 00:00:00 +0000</lastBuildDate>
+        <atom:link href="localhost/posts/index.xml" rel="self" type="application/rss+xml" />
+        
+        <item>
+            <title>CSI-CTF Writeup (Part-3)</title>
+            <link>localhost/posts/ctf-3/</link>
+            <pubDate>Wed, 23 Feb 2022 00:00:00 +0000</pubDate>
+            
+            <guid>localhost/posts/ctf-3/</guid>
+            <description>This is the 3rd and final part of the 3-part series for the CSI-CTF writeup. Click here to read 1st part or 2nd part.
 You can register and play this CTF. It&amp;rsquo;s open to everyone.
 In this 3-part series, we will see my method of approaching these challenges and how I solved them. The 9 challenges are divided into 3 posts.
 Decode It The challenge gives us a pretty clear hint that each line is mapped to the single character (The hint is ambiguous, character could either mean the person or a character in the flag).</description>
-      <content>&lt;p&gt;This is the 3rd and final part of the 3-part series for the CSI-CTF writeup.
-Click here to read &lt;a href=&#34;https://crystalsage.github.io/posts/ctf-1/&#34;&gt;1st part&lt;/a&gt; or
-&lt;a href=&#34;https://crystalsage.github.io/posts/ctf-2/&#34;&gt;2nd part&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;You can &lt;a href=&#34;https://tinyurl.com/2t6kwcxe&#34;&gt;register&lt;/a&gt; and
-&lt;a href=&#34;https://tinyurl.com/ms95pajv&#34;&gt;play&lt;/a&gt; this CTF. It&amp;rsquo;s open to everyone.&lt;/p&gt;
-&lt;p&gt;In this 3-part series, we will see my method of approaching these challenges
-and how I solved them. The 9 challenges are divided into 3 posts.&lt;/p&gt;
-&lt;h1 id=&#34;decode-it&#34;&gt;Decode It&lt;/h1&gt;
-&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/di.png&#34; alt=&#34;di&#34;&gt;&lt;/p&gt;
-&lt;p&gt;The challenge gives us a pretty clear hint that each line is mapped to &lt;em&gt;the&lt;/em&gt; single
+            <content type="html"><![CDATA[<p>This is the 3rd and final part of the 3-part series for the CSI-CTF writeup.
+Click here to read <a href="https://crystalsage.github.io/posts/ctf-1/">1st part</a> or
+<a href="https://crystalsage.github.io/posts/ctf-2/">2nd part</a>.</p>
+<p>You can <a href="https://tinyurl.com/2t6kwcxe">register</a> and
+<a href="https://tinyurl.com/ms95pajv">play</a> this CTF. It&rsquo;s open to everyone.</p>
+<p>In this 3-part series, we will see my method of approaching these challenges
+and how I solved them. The 9 challenges are divided into 3 posts.</p>
+<h1 id="decode-it">Decode It</h1>
+<p><img src="/ctf/di.png" alt="di"></p>
+<p>The challenge gives us a pretty clear hint that each line is mapped to <em>the</em> single
 character (The hint is ambiguous, character could either mean the person or
-a character in the flag).&lt;/p&gt;
-&lt;p&gt;And so, we are given some lines of text in a PDF file. We can quickly notice
-some things.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/di-morse.png&#34; alt=&#34;di-morse&#34;&gt;&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;
-&lt;p&gt;There are two lines with just brackets. These are obviously the brackets
+a character in the flag).</p>
+<p>And so, we are given some lines of text in a PDF file. We can quickly notice
+some things.</p>
+<p><img src="/ctf/di-morse.png" alt="di-morse"></p>
+<ol>
+<li>
+<p>There are two lines with just brackets. These are obviously the brackets
 from the flag itself. We can conclude that each line somehow maps to a single
-character in the flag.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;There&amp;rsquo;s no type of encoding in play here. No character/word limit for the
-line either.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;There&amp;rsquo;s no obvious pattern that stands out. Things such as skip cipher seem
-out of the question.&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;I was a bit thrown off at first. I tried things such as measuring character
+character in the flag.</p>
+</li>
+<li>
+<p>There&rsquo;s no type of encoding in play here. No character/word limit for the
+line either.</p>
+</li>
+<li>
+<p>There&rsquo;s no obvious pattern that stands out. Things such as skip cipher seem
+out of the question.</p>
+</li>
+</ol>
+<p>I was a bit thrown off at first. I tried things such as measuring character
 frequency to calculate any remapped letters. But then, I decided to actually
-take a moment to read the content of the paragraph (Seems obvious, isn&amp;rsquo;t.).
-The paragraph actually mentions Samuel Morse, the creator of Morse Code. Aha!&lt;/p&gt;
-&lt;p&gt;If we notice carefully, we see that each line contains either dits (.) or dahs
-(-). Maybe we can extract all the dits and dahs from each line.&lt;/p&gt;
-&lt;p&gt;e.g. The very first line,&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;There is a town known for cryptography named Encoder-Decoder.
-And it&amp;rsquo;s not just one person skilled with cryptography, it&amp;rsquo;s just
-fully-filled with all of them.&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;contains 1 dah, a dot, a dah and a dot again, in that order. So, &lt;code&gt;-.-.&lt;/code&gt;,
-which is clearly the letter &lt;code&gt;c&lt;/code&gt;. This must be the &amp;lsquo;c&amp;rsquo; of &lt;code&gt;csi-ctf&lt;/code&gt;!&lt;/p&gt;
-&lt;p&gt;Since we know the flag format, we can actually skip the first 8 lines and
-assume them to be &lt;code&gt;csi-ctf{&lt;/code&gt;. To decode everything inside the brackets, we can
-extract the dits and dahs from the lines, with some simple Python.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;extract_symbols &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;lambda&lt;/span&gt; line: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;join([i &lt;span style=&#34;color:#66d9ef&#34;&gt;for&lt;/span&gt; i &lt;span style=&#34;color:#f92672&#34;&gt;in&lt;/span&gt; line &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; i &lt;span style=&#34;color:#f92672&#34;&gt;in&lt;/span&gt; (&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;-&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;.&amp;#34;&lt;/span&gt;)])
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Once we extract all dits and dahs, we can put them in a morse &amp;ndash;&amp;gt; text converter.
-I happened to have a script on my machine for this.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/di-morse-ans.png&#34; alt=&#34;di-morse-ans&#34;&gt;&lt;/p&gt;
-&lt;p&gt;Which is the text inside the brackets, so the flag is
-&lt;code&gt;csi-ctf{MORSEINTERSTELLAR}&lt;/code&gt; $\blacksquare$&lt;/p&gt;
-&lt;h1 id=&#34;crack-the-sequence&#34;&gt;Crack the Sequence&lt;/h1&gt;
-&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/cts.png&#34; alt=&#34;cts&#34;&gt;&lt;/p&gt;
-&lt;p&gt;The challenge description tells us that we need to crack a sequence of four
-cards, and decrypt it. Cool.&lt;/p&gt;
-&lt;p&gt;If we click around on some 5 cards randomly, we get an alert box saying that
-the combination is wrong.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/cts-wrong.png&#34; alt=&#34;ctf-fail&#34;&gt;&lt;/p&gt;
-&lt;p&gt;Let&amp;rsquo;s see what&amp;rsquo;s going on under the hood. On the page&amp;rsquo;s source,  we find the
-following Javascript code.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;store&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;;
-    &lt;span style=&#34;color:#66d9ef&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;count&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;;
-    &lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;card&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;res&lt;/span&gt;) {
-      &lt;span style=&#34;color:#a6e22e&#34;&gt;store&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;store&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;res&lt;/span&gt;;
-      &lt;span style=&#34;color:#a6e22e&#34;&gt;count&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;++&lt;/span&gt;;
-      &lt;span style=&#34;color:#a6e22e&#34;&gt;console&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;log&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;store&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;length&lt;/span&gt;);
-
-      &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#a6e22e&#34;&gt;count&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;===&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;4&lt;/span&gt;) {
-        &lt;span style=&#34;color:#a6e22e&#34;&gt;setTimeout&lt;/span&gt;(() =&amp;gt; {
-          &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#f92672&#34;&gt;!&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;store&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;===&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;d8c2436e262448af3043fde3d652726a&amp;#34;&lt;/span&gt;)) {
-            &lt;span style=&#34;color:#a6e22e&#34;&gt;alert&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;wrong&amp;#34;&lt;/span&gt;);
-            window.&lt;span style=&#34;color:#a6e22e&#34;&gt;location&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;reload&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;true&lt;/span&gt;);
-          }
-          &lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt; {
-            &lt;span style=&#34;color:#a6e22e&#34;&gt;alert&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;congratulations you found the flag : &amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;`csi-ctf{&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;${&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;store&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;}&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;}`&lt;/span&gt;);
-            window.&lt;span style=&#34;color:#a6e22e&#34;&gt;location&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;reload&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;true&lt;/span&gt;);
-          }
-        }, &lt;span style=&#34;color:#ae81ff&#34;&gt;300&lt;/span&gt;);
-      }
-    }
-    &lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;flip&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;event&lt;/span&gt;) {
-      &lt;span style=&#34;color:#66d9ef&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;element&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;event&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;currentTarget&lt;/span&gt;;
-      &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#a6e22e&#34;&gt;element&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;className&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;===&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;cards col-md-4 col-sm-6 col-12&amp;#34;&lt;/span&gt;) {
-        &lt;span style=&#34;color:#a6e22e&#34;&gt;element&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;style&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;transform&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;rotateY(180deg)&amp;#34;&lt;/span&gt;;
-      }
-    }
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The &lt;code&gt;card()&lt;/code&gt; appends &amp;lsquo;something&amp;rsquo; to &lt;code&gt;store&lt;/code&gt;. Once we flip 5 cards, we check if
-the &amp;lsquo;something&amp;rsquo; of the cards form the sequence
-&lt;code&gt;d8c2436e262448af3043fde3d652726a&lt;/code&gt;. If so, we get the flag.&lt;/p&gt;
-&lt;p&gt;But hey!!! The
-flag is the &lt;code&gt;store&lt;/code&gt; variable itself, as evident by the
-&amp;ldquo;congratulations&amp;rdquo; message. So the flag is the hex sequence
-&lt;code&gt;d8c2436e262448af3043fde3d652726a&lt;/code&gt;. But this doesn&amp;rsquo;t make sense. If you try
-submitting this, it fails. Let&amp;rsquo;s try decrypting this.&lt;/p&gt;
-&lt;p&gt;Since the total length of the hex sequence is 32, I can safely assume this
+take a moment to read the content of the paragraph (Seems obvious, isn&rsquo;t.).
+The paragraph actually mentions Samuel Morse, the creator of Morse Code. Aha!</p>
+<p>If we notice carefully, we see that each line contains either dits (.) or dahs
+(-). Maybe we can extract all the dits and dahs from each line.</p>
+<p>e.g. The very first line,</p>
+<blockquote>
+<p>There is a town known for cryptography named Encoder-Decoder.
+And it&rsquo;s not just one person skilled with cryptography, it&rsquo;s just
+fully-filled with all of them.</p>
+</blockquote>
+<p>contains 1 dah, a dot, a dah and a dot again, in that order. So, <code>-.-.</code>,
+which is clearly the letter <code>c</code>. This must be the &lsquo;c&rsquo; of <code>csi-ctf</code>!</p>
+<p>Since we know the flag format, we can actually skip the first 8 lines and
+assume them to be <code>csi-ctf{</code>. To decode everything inside the brackets, we can
+extract the dits and dahs from the lines, with some simple Python.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>extract_symbols <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> line: <span style="color:#e6db74">&#34;&#34;</span><span style="color:#f92672">.</span>join([i <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> line <span style="color:#66d9ef">if</span> i <span style="color:#f92672">in</span> (<span style="color:#e6db74">&#34;-&#34;</span>, <span style="color:#e6db74">&#34;.&#34;</span>)])
+</span></span></code></pre></div><p>Once we extract all dits and dahs, we can put them in a morse &ndash;&gt; text converter.
+I happened to have a script on my machine for this.</p>
+<p><img src="/ctf/di-morse-ans.png" alt="di-morse-ans"></p>
+<p>Which is the text inside the brackets, so the flag is
+<code>csi-ctf{MORSEINTERSTELLAR}</code> $\blacksquare$</p>
+<h1 id="crack-the-sequence">Crack the Sequence</h1>
+<p><img src="/ctf/cts.png" alt="cts"></p>
+<p>The challenge description tells us that we need to crack a sequence of four
+cards, and decrypt it. Cool.</p>
+<p>If we click around on some 5 cards randomly, we get an alert box saying that
+the combination is wrong.</p>
+<p><img src="/ctf/cts-wrong.png" alt="ctf-fail"></p>
+<p>Let&rsquo;s see what&rsquo;s going on under the hood. On the page&rsquo;s source,  we find the
+following Javascript code.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">store</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">count</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">card</span>(<span style="color:#a6e22e">res</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">store</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">store</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">res</span>;
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">count</span><span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">store</span>.<span style="color:#a6e22e">length</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">count</span> <span style="color:#f92672">===</span> <span style="color:#ae81ff">4</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">setTimeout</span>(() =&gt; {
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>(<span style="color:#a6e22e">store</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#34;d8c2436e262448af3043fde3d652726a&#34;</span>)) {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">alert</span>(<span style="color:#e6db74">&#34;wrong&#34;</span>);
+</span></span><span style="display:flex;"><span>            window.<span style="color:#a6e22e">location</span>.<span style="color:#a6e22e">reload</span>(<span style="color:#66d9ef">true</span>);
+</span></span><span style="display:flex;"><span>          }
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">alert</span>(<span style="color:#e6db74">&#34;congratulations you found the flag : &#34;</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">`csi-ctf{</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">store</span><span style="color:#e6db74">}</span><span style="color:#e6db74">}`</span>);
+</span></span><span style="display:flex;"><span>            window.<span style="color:#a6e22e">location</span>.<span style="color:#a6e22e">reload</span>(<span style="color:#66d9ef">true</span>);
+</span></span><span style="display:flex;"><span>          }
+</span></span><span style="display:flex;"><span>        }, <span style="color:#ae81ff">300</span>);
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">flip</span>(<span style="color:#a6e22e">event</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">element</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">event</span>.<span style="color:#a6e22e">currentTarget</span>;
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">element</span>.<span style="color:#a6e22e">className</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#34;cards col-md-4 col-sm-6 col-12&#34;</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">element</span>.<span style="color:#a6e22e">style</span>.<span style="color:#a6e22e">transform</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;rotateY(180deg)&#34;</span>;
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span></code></pre></div><p>The <code>card()</code> appends &lsquo;something&rsquo; to <code>store</code>. Once we flip 5 cards, we check if
+the &lsquo;something&rsquo; of the cards form the sequence
+<code>d8c2436e262448af3043fde3d652726a</code>. If so, we get the flag.</p>
+<p>But hey!!! The
+flag is the <code>store</code> variable itself, as evident by the
+&ldquo;congratulations&rdquo; message. So the flag is the hex sequence
+<code>d8c2436e262448af3043fde3d652726a</code>. But this doesn&rsquo;t make sense. If you try
+submitting this, it fails. Let&rsquo;s try decrypting this.</p>
+<p>Since the total length of the hex sequence is 32, I can safely assume this
 to be the MD5 hash of the flag. We can crack this using a mask with hashcat
 or a wordlist. The easiest way is to check the online databases for the
-password. After checking some, I found a hit.&lt;/p&gt;
-&lt;img src=&#34;https://crystalsage.github.io/ctf/cts-decrypted.png&#34; alt=&#34;drawing&#34; width=&#34;500&#34;/&gt;
-&lt;p&gt;This should be our flag. &lt;code&gt;csi-ctf{sequential_flag}&lt;/code&gt; $\blacksquare$&lt;/p&gt;
-&lt;p&gt;If you want to do this the proper way:
+password. After checking some, I found a hit.</p>
+<!-- raw HTML omitted -->
+<p>This should be our flag. <code>csi-ctf{sequential_flag}</code> $\blacksquare$</p>
+<p>If you want to do this the proper way:
 The idea is to flip the cards in correct order. We notice that the
-&lt;code&gt;onClick()&lt;/code&gt; events for the cards are called with specific arguments. These
-seem like fragments of the entire sequence, these are the &amp;lsquo;something&amp;rsquo;.  e.g.
-we notice for the first card that &lt;code&gt;card(&#39;d8c2436e&#39;)&lt;/code&gt; is called. This matches
-with the first few characters of our resulting sequence.&lt;/p&gt;
-&lt;p&gt;So we collect all the &lt;code&gt;onClick&lt;/code&gt; snippets.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;onclick&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;[flip(event),card(&amp;#39;d8c2436e&amp;#39;)] //1
-&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;    onclick=&amp;#34;&lt;/span&gt;[&lt;span style=&#34;color:#a6e22e&#34;&gt;flip&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;event&lt;/span&gt;),&lt;span style=&#34;color:#a6e22e&#34;&gt;card&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;)] &lt;span style=&#34;color:#75715e&#34;&gt;//2
-&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;onclick&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;[flip(event),card(&amp;#39;&amp;#39;)] //3
-&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;    onclick=&amp;#34;&lt;/span&gt;[&lt;span style=&#34;color:#a6e22e&#34;&gt;flip&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;event&lt;/span&gt;),&lt;span style=&#34;color:#a6e22e&#34;&gt;card&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;)] &lt;span style=&#34;color:#75715e&#34;&gt;//4
-&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;onclick&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;[flip(event),card(&amp;#39;262448af&amp;#39;)] //5
-&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;    onclick=&amp;#34;&lt;/span&gt;[&lt;span style=&#34;color:#a6e22e&#34;&gt;flip&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;event&lt;/span&gt;),&lt;span style=&#34;color:#a6e22e&#34;&gt;card&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;652726a&amp;#39;&lt;/span&gt;)] &lt;span style=&#34;color:#75715e&#34;&gt;//6
-&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;onclick&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;[flip(event),card(&amp;#39;&amp;#39;)] //7 
-&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;    onclick=&amp;#34;&lt;/span&gt;[&lt;span style=&#34;color:#a6e22e&#34;&gt;flip&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;event&lt;/span&gt;),&lt;span style=&#34;color:#a6e22e&#34;&gt;card&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;3043fde3d&amp;#39;&lt;/span&gt;)] &lt;span style=&#34;color:#75715e&#34;&gt;//8
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;We notice that some of these are empty. So, if we were to flip the cards in
-the order &lt;code&gt;1-5-8-6&lt;/code&gt;, it&amp;rsquo;ll form the sequence that we want and we&amp;rsquo;ll get our hash, which is the same sequence.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/cts-flag-hashed.png&#34; alt=&#34;cts-flag&#34;&gt;&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Challenge Idea/Solution&lt;/strong&gt;: An alternate solution to this challenge, if the flag was something else, would be to set a breakpoint where we check if the &lt;code&gt;store&lt;/code&gt; is equivalent to the sequence, and (by)pass the check entirely by modifying the &lt;code&gt;store&lt;/code&gt; variable to be equal to the hash. Alternate challenge idea!&lt;/p&gt;
-&lt;h1 id=&#34;one-zero-one&#34;&gt;One Zero One&lt;/h1&gt;
-&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/ozo.png&#34; alt=&#34;ozo&#34;&gt;&lt;/p&gt;
-&lt;p&gt;This is easy. We just need to decode the binary. In fact, the hardest part
+<code>onClick()</code> events for the cards are called with specific arguments. These
+seem like fragments of the entire sequence, these are the &lsquo;something&rsquo;.  e.g.
+we notice for the first card that <code>card('d8c2436e')</code> is called. This matches
+with the first few characters of our resulting sequence.</p>
+<p>So we collect all the <code>onClick</code> snippets.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span>    <span style="color:#a6e22e">onclick</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;[flip(event),card(&#39;d8c2436e&#39;)] //1
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    onclick=&#34;</span>[<span style="color:#a6e22e">flip</span>(<span style="color:#a6e22e">event</span>),<span style="color:#a6e22e">card</span>(<span style="color:#e6db74">&#39;&#39;</span>)] <span style="color:#75715e">//2
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#a6e22e">onclick</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;[flip(event),card(&#39;&#39;)] //3
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    onclick=&#34;</span>[<span style="color:#a6e22e">flip</span>(<span style="color:#a6e22e">event</span>),<span style="color:#a6e22e">card</span>(<span style="color:#e6db74">&#39;&#39;</span>)] <span style="color:#75715e">//4
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#a6e22e">onclick</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;[flip(event),card(&#39;262448af&#39;)] //5
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    onclick=&#34;</span>[<span style="color:#a6e22e">flip</span>(<span style="color:#a6e22e">event</span>),<span style="color:#a6e22e">card</span>(<span style="color:#e6db74">&#39;652726a&#39;</span>)] <span style="color:#75715e">//6
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#a6e22e">onclick</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;[flip(event),card(&#39;&#39;)] //7 
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    onclick=&#34;</span>[<span style="color:#a6e22e">flip</span>(<span style="color:#a6e22e">event</span>),<span style="color:#a6e22e">card</span>(<span style="color:#e6db74">&#39;3043fde3d&#39;</span>)] <span style="color:#75715e">//8
+</span></span></span></code></pre></div><p>We notice that some of these are empty. So, if we were to flip the cards in
+the order <code>1-5-8-6</code>, it&rsquo;ll form the sequence that we want and we&rsquo;ll get our hash, which is the same sequence.</p>
+<p><img src="/ctf/cts-flag-hashed.png" alt="cts-flag"></p>
+<p><strong>Challenge Idea/Solution</strong>: An alternate solution to this challenge, if the flag was something else, would be to set a breakpoint where we check if the <code>store</code> is equivalent to the sequence, and (by)pass the check entirely by modifying the <code>store</code> variable to be equal to the hash. Alternate challenge idea!</p>
+<h1 id="one-zero-one">One Zero One</h1>
+<p><img src="/ctf/ozo.png" alt="ozo"></p>
+<p>This is easy. We just need to decode the binary. In fact, the hardest part
 of this challenge is to write down the binary in a text editor. The full binary
-is,&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;0100000001000011
+is,</p>
+<pre tabindex="0"><code>0100000001000011
 0101001101001001
 0100010001001101
 0100001101000101
 0100001101010100
 0100011000100011
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;which decodes to, &lt;code&gt;@CSIDMCECTF#&lt;/code&gt;. The challenge deviates from other challenges
+</code></pre><p>which decodes to, <code>@CSIDMCECTF#</code>. The challenge deviates from other challenges
 to give us the text inside the brackets. I found it surprising that there
-was no indication about this. The full flag is &lt;code&gt;csi-ctf{@CSIDMCECTF#}&lt;/code&gt;
-$\blacksquare$&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Note&lt;/strong&gt;: In theory, it&amp;rsquo;s much convenient to use OCR on the image to extract the
+was no indication about this. The full flag is <code>csi-ctf{@CSIDMCECTF#}</code>
+$\blacksquare$</p>
+<p><strong>Note</strong>: In theory, it&rsquo;s much convenient to use OCR on the image to extract the
 binary digits, but I could not find one reliable OCR service which could do so.
-So I ended up writing them by hand.&lt;/p&gt;
-&lt;hr style=&#34;border:2px solid gray&#34;&gt; &lt;/hr&gt;
-This marks the end of the writeups.
-</content>
-    </item>
-    
-    <item>
-      <title>CSI-CTF Writeup (Part-2)</title>
-      <link>https://crystalsage.github.io/posts/ctf-2/</link>
-      <pubDate>Sun, 20 Feb 2022 00:00:00 +0000</pubDate>
-      
-      <guid>https://crystalsage.github.io/posts/ctf-2/</guid>
-      <description>This is the part 2 of the 3-part series for the CSI-CTF writeup. Click Here to read the 1st part.
+So I ended up writing them by hand.</p>
+<!-- raw HTML omitted -->
+]]></content>
+        </item>
+        
+        <item>
+            <title>CSI-CTF Writeup (Part-2)</title>
+            <link>localhost/posts/ctf-2/</link>
+            <pubDate>Sun, 20 Feb 2022 00:00:00 +0000</pubDate>
+            
+            <guid>localhost/posts/ctf-2/</guid>
+            <description>This is the part 2 of the 3-part series for the CSI-CTF writeup. Click Here to read the 1st part.
 You can register and play this CTF. It&amp;rsquo;s open to everyone.
 In this 3-part series, we will see my method of approaching these challenges and how I solved them. The 9 challenges are divided into 3 posts.
 Attack on Bank The challenge description gives us info about the encrypted text (Also notice how ECB abbreviation gives us a hint about 128-bit AES-ECB being the cryptosystem).</description>
-      <content>&lt;p&gt;This is the part 2 of the 3-part series for the CSI-CTF writeup. Click
-&lt;a href=&#34;https://crystalsage.github.io/posts/ctf-1/&#34;&gt;Here&lt;/a&gt; to read the 1st part.&lt;/p&gt;
-&lt;p&gt;You can &lt;a href=&#34;https://tinyurl.com/2t6kwcxe&#34;&gt;register&lt;/a&gt; and
-&lt;a href=&#34;https://tinyurl.com/ms95pajv&#34;&gt;play&lt;/a&gt; this CTF. It&amp;rsquo;s open to everyone.&lt;/p&gt;
-&lt;p&gt;In this 3-part series, we will see my method of approaching these challenges
-and how I solved them. The 9 challenges are divided into 3 posts.&lt;/p&gt;
-&lt;h1 id=&#34;attack-on-bank&#34;&gt;Attack on Bank&lt;/h1&gt;
-&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/AOB.png&#34; alt=&#34;here&#34;&gt;&lt;/p&gt;
-&lt;p&gt;The challenge description gives us info about the encrypted text (Also notice
+            <content type="html"><![CDATA[<p>This is the part 2 of the 3-part series for the CSI-CTF writeup. Click
+<a href="https://crystalsage.github.io/posts/ctf-1/">Here</a> to read the 1st part.</p>
+<p>You can <a href="https://tinyurl.com/2t6kwcxe">register</a> and
+<a href="https://tinyurl.com/ms95pajv">play</a> this CTF. It&rsquo;s open to everyone.</p>
+<p>In this 3-part series, we will see my method of approaching these challenges
+and how I solved them. The 9 challenges are divided into 3 posts.</p>
+<h1 id="attack-on-bank">Attack on Bank</h1>
+<p><img src="/ctf/AOB.png" alt="here"></p>
+<p>The challenge description gives us info about the encrypted text (Also notice
 how ECB abbreviation gives us a hint about 128-bit AES-ECB being the cryptosystem).
-We also get an unique ID for the bank, which should be the decryption key, if my guess is correct.&lt;/p&gt;
-&lt;p&gt;The link given in the challenge leads us to a Paste(bin) where we can find some encrypted text, encoded in base64: &lt;code&gt;Keg7B3p7TENwcvdk2zsy+NXVQzMnMxg6ik2xO0M6A3c=&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;Cool. This is easy. We can use what we assume to be the key as the key, and
-decrypt the text. I used my favorite tool, &lt;a href=&#34;https://gchq.github.io/CyberChef/&#34;&gt;CyberChef&lt;/a&gt;
-for this.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/aob-flag.png&#34; alt=&#34;aob-flag&#34;&gt;&lt;/p&gt;
-&lt;p&gt;We first decoded the base64 encoded plaintext, and decrypted the text using the
-key, and a blank IV. This gets us our flag! &lt;code&gt;csi-ctf{pR0videncE_$4ys_He110}&lt;/code&gt; $\blacksquare$&lt;/p&gt;
-&lt;h1 id=&#34;js-nerds&#34;&gt;JS Nerds&lt;/h1&gt;
-&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/jsn.png&#34; alt=&#34;jsn&#34;&gt;&lt;/p&gt;
-&lt;p&gt;We get login page right off the bat. I was initially thrown off by the obvious
-hints towards a Blind SQL injection. &lt;em&gt;You can&amp;rsquo;t see me&lt;/em&gt; is really
-suggestive. To test this if there&amp;rsquo;s any SQLi involved at all,
-I used typical payloads such as &lt;code&gt;&#39; OR 1=1 --&lt;/code&gt; and friends.
-But this yielded nothing even after 5-6 minutes of trying, so I eventually gave up on this.&lt;/p&gt;
-&lt;p&gt;If we visit this page&amp;rsquo;s source, we can find a file at the bottom named
-&lt;code&gt;index.js&lt;/code&gt; referenced in there. This &lt;code&gt;index.js&lt;/code&gt; file contains some Javascript
-code.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;checkData&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;event&lt;/span&gt;) {
-    &lt;span style=&#34;color:#a6e22e&#34;&gt;console&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;log&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;click&amp;#34;&lt;/span&gt;);
-    &lt;span style=&#34;color:#a6e22e&#34;&gt;event&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;preventDefault&lt;/span&gt;();
-    &lt;span style=&#34;color:#66d9ef&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;x&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; document.&lt;span style=&#34;color:#a6e22e&#34;&gt;forms&lt;/span&gt;[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;login-form&amp;#34;&lt;/span&gt;][&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;username&amp;#34;&lt;/span&gt;].&lt;span style=&#34;color:#a6e22e&#34;&gt;value&lt;/span&gt;;
-    &lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;p&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; document.&lt;span style=&#34;color:#a6e22e&#34;&gt;forms&lt;/span&gt;[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;login-form&amp;#34;&lt;/span&gt;][&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;password&amp;#34;&lt;/span&gt;].&lt;span style=&#34;color:#a6e22e&#34;&gt;value&lt;/span&gt;;
-    &lt;span style=&#34;color:#75715e&#34;&gt;// oh no! Client side validation always fails! thank god I have encrypted it!
-&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#a6e22e&#34;&gt;x&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;===&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;John&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;||&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;SHA1&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;p&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;b89356ff6151527e89c4f3e3d30c8e6586c63962&amp;#34;&lt;/span&gt;) {;
-    } &lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt; {
-        &lt;span style=&#34;color:#a6e22e&#34;&gt;alert&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Invalid username or password&amp;#34;&lt;/span&gt;);
-    }
-
-};
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Oh. We get the username and SHA-1 hash of our password. So I guess we have
+We also get an unique ID for the bank, which should be the decryption key, if my guess is correct.</p>
+<p>The link given in the challenge leads us to a Paste(bin) where we can find some encrypted text, encoded in base64: <code>Keg7B3p7TENwcvdk2zsy+NXVQzMnMxg6ik2xO0M6A3c=</code></p>
+<p>Cool. This is easy. We can use what we assume to be the key as the key, and
+decrypt the text. I used my favorite tool, <a href="https://gchq.github.io/CyberChef/">CyberChef</a>
+for this.</p>
+<p><img src="/ctf/aob-flag.png" alt="aob-flag"></p>
+<p>We first decoded the base64 encoded plaintext, and decrypted the text using the
+key, and a blank IV. This gets us our flag! <code>csi-ctf{pR0videncE_$4ys_He110}</code> $\blacksquare$</p>
+<h1 id="js-nerds">JS Nerds</h1>
+<p><img src="/ctf/jsn.png" alt="jsn"></p>
+<p>We get login page right off the bat. I was initially thrown off by the obvious
+hints towards a Blind SQL injection. <em>You can&rsquo;t see me</em> is really
+suggestive. To test this if there&rsquo;s any SQLi involved at all,
+I used typical payloads such as <code>' OR 1=1 --</code> and friends.
+But this yielded nothing even after 5-6 minutes of trying, so I eventually gave up on this.</p>
+<p>If we visit this page&rsquo;s source, we can find a file at the bottom named
+<code>index.js</code> referenced in there. This <code>index.js</code> file contains some Javascript
+code.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">checkData</span>(<span style="color:#a6e22e">event</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;click&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">event</span>.<span style="color:#a6e22e">preventDefault</span>();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">x</span> <span style="color:#f92672">=</span> document.<span style="color:#a6e22e">forms</span>[<span style="color:#e6db74">&#34;login-form&#34;</span>][<span style="color:#e6db74">&#34;username&#34;</span>].<span style="color:#a6e22e">value</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">p</span> <span style="color:#f92672">=</span> document.<span style="color:#a6e22e">forms</span>[<span style="color:#e6db74">&#34;login-form&#34;</span>][<span style="color:#e6db74">&#34;password&#34;</span>].<span style="color:#a6e22e">value</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// oh no! Client side validation always fails! thank god I have encrypted it!
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">x</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#34;John&#34;</span> <span style="color:#f92672">||</span> <span style="color:#a6e22e">SHA1</span>(<span style="color:#a6e22e">p</span>) <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;b89356ff6151527e89c4f3e3d30c8e6586c63962&#34;</span>) {;
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">alert</span>(<span style="color:#e6db74">&#34;Invalid username or password&#34;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><p>Oh. We get the username and SHA-1 hash of our password. So I guess we have
 to crack SHA-1 now. We can do this using a tool such as hashcat and crack this
-password using a wordlist. But I didn&amp;rsquo;t happen to have my machine with me,
-so I had to use &lt;a href=&#34;https://crackstation.net/&#34;&gt;crackstation&lt;/a&gt; to do this. Fortunately,
+password using a wordlist. But I didn&rsquo;t happen to have my machine with me,
+so I had to use <a href="https://crackstation.net/">crackstation</a> to do this. Fortunately,
 crackstation had this hash in their database, which reveals the password to be
-&lt;code&gt;adminz&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/jsn-hash.png&#34; alt=&#34;jsn-hash&#34;&gt;&lt;/p&gt;
-&lt;p&gt;We can log in to the site with our credentials now to get the flag.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/jsn-flag.png&#34; alt=&#34;jsn-flag&#34;&gt;&lt;/p&gt;
-&lt;p&gt;Bread! &lt;code&gt;csi-ctf{eXploIted_wEb}&lt;/code&gt; $\blacksquare$&lt;/p&gt;
-&lt;h1 id=&#34;computer-engineering&#34;&gt;Computer Engineering&lt;/h1&gt;
-&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/ce1.png&#34; alt=&#34;ce-1&#34;&gt;&lt;/p&gt;
-&lt;p&gt;We get another Github page. Except this time, there is nothing in
-the 6 commits. We do notice the 6 branches though.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/ce2.png&#34; alt=&#34;ce-2&#34;&gt;&lt;/p&gt;
-&lt;p&gt;There are 6 branches, let&amp;rsquo;s visit CS first. There are 3 commits in
-there, one of which gives us the flag.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/ce3.png&#34; alt=&#34;ce-3&#34;&gt;&lt;/p&gt;
-&lt;p&gt;Flag! &lt;code&gt;csi-ctf{this_is_the_flag_codecocomo}&lt;/code&gt; $\blacksquare$&lt;/p&gt;
-&lt;p&gt;This challenge was really more of a &amp;ldquo;click 50 times to get the flag&amp;rdquo; challenge.
+<code>adminz</code>.</p>
+<p><img src="/ctf/jsn-hash.png" alt="jsn-hash"></p>
+<p>We can log in to the site with our credentials now to get the flag.</p>
+<p><img src="/ctf/jsn-flag.png" alt="jsn-flag"></p>
+<p>Bread! <code>csi-ctf{eXploIted_wEb}</code> $\blacksquare$</p>
+<h1 id="computer-engineering">Computer Engineering</h1>
+<p><img src="/ctf/ce1.png" alt="ce-1"></p>
+<p>We get another Github page. Except this time, there is nothing in
+the 6 commits. We do notice the 6 branches though.</p>
+<p><img src="/ctf/ce2.png" alt="ce-2"></p>
+<p>There are 6 branches, let&rsquo;s visit CS first. There are 3 commits in
+there, one of which gives us the flag.</p>
+<p><img src="/ctf/ce3.png" alt="ce-3"></p>
+<p>Flag! <code>csi-ctf{this_is_the_flag_codecocomo}</code> $\blacksquare$</p>
+<p>This challenge was really more of a &ldquo;click 50 times to get the flag&rdquo; challenge.
 These types of challenges where flags are hidden in commit histories and
-branches are not included &lt;strong&gt;in CTFs&lt;/strong&gt; due to them having less of a problem
-solving aspect to them.&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;However&lt;/strong&gt;, every often, some company get pwned or a bug hunter gets rewarded
+branches are not included <strong>in CTFs</strong> due to them having less of a problem
+solving aspect to them.</p>
+<p><strong>However</strong>, every often, some company get pwned or a bug hunter gets rewarded
 handsomely because he found an internal API key or SSH key in a Github
-commit history, which was accidentally pushed to the repo. So, it&amp;rsquo;s not
-unrealistic at all. There&amp;rsquo;s a lesson to be learned here.&lt;/p&gt;
-&lt;hr style=&#34;border:2px solid gray&#34;&gt; &lt;/hr&gt;
-This series is to be continued in part 3 where we&#39;ll solve more
-challenges...
-</content>
-    </item>
-    
-    <item>
-      <title>CSI-CTF Writeup (Part-1)</title>
-      <link>https://crystalsage.github.io/posts/ctf-1/</link>
-      <pubDate>Sun, 13 Feb 2022 00:00:00 +0000</pubDate>
-      
-      <guid>https://crystalsage.github.io/posts/ctf-1/</guid>
-      <description>I recently won 1st place at the CSI-CTF 2022. The CTF was basic, but still amazing (We find that the two things are often mutually exclusive in many CTFs). The challenges were easy, but not lame. The UI was fantastic. I was impressed by the CTF infrastructure. It is not easy to host a CTF this well.
+commit history, which was accidentally pushed to the repo. So, it&rsquo;s not
+unrealistic at all. There&rsquo;s a lesson to be learned here.</p>
+<!-- raw HTML omitted -->
+]]></content>
+        </item>
+        
+        <item>
+            <title>CSI-CTF Writeup (Part-1)</title>
+            <link>localhost/posts/ctf-1/</link>
+            <pubDate>Sun, 13 Feb 2022 00:00:00 +0000</pubDate>
+            
+            <guid>localhost/posts/ctf-1/</guid>
+            <description>I recently won 1st place at the CSI-CTF 2022. The CTF was basic, but still amazing (We find that the two things are often mutually exclusive in many CTFs). The challenges were easy, but not lame. The UI was fantastic. I was impressed by the CTF infrastructure. It is not easy to host a CTF this well.
 You can register and play this CTF. It&amp;rsquo;s open to everyone.
 In this 3-part series, we will see my method of approaching these challenges and how I solved them.</description>
-      <content>&lt;p&gt;I recently won 1st place at the CSI-CTF 2022. The CTF was basic, but still
+            <content type="html"><![CDATA[<p>I recently won 1st place at the CSI-CTF 2022. The CTF was basic, but still
 amazing (We find that the two things are often mutually exclusive in many CTFs).
 The challenges were easy, but not lame. The UI was fantastic. I was impressed
-by the CTF infrastructure. It is not easy to host a CTF this well.&lt;/p&gt;
-&lt;p&gt;You can &lt;a href=&#34;https://tinyurl.com/2t6kwcxe&#34;&gt;register&lt;/a&gt; and
-&lt;a href=&#34;https://tinyurl.com/ms95pajv&#34;&gt;play&lt;/a&gt; this CTF. It&amp;rsquo;s open to everyone.&lt;/p&gt;
-&lt;p&gt;In this 3-part series, we will see my method of approaching these challenges
+by the CTF infrastructure. It is not easy to host a CTF this well.</p>
+<p>You can <a href="https://tinyurl.com/2t6kwcxe">register</a> and
+<a href="https://tinyurl.com/ms95pajv">play</a> this CTF. It&rsquo;s open to everyone.</p>
+<p>In this 3-part series, we will see my method of approaching these challenges
 and how I solved them. The 9 challenges are divided into 3 posts.
-&lt;img src=&#34;https://crystalsage.github.io/ctf.jpg&#34; alt=&#34;Some&#34;&gt;&lt;/p&gt;
-&lt;p&gt;A tip for solving easy CTF challenges is that the name of the challenge
+<img src="/ctf.jpg" alt="Some"></p>
+<p>A tip for solving easy CTF challenges is that the name of the challenge
 often gives a hint to you. After that, you just need to keep your mind open to all
 the possibilities and think your way through. Keep the name in the back of
-your mind but don&amp;rsquo;t let it bias your thinking. Keep an open approach to any
-challenge which you&amp;rsquo;re aiming to solve.&lt;/p&gt;
-&lt;h1 id=&#34;what-lies-within&#34;&gt;What Lies Within&lt;/h1&gt;
-&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/whatlieswithin.png&#34; alt=&#34;challenge&#34;&gt;
-From the challenge&amp;rsquo;s name and some experience, we can immediately guess that the
+your mind but don&rsquo;t let it bias your thinking. Keep an open approach to any
+challenge which you&rsquo;re aiming to solve.</p>
+<h1 id="what-lies-within">What Lies Within</h1>
+<p><img src="/ctf/whatlieswithin.png" alt="challenge">
+From the challenge&rsquo;s name and some experience, we can immediately guess that the
 image has data inside it. The most preliminary test you can do to weed out
-some easy challenges is to run &lt;code&gt;strings&lt;/code&gt; on the image. &lt;code&gt;strings&lt;/code&gt; will yield us
-the plaintext strings inside the file.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/whatlieswithin-strings.png&#34; alt=&#34;wlw-strings&#34;&gt;&lt;/p&gt;
-&lt;p&gt;As you can see, it returns us all of the plaintext things inside the image. It
+some easy challenges is to run <code>strings</code> on the image. <code>strings</code> will yield us
+the plaintext strings inside the file.</p>
+<p><img src="/ctf/whatlieswithin-strings.png" alt="wlw-strings"></p>
+<p>As you can see, it returns us all of the plaintext things inside the image. It
 would be a mad task to scroll down and find our flag in this haystack. So, we
-can find our flag using &lt;code&gt;grep&lt;/code&gt;. We can grep for the flag&amp;rsquo;s format since we
-definitely know it&amp;rsquo;s a part of the flag.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/whatlieswithin-flag.png&#34; alt=&#34;flag&#34;&gt;&lt;/p&gt;
-&lt;p&gt;The flag! &lt;code&gt;csi-ctf{Let&#39;s_go_to_the_subway_for_lunch}&lt;/code&gt; $\blacksquare$&lt;/p&gt;
-&lt;hr&gt;
-&lt;h1 id=&#34;luminous-hunt&#34;&gt;Luminous Hunt&lt;/h1&gt;
-&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/lh-chall.png&#34; alt=&#34;lh-chall&#34;&gt;
+can find our flag using <code>grep</code>. We can grep for the flag&rsquo;s format since we
+definitely know it&rsquo;s a part of the flag.</p>
+<p><img src="/ctf/whatlieswithin-flag.png" alt="flag"></p>
+<p>The flag! <code>csi-ctf{Let's_go_to_the_subway_for_lunch}</code> $\blacksquare$</p>
+<hr>
+<h1 id="luminous-hunt">Luminous Hunt</h1>
+<p><img src="/ctf/lh-chall.png" alt="lh-chall">
 In this challenge, we are again, starting with an image. And, the name gives
-us a hint about this being related to light.&lt;/p&gt;
-&lt;p&gt;My initial guess was that the image contained the flag, but it&amp;rsquo;s too small to
-see. I &lt;em&gt;really&lt;/em&gt; zoomed in on the image to see if there was a tiny flag somewhere
+us a hint about this being related to light.</p>
+<p>My initial guess was that the image contained the flag, but it&rsquo;s too small to
+see. I <em>really</em> zoomed in on the image to see if there was a tiny flag somewhere
 in there, but nope. Thanks creators for not doing this!
-(This is actually a pretty common thing in CTFs!)&lt;/p&gt;
-&lt;p&gt;Next, I tried putting this image in an image editor and analyzed its RGB
+(This is actually a pretty common thing in CTFs!)</p>
+<p>Next, I tried putting this image in an image editor and analyzed its RGB
 channels. The flag, if  hidden in one of the three channels, is only visible
-in that particular channel. But no.&lt;/p&gt;
-&lt;p&gt;I was out of my typical ideas when I enlarged the image a bit and noticed that
+in that particular channel. But no.</p>
+<p>I was out of my typical ideas when I enlarged the image a bit and noticed that
 the blackboard looked too black. Something seemed off about it. So, keeping the
 challenge name and the weird blackboard color in mind, I decided to brighten
 up the image, and play around with the contrast, which gives us our flag,
-hidden in the darkness of the blackboard.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/lh-brighten.png&#34; alt=&#34;lh-brighten&#34;&gt;&lt;/p&gt;
-&lt;p&gt;It&amp;rsquo;s still somewhat hard to read, but we can make out &lt;code&gt;csi-ctf{CPL-CSI}&lt;/code&gt;, which
-is our flag. $\blacksquare$&lt;/p&gt;
-&lt;hr&gt;
-&lt;h1 id=&#34;a-tribute&#34;&gt;A Tribute&lt;/h1&gt;
-&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/at-chall.png&#34; alt=&#34;at-chall&#34;&gt;
+hidden in the darkness of the blackboard.</p>
+<p><img src="/ctf/lh-brighten.png" alt="lh-brighten"></p>
+<p>It&rsquo;s still somewhat hard to read, but we can make out <code>csi-ctf{CPL-CSI}</code>, which
+is our flag. $\blacksquare$</p>
+<hr>
+<h1 id="a-tribute">A Tribute</h1>
+<p><img src="/ctf/at-chall.png" alt="at-chall">
 We are given a GitHub page which tells us to find the name of a person. This
-obviously is an OSINT challenge, right? No! There&amp;rsquo;s a twist here.&lt;/p&gt;
-&lt;p&gt;If you find out the person&amp;rsquo;s name, and try to submit it as a flag, the
-submission gets denied.&lt;/p&gt;
-&lt;p&gt;If you take a look around the page, you&amp;rsquo;ll see that the repository&amp;rsquo;s commit
+obviously is an OSINT challenge, right? No! There&rsquo;s a twist here.</p>
+<p>If you find out the person&rsquo;s name, and try to submit it as a flag, the
+submission gets denied.</p>
+<p>If you take a look around the page, you&rsquo;ll see that the repository&rsquo;s commit
 history is pretty interesting. It contains some strings that could be useful
 to us.
-&lt;img src=&#34;https://crystalsage.github.io/ctf/at-commits.png&#34; alt=&#34;at-commits&#34;&gt;
+<img src="/ctf/at-commits.png" alt="at-commits">
 The letters look jumbled but they are still readable. This is probably encoded
-with some cipher. If you&amp;rsquo;ve had any sort of experience with ciphers, you&amp;rsquo;ve
+with some cipher. If you&rsquo;ve had any sort of experience with ciphers, you&rsquo;ve
 probably heard of the Caesar cipher, AKA rot-n cipher. One of the strings of
-the commit messages must be our encoded flag.&lt;/p&gt;
-&lt;p&gt;If you patiently try out some/all of these, you&amp;rsquo;ll find out that the 4th commit
+the commit messages must be our encoded flag.</p>
+<p>If you patiently try out some/all of these, you&rsquo;ll find out that the 4th commit
 message from the top is actually our flag, with rot-18 encoding.
-&lt;img src=&#34;https://crystalsage.github.io/ctf/at-flag.png&#34; alt=&#34;at-flag&#34;&gt;&lt;/p&gt;
-&lt;p&gt;The flag is &lt;code&gt;csi-ctf{congratulations_the_flag_is_jira}&lt;/code&gt; $\blacksquare$&lt;/p&gt;
-&lt;hr style=&#34;border:2px solid gray&#34;&gt; &lt;/hr&gt;
-This series is to be continued in the part 2 and 3 where we&#39;ll solve more
-challenges...
-</content>
-    </item>
-    
-    <item>
-      <title>Swallow</title>
-      <link>https://crystalsage.github.io/posts/swallow/</link>
-      <pubDate>Thu, 13 Jan 2022 00:00:00 +0000</pubDate>
-      
-      <guid>https://crystalsage.github.io/posts/swallow/</guid>
-      <description>Throughout the discussion, C-x means Control + x keychord.
+<img src="/ctf/at-flag.png" alt="at-flag"></p>
+<p>The flag is <code>csi-ctf{congratulations_the_flag_is_jira}</code> $\blacksquare$</p>
+<!-- raw HTML omitted -->
+]]></content>
+        </item>
+        
+        <item>
+            <title>Swallow</title>
+            <link>localhost/posts/swallow/</link>
+            <pubDate>Thu, 13 Jan 2022 00:00:00 +0000</pubDate>
+            
+            <guid>localhost/posts/swallow/</guid>
+            <description>Throughout the discussion, C-x means Control + x keychord.
 Introduction Window swallowing is a mechanism in tiling window managers, by which a GUI application&amp;rsquo;s window can replace the terminal window in-place, when the application is called from the terminal.
 This avoids congestion in tiling WMs, and is a much preferred solution than zooming into the said GUI window (Also called monocle mode in some WMs)
 For instance, consider a scenario where I want to spawn VLC from my terminal.</description>
-      <content>&lt;p&gt;Throughout the discussion, &lt;code&gt;C-x&lt;/code&gt; means Control + x keychord.&lt;/p&gt;
-&lt;h1 id=&#34;introduction&#34;&gt;Introduction&lt;/h1&gt;
-&lt;p&gt;Window swallowing is a mechanism in tiling window managers, by which a GUI application&amp;rsquo;s window can replace the terminal window in-place, when the application is called from the terminal.&lt;/p&gt;
-&lt;p&gt;This avoids congestion in tiling WMs, and is a much preferred solution than zooming into the said GUI window (Also called &lt;em&gt;monocle mode&lt;/em&gt; in some WMs)&lt;/p&gt;
-&lt;p&gt;For instance, consider a scenario where I want to spawn VLC from my terminal. After I call VLC with &lt;code&gt;vlc ./video.mp4&lt;/code&gt;, I get a VLC window on my screen. But now, there&amp;rsquo;s a leftover terminal window that does nothing, and you can&amp;rsquo;t close it because it&amp;rsquo;s the parent window of VLC.&lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
-&lt;p&gt;The following diagram illustrates the difference without and with swallowing, respectively:
-&lt;img src=&#34;https://crystalsage.github.io/swallow.png&#34; alt=&#34;Swallow_VLC&#34;&gt;&lt;/p&gt;
-&lt;p&gt;Popular WMs such as DWM, BSPWM and i3 have patches available for swallowing a window. However, I prefer a native solution over patches. As a bonus, the solution that I was able to come up with is also universal.&lt;/p&gt;
-&lt;h1 id=&#34;my-solution&#34;&gt;My solution&lt;/h1&gt;
-&lt;p&gt;My solution, whether if inefficient or dumb, most importantly works and has never failed me.&lt;/p&gt;
-&lt;p&gt;I combine a BASH script + a Fish shell function (alias) + a Fish shell keyboard shortcut that swallows a window. Code explained below. Please don&amp;rsquo;t mind the names.&lt;/p&gt;
-&lt;h2 id=&#34;bash-script-rbgsh&#34;&gt;Bash script: &lt;code&gt;rbg.sh&lt;/code&gt;&lt;/h2&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#!/bin/sh
-&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
-$@ &amp;amp;
-disown
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This is just doing automatically the stuff that would require manual efforts. The first line takes in the entire &lt;code&gt;argv&lt;/code&gt;, symbolized with &lt;code&gt;@&lt;/code&gt; variable, puts it in background with &lt;code&gt;&amp;amp;&lt;/code&gt; and disowns it.&lt;/p&gt;
-&lt;p&gt;The script is meant to be placed in one of the directories in your &lt;code&gt;$PATH&lt;/code&gt;.&lt;/p&gt;
-&lt;h2 id=&#34;fish-function-sdffish&#34;&gt;Fish function: &lt;code&gt;sdf.fish&lt;/code&gt;&lt;/h2&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; sdf
-  rbg $argv &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; exit
-end
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Which calls the &lt;code&gt;rbg&lt;/code&gt; binary with your command.&lt;/p&gt;
-&lt;p&gt;This function allows us to wrap over the &lt;code&gt;rbg.sh&lt;/code&gt; script as well as close the actual terminal window. This only exists because I couldn&amp;rsquo;t find a way to both exit the BASH script and close the terminal window without messing with Xorg tools.&lt;/p&gt;
-&lt;h2 id=&#34;fish-shortcut-goes-in-configfish&#34;&gt;Fish shortcut: goes in &lt;code&gt;config.fish&lt;/code&gt;&lt;/h2&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;bind &lt;span style=&#34;color:#ae81ff&#34;&gt;\c&lt;/span&gt;s &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;fish_commandline_prepend sdf&amp;#39;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Which just prepends &lt;code&gt;sdf&lt;/code&gt; to your command in the terminal. Note that typing &lt;code&gt;sdf &amp;lt;command&amp;gt;&lt;/code&gt; is kind of awkward and feels unnatural (I always forget to do it), so typing the command first and prepending is the most natural flow.&lt;/p&gt;
-&lt;h1 id=&#34;results&#34;&gt;Results&lt;/h1&gt;
-&lt;p&gt;Now, when I type &lt;code&gt;vlc ./video.mp4&lt;/code&gt; and press &lt;code&gt;C-s&lt;/code&gt; the resulting command becomes &lt;code&gt;sdf vlc ./video.mp4&lt;/code&gt;, which successfully swallows the terminal when executed. It&amp;rsquo;s instantaneous with really no lag.&lt;/p&gt;
-&lt;section class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
-&lt;hr&gt;
-&lt;ol&gt;
-&lt;li id=&#34;fn:1&#34; role=&#34;doc-endnote&#34;&gt;
-&lt;p&gt;You can close the window by putting the process to background, disowning it and then closing the terminal. The problem with this approach is that it is slow and just doesn&amp;rsquo;t feel right.&amp;#160;&lt;a href=&#34;#fnref:1&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/section&gt;
-</content>
-    </item>
-    
-    <item>
-      <title>ls clone using getdents syscall</title>
-      <link>https://crystalsage.github.io/posts/fp/</link>
-      <pubDate>Mon, 15 Nov 2021 18:20:39 +0530</pubDate>
-      
-      <guid>https://crystalsage.github.io/posts/fp/</guid>
-      <description>Introduction In this short post, we’re building a barebones,toy implementation of the ls-like directory listing program in x86-64 assembly. We achieve this by using the getdents syscall.
+            <content type="html"><![CDATA[<p>Throughout the discussion, <code>C-x</code> means Control + x keychord.</p>
+<h1 id="introduction">Introduction</h1>
+<p>Window swallowing is a mechanism in tiling window managers, by which a GUI application&rsquo;s window can replace the terminal window in-place, when the application is called from the terminal.</p>
+<p>This avoids congestion in tiling WMs, and is a much preferred solution than zooming into the said GUI window (Also called <em>monocle mode</em> in some WMs)</p>
+<p>For instance, consider a scenario where I want to spawn VLC from my terminal. After I call VLC with <code>vlc ./video.mp4</code>, I get a VLC window on my screen. But now, there&rsquo;s a leftover terminal window that does nothing, and you can&rsquo;t close it because it&rsquo;s the parent window of VLC.<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup></p>
+<p>The following diagram illustrates the difference without and with swallowing, respectively:
+<img src="/swallow.png" alt="Swallow_VLC"></p>
+<p>Popular WMs such as DWM, BSPWM and i3 have patches available for swallowing a window. However, I prefer a native solution over patches. As a bonus, the solution that I was able to come up with is also universal.</p>
+<h1 id="my-solution">My solution</h1>
+<p>My solution, whether if inefficient or dumb, most importantly works and has never failed me.</p>
+<p>I combine a BASH script + a Fish shell function (alias) + a Fish shell keyboard shortcut that swallows a window. Code explained below. Please don&rsquo;t mind the names.</p>
+<h2 id="bash-script-rbgsh">Bash script: <code>rbg.sh</code></h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#!/bin/sh
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>$@ &amp;
+</span></span><span style="display:flex;"><span>disown
+</span></span></code></pre></div><p>This is just doing automatically the stuff that would require manual efforts. The first line takes in the entire <code>argv</code>, symbolized with <code>@</code> variable, puts it in background with <code>&amp;</code> and disowns it.</p>
+<p>The script is meant to be placed in one of the directories in your <code>$PATH</code>.</p>
+<h2 id="fish-function-sdffish">Fish function: <code>sdf.fish</code></h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#66d9ef">function</span> sdf
+</span></span><span style="display:flex;"><span>  rbg $argv <span style="color:#f92672">&amp;&amp;</span> exit
+</span></span><span style="display:flex;"><span>end
+</span></span></code></pre></div><p>Which calls the <code>rbg</code> binary with your command.</p>
+<p>This function allows us to wrap over the <code>rbg.sh</code> script as well as close the actual terminal window. This only exists because I couldn&rsquo;t find a way to both exit the BASH script and close the terminal window without messing with Xorg tools.</p>
+<h2 id="fish-shortcut-goes-in-configfish">Fish shortcut: goes in <code>config.fish</code></h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>bind <span style="color:#ae81ff">\c</span>s <span style="color:#e6db74">&#39;fish_commandline_prepend sdf&#39;</span>
+</span></span></code></pre></div><p>Which just prepends <code>sdf</code> to your command in the terminal. Note that typing <code>sdf &lt;command&gt;</code> is kind of awkward and feels unnatural (I always forget to do it), so typing the command first and prepending is the most natural flow.</p>
+<h1 id="results">Results</h1>
+<p>Now, when I type <code>vlc ./video.mp4</code> and press <code>C-s</code> the resulting command becomes <code>sdf vlc ./video.mp4</code>, which successfully swallows the terminal when executed. It&rsquo;s instantaneous with really no lag.</p>
+<section class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1" role="doc-endnote">
+<p>You can close the window by putting the process to background, disowning it and then closing the terminal. The problem with this approach is that it is slow and just doesn&rsquo;t feel right.&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</section>
+]]></content>
+        </item>
+        
+        <item>
+            <title>ls clone using getdents syscall</title>
+            <link>localhost/posts/fp/</link>
+            <pubDate>Mon, 15 Nov 2021 18:20:39 +0530</pubDate>
+            
+            <guid>localhost/posts/fp/</guid>
+            <description>Introduction In this short post, we’re building a barebones,toy implementation of the ls-like directory listing program in x86-64 assembly. We achieve this by using the getdents syscall.
 getdents() syscall The getdents syscall takes in 3 parameters. So the prototype of the syscall looks like: ssize_t getdents(int fd, void *dirp, size_t count), where:
  fd : is the file descriptor of the directory (which is also just another file in Unix) dirp : is where all the dirent structs are copied during the syscall.</description>
-      <content>&lt;h1 id=&#34;introduction&#34;&gt;Introduction&lt;/h1&gt;
-&lt;p&gt;In this short post, we’re building a barebones,toy implementation of the &lt;code&gt;ls&lt;/code&gt;-like directory listing program in x86-64 assembly. We achieve this by using the &lt;code&gt;getdents&lt;/code&gt; syscall.&lt;/p&gt;
-&lt;h1 id=&#34;getdents-syscall&#34;&gt;getdents() syscall&lt;/h1&gt;
-&lt;p&gt;The &lt;code&gt;getdents&lt;/code&gt; syscall takes in 3 parameters. So the prototype of the syscall looks like: &lt;code&gt;ssize_t getdents(int fd, void *dirp, size_t count)&lt;/code&gt;, where:&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;&lt;code&gt;fd&lt;/code&gt; : is the file descriptor of the directory (which is also just another file in Unix)&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;dirp&lt;/code&gt; : is where all the &lt;code&gt;dirent&lt;/code&gt; structs are copied during the syscall.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;count&lt;/code&gt; : is the size of the buffer that &lt;code&gt;dirp&lt;/code&gt; points to.&lt;/li&gt;
-&lt;/ol&gt;
-&lt;h1 id=&#34;dirent-structs&#34;&gt;Dirent structs&lt;/h1&gt;
-&lt;p&gt;A &lt;em&gt;dirent&lt;/em&gt; or &lt;em&gt;linux_dirent&lt;/em&gt; struct is defined as follows.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-c++&#34; data-lang=&#34;c++&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;struct&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;linux_dirent&lt;/span&gt; {
-       &lt;span style=&#34;color:#66d9ef&#34;&gt;unsigned&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;long&lt;/span&gt;  d_ino;     &lt;span style=&#34;color:#75715e&#34;&gt;/* File inode*/&lt;/span&gt;
-       &lt;span style=&#34;color:#66d9ef&#34;&gt;unsigned&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;long&lt;/span&gt;  d_off;     &lt;span style=&#34;color:#75715e&#34;&gt;/* Offset of the next linux_dirent */&lt;/span&gt;
-       &lt;span style=&#34;color:#66d9ef&#34;&gt;unsigned&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;short&lt;/span&gt; d_reclen;  &lt;span style=&#34;color:#75715e&#34;&gt;/* Size of the current dirent struct*/&lt;/span&gt;
-       &lt;span style=&#34;color:#66d9ef&#34;&gt;char&lt;/span&gt;           d_name[];  &lt;span style=&#34;color:#75715e&#34;&gt;// The filename of the file
-&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
-       &lt;span style=&#34;color:#66d9ef&#34;&gt;char&lt;/span&gt;           pad;       &lt;span style=&#34;color:#75715e&#34;&gt;// Zero padding byte
-&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;       &lt;span style=&#34;color:#66d9ef&#34;&gt;char&lt;/span&gt;           d_type;    &lt;span style=&#34;color:#75715e&#34;&gt;// File types such as block devices, named pipes, sockets etc.
-&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;   }
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;So anytime we call the &lt;code&gt;getdents&lt;/code&gt; syscall, we are populating with &lt;code&gt;dirent&lt;/code&gt; structures, the buffer that &lt;code&gt;dirp&lt;/code&gt; points to. Notice how the struct also involves the filename of the file that the struct is for. We can use this for directory listing!&lt;/p&gt;
-&lt;h1 id=&#34;the-program&#34;&gt;The program&lt;/h1&gt;
-&lt;p&gt;The program that we are building lists the directory contents of the current directory. We allocate a 512 bytes buffer for storing the dirent structs. (Which is sufficient for a toy implementation)&lt;/p&gt;
-&lt;p&gt;Based on the info above, we define the &lt;code&gt;.bss&lt;/code&gt; and the &lt;code&gt;.data&lt;/code&gt; sections as follows:&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code class=&#34;language-x86asm&#34; data-lang=&#34;x86asm&#34;&gt;[SECTION .data]
-dirname: db &#39;.&#39;
-
-[SECTION .bss]
-msgbuf:
-	resb 512
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Then in the &lt;code&gt;.text&lt;/code&gt; section, we write the actual program, which consists of 2 functions called &lt;code&gt;main&lt;/code&gt; and &lt;code&gt;next_dirent&lt;/code&gt;. We populate the &lt;code&gt;msgbuf&lt;/code&gt; in the &lt;code&gt;main&lt;/code&gt; function and then process the dirent structs in the &lt;code&gt;next_dirent&lt;/code&gt; function, which handles the buffer struct by struct.&lt;/p&gt;
-&lt;p&gt;The &lt;code&gt;main&lt;/code&gt; function goes like:&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code class=&#34;language-x86asm&#34; data-lang=&#34;x86asm&#34;&gt;[SECTION .text]
-extern puts
-global main
-
-main:
-	;Setup
-	push rbp
-	mov rbp, rsp
-	and rsp, 0xfffffffffffffff0
-
-	;Open the current directory using the open() syscall
-	mov rax, 2
-	mov rdi, dirname
-	mov rsi, 0x10000
-	syscall
-
-	;getdents(fd, buf, 64) syscall
-	mov rdi, rax  ;The open syscall returns the fd for the current directory
-	mov rax,78
-	mov rsi, msgbuf
-	mov rdx, 512
-	syscall
-	xchg rax,rdx  ;Syscall returns total size, save it somewhere safe
-
-	;setup registers for loop
-	xor rcx, rcx
-	xor rbx, rbx
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Now that we have the structs we need in the &lt;code&gt;msgbuf&lt;/code&gt;, we can iterate over them. Heading into the &lt;code&gt;next_dirent&lt;/code&gt; function:&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code class=&#34;language-x86asm&#34; data-lang=&#34;x86asm&#34;&gt;next_dirent:
+            <content type="html"><![CDATA[<h1 id="introduction">Introduction</h1>
+<p>In this short post, we’re building a barebones,toy implementation of the <code>ls</code>-like directory listing program in x86-64 assembly. We achieve this by using the <code>getdents</code> syscall.</p>
+<h1 id="getdents-syscall">getdents() syscall</h1>
+<p>The <code>getdents</code> syscall takes in 3 parameters. So the prototype of the syscall looks like: <code>ssize_t getdents(int fd, void *dirp, size_t count)</code>, where:</p>
+<ol>
+<li><code>fd</code> : is the file descriptor of the directory (which is also just another file in Unix)</li>
+<li><code>dirp</code> : is where all the <code>dirent</code> structs are copied during the syscall.</li>
+<li><code>count</code> : is the size of the buffer that <code>dirp</code> points to.</li>
+</ol>
+<h1 id="dirent-structs">Dirent structs</h1>
+<p>A <em>dirent</em> or <em>linux_dirent</em> struct is defined as follows.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">linux_dirent</span> {
+</span></span><span style="display:flex;"><span>       <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span>  d_ino;     <span style="color:#75715e">/* File inode*/</span>
+</span></span><span style="display:flex;"><span>       <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span>  d_off;     <span style="color:#75715e">/* Offset of the next linux_dirent */</span>
+</span></span><span style="display:flex;"><span>       <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">short</span> d_reclen;  <span style="color:#75715e">/* Size of the current dirent struct*/</span>
+</span></span><span style="display:flex;"><span>       <span style="color:#66d9ef">char</span>           d_name[];  <span style="color:#75715e">// The filename of the file
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>       <span style="color:#66d9ef">char</span>           pad;       <span style="color:#75715e">// Zero padding byte
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>       <span style="color:#66d9ef">char</span>           d_type;    <span style="color:#75715e">// File types such as block devices, named pipes, sockets etc.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>   }
+</span></span></code></pre></div><p>So anytime we call the <code>getdents</code> syscall, we are populating with <code>dirent</code> structures, the buffer that <code>dirp</code> points to. Notice how the struct also involves the filename of the file that the struct is for. We can use this for directory listing!</p>
+<h1 id="the-program">The program</h1>
+<p>The program that we are building lists the directory contents of the current directory. We allocate a 512 bytes buffer for storing the dirent structs. (Which is sufficient for a toy implementation)</p>
+<p>Based on the info above, we define the <code>.bss</code> and the <code>.data</code> sections as follows:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">[</span><span style="color:#a6e22e">SECTION</span> <span style="color:#66d9ef">.data</span>]
+</span></span><span style="display:flex;"><span>dirname: <span style="color:#a6e22e">db</span> <span style="color:#960050;background-color:#1e0010">&#39;</span>.<span style="color:#960050;background-color:#1e0010">&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">[</span><span style="color:#a6e22e">SECTION</span> <span style="color:#66d9ef">.bss</span>]
+</span></span><span style="display:flex;"><span>msgbuf:
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">resb</span> <span style="color:#ae81ff">512</span>
+</span></span></code></pre></div><p>Then in the <code>.text</code> section, we write the actual program, which consists of 2 functions called <code>main</code> and <code>next_dirent</code>. We populate the <code>msgbuf</code> in the <code>main</code> function and then process the dirent structs in the <code>next_dirent</code> function, which handles the buffer struct by struct.</p>
+<p>The <code>main</code> function goes like:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">[</span><span style="color:#a6e22e">SECTION</span> <span style="color:#66d9ef">.text</span>]
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">extern</span> <span style="color:#66d9ef">puts</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">global</span> <span style="color:#66d9ef">main</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>main:
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">;Setup
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#a6e22e">push</span> <span style="color:#66d9ef">rbp</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">mov</span> <span style="color:#66d9ef">rbp</span>, <span style="color:#66d9ef">rsp</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">and</span> <span style="color:#66d9ef">rsp</span>, <span style="color:#ae81ff">0xfffffffffffffff0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">;Open the current directory using the open() syscall
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#a6e22e">mov</span> <span style="color:#66d9ef">rax</span>, <span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">mov</span> <span style="color:#66d9ef">rdi</span>, <span style="color:#66d9ef">dirname</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">mov</span> <span style="color:#66d9ef">rsi</span>, <span style="color:#ae81ff">0x10000</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">syscall</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">;getdents(fd, buf, 64) syscall
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#a6e22e">mov</span> <span style="color:#66d9ef">rdi</span>, <span style="color:#66d9ef">rax</span>  <span style="color:#75715e">;The open syscall returns the fd for the current directory
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#66d9ef">mov</span> <span style="color:#66d9ef">rax</span>,<span style="color:#ae81ff">78</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">mov</span> <span style="color:#66d9ef">rsi</span>, <span style="color:#66d9ef">msgbuf</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">mov</span> <span style="color:#66d9ef">rdx</span>, <span style="color:#ae81ff">512</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">syscall</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">xchg</span> <span style="color:#66d9ef">rax</span>,<span style="color:#66d9ef">rdx</span>  <span style="color:#75715e">;Syscall returns total size, save it somewhere safe
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">;setup registers for loop
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#a6e22e">xor</span> <span style="color:#66d9ef">rcx</span>, <span style="color:#66d9ef">rcx</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">xor</span> <span style="color:#66d9ef">rbx</span>, <span style="color:#66d9ef">rbx</span>
+</span></span></code></pre></div><p>Now that we have the structs we need in the <code>msgbuf</code>, we can iterate over them. Heading into the <code>next_dirent</code> function:</p>
+<pre tabindex="0"><code class="language-x86asm" data-lang="x86asm">next_dirent:
 	;We move to the 0th position of msgbuf every loop
 	;and absolute position of every struct from it
 	mov rax, msgbuf
@@ -473,7 +468,7 @@ main:
 	pop rcx
 
 	;Move to next struct if
-	;index(curr_struct) &amp;lt; total structs
+	;index(curr_struct) &lt; total structs
 	add cx, bx			
 	cmp cx, dx			
 	jl next_dirent
@@ -482,26 +477,26 @@ main:
 	mov rsp, rbp
 	pop rbp
 	ret
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Offset calculation is:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;The struct size sits at &lt;code&gt;struct_index + 8*2 = 0x10&lt;/code&gt; bytes. 2 &lt;code&gt;unsigned long&lt;/code&gt;s are considered for.&lt;/li&gt;
-&lt;li&gt;The filename sits at &lt;code&gt;struct_index + 8*2 + 2 = 0x12&lt;/code&gt;bytes. 1 &lt;code&gt;unsigned short&lt;/code&gt; is considered for. Note that we just add &lt;code&gt;0x2&lt;/code&gt; to the struct size offset when outputting the filename.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h1 id=&#34;results&#34;&gt;Results&lt;/h1&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&amp;gt;&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&amp;gt; ls
-file1.txt  file2.txt  main
-&amp;gt;&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&amp;gt; ./main
-.
-file2.txt
-main
-..
-file1.txt
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Thus we get a barebones directory listing.&lt;/p&gt;
-&lt;p&gt;The compile script and code is available : &lt;a href=&#34;https://github.com/CrystalSage/Direntries&#34;&gt;Here&lt;/a&gt;&lt;/p&gt;
-&lt;h1 id=&#34;ps&#34;&gt;P.S&lt;/h1&gt;
-&lt;p&gt;I originally intended to write some malware in assembly with this, but got sidetracked and this was made ;)&lt;/p&gt;
-</content>
-    </item>
-    
-  </channel>
+</code></pre><p>Offset calculation is:</p>
+<ul>
+<li>The struct size sits at <code>struct_index + 8*2 = 0x10</code> bytes. 2 <code>unsigned long</code>s are considered for.</li>
+<li>The filename sits at <code>struct_index + 8*2 + 2 = 0x12</code>bytes. 1 <code>unsigned short</code> is considered for. Note that we just add <code>0x2</code> to the struct size offset when outputting the filename.</li>
+</ul>
+<h1 id="results">Results</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>&gt;<span style="color:#f92672">=</span>&gt; ls
+</span></span><span style="display:flex;"><span>file1.txt  file2.txt  main
+</span></span><span style="display:flex;"><span>&gt;<span style="color:#f92672">=</span>&gt; ./main
+</span></span><span style="display:flex;"><span>.
+</span></span><span style="display:flex;"><span>file2.txt
+</span></span><span style="display:flex;"><span>main
+</span></span><span style="display:flex;"><span>..
+</span></span><span style="display:flex;"><span>file1.txt
+</span></span></code></pre></div><p>Thus we get a barebones directory listing.</p>
+<p>The compile script and code is available : <a href="https://github.com/CrystalSage/Direntries">Here</a></p>
+<h1 id="ps">P.S</h1>
+<p>I originally intended to write some malware in assembly with this, but got sidetracked and this was made ;)</p>
+]]></content>
+        </item>
+        
+    </channel>
 </rss>

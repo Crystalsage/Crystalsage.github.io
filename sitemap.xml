@@ -2,39 +2,41 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://crystalsage.github.io/</loc>
+    <loc>localhost/</loc>
     <lastmod>2022-02-23T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://crystalsage.github.io/posts/ctf-3/</loc>
+    <loc>localhost/posts/ctf-3/</loc>
     <lastmod>2022-02-23T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://crystalsage.github.io/posts/</loc>
+    <loc>localhost/posts/</loc>
     <lastmod>2022-02-23T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://crystalsage.github.io/posts/ctf-2/</loc>
+    <loc>localhost/posts/ctf-2/</loc>
     <lastmod>2022-02-20T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://crystalsage.github.io/posts/ctf-1/</loc>
+    <loc>localhost/posts/ctf-1/</loc>
     <lastmod>2022-02-13T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://crystalsage.github.io/tags/bspwm/</loc>
+    <loc>localhost/tags/bspwm/</loc>
     <lastmod>2022-01-13T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://crystalsage.github.io/tags/linux/</loc>
+    <loc>localhost/tags/linux/</loc>
     <lastmod>2022-01-13T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://crystalsage.github.io/posts/swallow/</loc>
+    <loc>localhost/posts/swallow/</loc>
     <lastmod>2022-01-13T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://crystalsage.github.io/tags/</loc>
+    <loc>localhost/tags/</loc>
     <lastmod>2022-01-13T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://crystalsage.github.io/posts/fp/</loc>
+    <loc>localhost/posts/fp/</loc>
     <lastmod>2021-11-15T18:20:39+05:30</lastmod>
   </url><url>
-    <loc>https://crystalsage.github.io/setup/</loc>
+    <loc>localhost/setup/</loc>
     <lastmod>2021-11-15T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://crystalsage.github.io/categories/</loc>
+    <loc>localhost/blog/</loc>
+  </url><url>
+    <loc>localhost/series/</loc>
   </url>
 </urlset>
