@@ -1,63 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-<meta http-equiv="X-UA-Compatible" content="ie=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="author" content="Bourbon ">
+<head>
+  
+    <title>CSI-CTF Writeup (Part-1) :: /home/bourbon</title>
+  
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="The 1st part of the 3-part writeup for CSI-CTF 2022" />
 <meta name="keywords" content="" />
 <meta name="robots" content="noodp" />
-<meta name="theme-color" content="" />
-<link rel="canonical" href="localhost/posts/ctf-1/" />
-
-
-    <title>
-        
-            CSI-CTF Writeup (Part-1) :: Bourbon&#39;s Blog 
-        
-    </title>
-
-
-
-<link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet"
-    type="text/css">
-
-
-
-<link rel="stylesheet" href="/localhost/main.4e5c639214707eff609bb55fe49e183dee42258a73bc90e4cc7b0a84f900798a.css">
-
-
-
-    <link rel="apple-touch-icon" sizes="180x180" href="/localhost/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/localhost/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/localhost/favicon-16x16.png">
-    <link rel="manifest" href="/localhost/site.webmanifest">
-    <link rel="mask-icon" href="/localhost/safari-pinned-tab.svg" color="">
-    <link rel="shortcut icon" href="/localhost/favicon.ico">
-    <meta name="msapplication-TileColor" content="">
-
-
-<meta itemprop="name" content="CSI-CTF Writeup (Part-1)">
-<meta itemprop="description" content="The 1st part of the 3-part writeup for CSI-CTF 2022"><meta itemprop="datePublished" content="2022-02-13T00:00:00+00:00" />
-<meta itemprop="dateModified" content="2022-02-13T00:00:00+00:00" />
-<meta itemprop="wordCount" content="619"><meta itemprop="image" content="localhost"/>
-<meta itemprop="keywords" content="" />
-<meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:image" content="localhost"/>
-
-<meta name="twitter:title" content="CSI-CTF Writeup (Part-1)"/>
-<meta name="twitter:description" content="The 1st part of the 3-part writeup for CSI-CTF 2022"/>
+<link rel="canonical" href="https://crystalsage.github.io/posts/ctf-1/" />
 
 
 
 
-    <meta property="og:title" content="CSI-CTF Writeup (Part-1)" />
-<meta property="og:description" content="The 1st part of the 3-part writeup for CSI-CTF 2022" />
+<link rel="stylesheet" href="https://crystalsage.github.io/assets/style.css">
+
+  <link rel="stylesheet" href="https://crystalsage.github.io/assets/green.css">
+
+
+
+
+
+
+<link rel="apple-touch-icon" href="https://crystalsage.github.io/img/apple-touch-icon-192x192.png">
+
+  <link rel="shortcut icon" href="https://crystalsage.github.io/favicon.png">
+
+
+
+<meta name="twitter:card" content="summary" />
+
+  
+    <meta name="twitter:site" content="" />
+  
+    <meta name="twitter:creator" content="" />
+
+
+
+<meta property="og:locale" content="en" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="localhost/posts/ctf-1/" /><meta property="og:image" content="localhost"/><meta property="article:section" content="posts" />
-<meta property="article:published_time" content="2022-02-13T00:00:00+00:00" />
-<meta property="article:modified_time" content="2022-02-13T00:00:00+00:00" /><meta property="og:site_name" content="Bourbon&#39;s Blog" />
+<meta property="og:title" content="CSI-CTF Writeup (Part-1)">
+<meta property="og:description" content="The 1st part of the 3-part writeup for CSI-CTF 2022" />
+<meta property="og:url" content="https://crystalsage.github.io/posts/ctf-1/" />
+<meta property="og:site_name" content="/home/bourbon" />
+
+  
+    <meta property="og:image" content="https://crystalsage.github.io/favicon.png">
+  
+
+<meta property="og:image:width" content="2048">
+<meta property="og:image:height" content="1024">
+
+
+  <meta property="article:published_time" content="2022-02-13 00:00:00 &#43;0000 UTC" />
 
 
 
@@ -65,95 +61,91 @@
 
 
 
-    <meta property="article:published_time" content="2022-02-13 00:00:00 &#43;0000 UTC" />
 
 
 
 
 
+</head>
+<body class="green">
 
 
+<div class="container center headings--one-size">
 
-
-
-    </head>
-
-    
-        <body>
-    
-    
-        <div class="container">
-            <header class="header">
-    <span class="header__inner">
-        <a href="/" style="text-decoration: none;">
-    <div class="logo">
-        
-            <span class="logo__mark">></span>
-            <span class="logo__text">/home</span>
-            <span class="logo__cursor" style=
-                  "
-                   background-color:#8E3200;
-                   ">
-            </span>
-        
-    </div>
+  <header class="header">
+  <div class="header__inner">
+    <div class="header__logo">
+      <a href="/">
+  <div class="logo">
+    /home/bourbon
+  </div>
 </a>
 
+    </div>
+    
+      <div class="menu-trigger">menu</div>
+    
+  </div>
+  
+    <nav class="menu">
+  <ul class="menu__inner menu__inner--desktop">
+    
+      
+        
+          <li><a href="/about">About</a></li>
+        
+      
+        
+          <li><a href="/setup">Setup</a></li>
+        
+      
+      
+    
 
-        <span class="header__right">
-            
-                <nav class="menu">
-    <ul class="menu__inner"><li><a href="/localhost/about">About</a></li><li><a href="/localhost/posts">Posts</a></li><li><a href="/localhost/setup">Setup</a></li>
-    </ul>
+    
+  </ul>
+
+  <ul class="menu__inner menu__inner--mobile">
+    
+      
+        <li><a href="/about">About</a></li>
+      
+    
+      
+        <li><a href="/setup">Setup</a></li>
+      
+    
+    
+  </ul>
 </nav>
 
-                <span class="menu-trigger">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                        <path d="M0 0h24v24H0z" fill="none"/>
-                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-                    </svg>
-                </span>
-            
-                <span class="theme-toggle not-selectable"><svg class="theme-toggler" width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-   <path d="M22 41C32.4934 41 41 32.4934 41 22C41 11.5066 32.4934 3 22
-   3C11.5066 3 3 11.5066 3 22C3 32.4934 11.5066 41 22 41ZM7 22C7
-   13.7157 13.7157 7 22 7V37C13.7157 37 7 30.2843 7 22Z"/>
- </svg></span>
-        </span>
-    </span>
+  
 </header>
 
 
-            <div class="content">
-                
-  <main class="post">
-
-    <div class="post-info">
-      <p>
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
-          <circle cx="12" cy="12" r="10"></circle>
-          <polyline points="12 6 12 12 16 14"></polyline>
-        </svg>
-        3 minutes
-
+  <div class="content">
+    
+<div class="post">
+  <h1 class="post-title">
+    <a href="https://crystalsage.github.io/posts/ctf-1/">CSI-CTF Writeup (Part-1)</a></h1>
+  <div class="post-meta">
+    
+      <span class="post-date">
+        2022-02-13
         
-      </p>
-    </div>
+      </span>
+    
+    
+    
+  </div>
 
-    <article>
-      <h1 class="post-title">
-        <a href="localhost/posts/ctf-1/">CSI-CTF Writeup (Part-1)</a>
-      </h1>
+  
+  
 
-      
-        <div class="post-excerpt">The 1st part of the 3-part writeup for CSI-CTF 2022</div>
-      
 
-      
+  
 
-      
-
-      <div class="post-content">
+  <div class="post-content"><div>
         <p>I recently won 1st place at the CSI-CTF 2022. The CTF was basic, but still
 amazing (We find that the two things are often mutually exclusive in many CTFs).
 The challenges were easy, but not lame. The UI was fantastic. I was impressed
@@ -168,7 +160,7 @@ often gives a hint to you. After that, you just need to keep your mind open to a
 the possibilities and think your way through. Keep the name in the back of
 your mind but don&rsquo;t let it bias your thinking. Keep an open approach to any
 challenge which you&rsquo;re aiming to solve.</p>
-<h1 id="what-lies-within">What Lies Within</h1>
+<h1 id="what-lies-within">What Lies Within<a href="#what-lies-within" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
 <p><img src="/ctf/whatlieswithin.png" alt="challenge">
 From the challenge&rsquo;s name and some experience, we can immediately guess that the
 image has data inside it. The most preliminary test you can do to weed out
@@ -182,7 +174,7 @@ definitely know it&rsquo;s a part of the flag.</p>
 <p><img src="/ctf/whatlieswithin-flag.png" alt="flag"></p>
 <p>The flag! <code>csi-ctf{Let's_go_to_the_subway_for_lunch}</code> $\blacksquare$</p>
 <hr>
-<h1 id="luminous-hunt">Luminous Hunt</h1>
+<h1 id="luminous-hunt">Luminous Hunt<a href="#luminous-hunt" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
 <p><img src="/ctf/lh-chall.png" alt="lh-chall">
 In this challenge, we are again, starting with an image. And, the name gives
 us a hint about this being related to light.</p>
@@ -202,7 +194,7 @@ hidden in the darkness of the blackboard.</p>
 <p>It&rsquo;s still somewhat hard to read, but we can make out <code>csi-ctf{CPL-CSI}</code>, which
 is our flag. $\blacksquare$</p>
 <hr>
-<h1 id="a-tribute">A Tribute</h1>
+<h1 id="a-tribute">A Tribute<a href="#a-tribute" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
 <p><img src="/ctf/at-chall.png" alt="at-chall">
 We are given a GitHub page which tells us to find the name of a person. This
 obviously is an OSINT challenge, right? No! There&rsquo;s a twist here.</p>
@@ -220,72 +212,63 @@ the commit messages must be our encoded flag.</p>
 message from the top is actually our flag, with rot-18 encoding.
 <img src="/ctf/at-flag.png" alt="at-flag"></p>
 <p>The flag is <code>csi-ctf{congratulations_the_flag_is_jira}</code> $\blacksquare$</p>
-<!-- raw HTML omitted -->
+<hr style="border:2px solid gray"> </hr>
+This series is to be continued in the part 2 and 3 where we'll solve more
+challenges...
 
+      </div></div>
+
+  
+  
+<div class="pagination">
+    <div class="pagination__title">
+        <span class="pagination__title-h">Read other posts</span>
+        <hr />
+    </div>
+    <div class="pagination__buttons">
+        
+        <span class="button previous">
+            <a href="https://crystalsage.github.io/posts/ctf-2/">
+                <span class="button__icon">←</span>
+                <span class="button__text">CSI-CTF Writeup (Part-2)</span>
+            </a>
+        </span>
+        
+        
+        <span class="button next">
+            <a href="https://crystalsage.github.io/posts/swallow/">
+                <span class="button__text">Swallow</span>
+                <span class="button__icon">→</span>
+            </a>
+        </span>
+        
+    </div>
+</div>
+
+  
+
+  
+
+</div>
+
+  </div>
+
+  
+    <footer class="footer">
+  <div class="footer__inner">
+    
+      <div class="copyright copyright--user">
+        <span>Licensed to Bourbon</span>
+    
+        <span>:: Theme made by <a href="https://twitter.com/panr">panr</a></span>
       </div>
-    </article>
-
-    <hr />
-
-    <div class="post-info">
-      
-      
-
-      <p>
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-          <polyline points="14 2 14 8 20 8"></polyline>
-          <line x1="16" y1="13" x2="8" y2="13"></line>
-          <line x1="16" y1="17" x2="8" y2="17"></line>
-          <polyline points="10 9 9 9 8 9"></polyline>
-        </svg>
-        619 Words
-      </p>
-
-      <p>
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
-          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-          <line x1="16" y1="2" x2="16" y2="6"></line>
-          <line x1="8" y1="2" x2="8" y2="6"></line>
-          <line x1="3" y1="10" x2="21" y2="10"></line>
-        </svg>
-        
-          2022-02-13 05:30
-        
-
-         
-          
-        
-      </p>
-    </div>
-
-    
-
-    
-
-    
-
-  </main>
-
-            </div>
-
-            
-                <footer class="footer">
-    
-    <div class="footer__inner">
-        <div class="footer__content">
-            <span>&copy; 2022</span>
-            <span><a href="localhost">Bourbon</a></span>
-            <span><a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></span>
-            <span><a href="localhost/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a></span>
-            
-        </div>
-    </div>
-    
-    
+  </div>
 </footer>
 
 
+
+<script src="https://crystalsage.github.io/assets/main.js"></script>
+<script src="https://crystalsage.github.io/assets/prism.js"></script>
 <script type="text/javascript"
   src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
 </script>
@@ -303,16 +286,13 @@ message from the top is actually our flag, with rot-18 encoding.
   });
   </script>
 
-            
-        </div>
-
-        
 
 
 
-<script type="text/javascript" src="/localhost/bundle.min.a2c5b062c87998f04d1b5dfb6a89a1b2d79786c21d0cb63a05e8a2082984b64b77d80955e3b97eab17273775162ba372511b711fea2f7608f216e68a67bb22d6.js" integrity="sha512-osWwYsh5mPBNG137aomhsteXhsIdDLY6BeiiCCmEtkt32AlV47l&#43;qxcnN3UWK6NyURtxH&#43;ovdgjyFuaKZ7si1g=="></script>
 
 
+  
+</div>
 
-    </body>
+</body>
 </html>
