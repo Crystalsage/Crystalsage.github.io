@@ -174,19 +174,19 @@ But this yielded nothing even after 5-6 minutes of trying, so I eventually gave 
 <p>If we visit this page&rsquo;s source, we can find a file at the bottom named
 <code>index.js</code> referenced in there. This <code>index.js</code> file contains some Javascript
 code.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">checkData</span>(<span style="color:#a6e22e">event</span>) {
-    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;click&#34;</span>);
-    <span style="color:#a6e22e">event</span>.<span style="color:#a6e22e">preventDefault</span>();
-    <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">x</span> <span style="color:#f92672">=</span> document.<span style="color:#a6e22e">forms</span>[<span style="color:#e6db74">&#34;login-form&#34;</span>][<span style="color:#e6db74">&#34;username&#34;</span>].<span style="color:#a6e22e">value</span>;
-    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">p</span> <span style="color:#f92672">=</span> document.<span style="color:#a6e22e">forms</span>[<span style="color:#e6db74">&#34;login-form&#34;</span>][<span style="color:#e6db74">&#34;password&#34;</span>].<span style="color:#a6e22e">value</span>;
-    <span style="color:#75715e">// oh no! Client side validation always fails! thank god I have encrypted it!
-</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">x</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#34;John&#34;</span> <span style="color:#f92672">||</span> <span style="color:#a6e22e">SHA1</span>(<span style="color:#a6e22e">p</span>) <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;b89356ff6151527e89c4f3e3d30c8e6586c63962&#34;</span>) {;
-    } <span style="color:#66d9ef">else</span> {
-        <span style="color:#a6e22e">alert</span>(<span style="color:#e6db74">&#34;Invalid username or password&#34;</span>);
-    }
-
-};
-</code></pre></div><p>Oh. We get the username and SHA-1 hash of our password. So I guess we have
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">checkData</span>(<span style="color:#a6e22e">event</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;click&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">event</span>.<span style="color:#a6e22e">preventDefault</span>();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">x</span> <span style="color:#f92672">=</span> document.<span style="color:#a6e22e">forms</span>[<span style="color:#e6db74">&#34;login-form&#34;</span>][<span style="color:#e6db74">&#34;username&#34;</span>].<span style="color:#a6e22e">value</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">p</span> <span style="color:#f92672">=</span> document.<span style="color:#a6e22e">forms</span>[<span style="color:#e6db74">&#34;login-form&#34;</span>][<span style="color:#e6db74">&#34;password&#34;</span>].<span style="color:#a6e22e">value</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// oh no! Client side validation always fails! thank god I have encrypted it!
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">x</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#34;John&#34;</span> <span style="color:#f92672">||</span> <span style="color:#a6e22e">SHA1</span>(<span style="color:#a6e22e">p</span>) <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;b89356ff6151527e89c4f3e3d30c8e6586c63962&#34;</span>) {;
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">alert</span>(<span style="color:#e6db74">&#34;Invalid username or password&#34;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><p>Oh. We get the username and SHA-1 hash of our password. So I guess we have
 to crack SHA-1 now. We can do this using a tool such as hashcat and crack this
 password using a wordlist. But I didn&rsquo;t happen to have my machine with me,
 so I had to use <a href="https://crackstation.net/">crackstation</a> to do this. Fortunately,

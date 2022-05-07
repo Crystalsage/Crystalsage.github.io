@@ -166,21 +166,21 @@
 <p>My solution, whether if inefficient or dumb, most importantly works and has never failed me.</p>
 <p>I combine a BASH script + a Fish shell function (alias) + a Fish shell keyboard shortcut that swallows a window. Code explained below. Please don&rsquo;t mind the names.</p>
 <h2 id="bash-script-rbgsh">Bash script: <code>rbg.sh</code><a href="#bash-script-rbgsh" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e">#!/bin/sh
-</span><span style="color:#75715e"></span>
-$@ &amp;
-disown
-</code></pre></div><p>This is just doing automatically the stuff that would require manual efforts. The first line takes in the entire <code>argv</code>, symbolized with <code>@</code> variable, puts it in background with <code>&amp;</code> and disowns it.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#!/bin/sh
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>$@ &amp;
+</span></span><span style="display:flex;"><span>disown
+</span></span></code></pre></div><p>This is just doing automatically the stuff that would require manual efforts. The first line takes in the entire <code>argv</code>, symbolized with <code>@</code> variable, puts it in background with <code>&amp;</code> and disowns it.</p>
 <p>The script is meant to be placed in one of the directories in your <code>$PATH</code>.</p>
 <h2 id="fish-function-sdffish">Fish function: <code>sdf.fish</code><a href="#fish-function-sdffish" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#66d9ef">function</span> sdf
-  rbg $argv <span style="color:#f92672">&amp;&amp;</span> exit
-end
-</code></pre></div><p>Which calls the <code>rbg</code> binary with your command.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#66d9ef">function</span> sdf
+</span></span><span style="display:flex;"><span>  rbg $argv <span style="color:#f92672">&amp;&amp;</span> exit
+</span></span><span style="display:flex;"><span>end
+</span></span></code></pre></div><p>Which calls the <code>rbg</code> binary with your command.</p>
 <p>This function allows us to wrap over the <code>rbg.sh</code> script as well as close the actual terminal window. This only exists because I couldn&rsquo;t find a way to both exit the BASH script and close the terminal window without messing with Xorg tools.</p>
 <h2 id="fish-shortcut-goes-in-configfish">Fish shortcut: goes in <code>config.fish</code><a href="#fish-shortcut-goes-in-configfish" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">bind <span style="color:#ae81ff">\c</span>s <span style="color:#e6db74">&#39;fish_commandline_prepend sdf&#39;</span>
-</code></pre></div><p>Which just prepends <code>sdf</code> to your command in the terminal. Note that typing <code>sdf &lt;command&gt;</code> is kind of awkward and feels unnatural (I always forget to do it), so typing the command first and prepending is the most natural flow.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>bind <span style="color:#ae81ff">\c</span>s <span style="color:#e6db74">&#39;fish_commandline_prepend sdf&#39;</span>
+</span></span></code></pre></div><p>Which just prepends <code>sdf</code> to your command in the terminal. Note that typing <code>sdf &lt;command&gt;</code> is kind of awkward and feels unnatural (I always forget to do it), so typing the command first and prepending is the most natural flow.</p>
 <h1 id="results">Results<a href="#results" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
 <p>Now, when I type <code>vlc ./video.mp4</code> and press <code>C-s</code> the resulting command becomes <code>sdf vlc ./video.mp4</code>, which successfully swallows the terminal when executed. It&rsquo;s instantaneous with really no lag.</p>
 <section class="footnotes" role="doc-endnotes">

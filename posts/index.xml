@@ -7,7 +7,153 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>Licensed to Bourbon</copyright>
-    <lastBuildDate>Wed, 23 Feb 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://crystalsage.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 07 May 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://crystalsage.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>SMT solving for CTFs</title>
+      <link>https://crystalsage.github.io/posts/smt/</link>
+      <pubDate>Sat, 07 May 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://crystalsage.github.io/posts/smt/</guid>
+      <description>Introduction Solving a problem by hand Z3 Challenge Exercise to the reader Further reading </description>
+      <content>&lt;h1 id=&#34;introduction&#34;&gt;Introduction&lt;/h1&gt;
+&lt;h2 id=&#34;solving-a-problem-by-hand&#34;&gt;Solving a problem by hand&lt;/h2&gt;
+&lt;h2 id=&#34;z3&#34;&gt;Z3&lt;/h2&gt;
+&lt;h2 id=&#34;challenge&#34;&gt;Challenge&lt;/h2&gt;
+&lt;h2 id=&#34;exercise-to-the-reader&#34;&gt;Exercise to the reader&lt;/h2&gt;
+&lt;h2 id=&#34;further-reading&#34;&gt;Further reading&lt;/h2&gt;
+</content>
+    </item>
+    
+    <item>
+      <title>Partial ordering and Rust</title>
+      <link>https://crystalsage.github.io/posts/partialord/</link>
+      <pubDate>Mon, 28 Feb 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://crystalsage.github.io/posts/partialord/</guid>
+      <description>Without order, there is chaos.
+ Introduction Wikipedia defines a partial order as,
+ A reflexive, weak, or non-strict partial order is a homogeneous relation $\leq$ on a set $P$ that is reflexive, antisymmetric, and transitive.
+ In other words, we have that in a set $P$, for all $a, b, c \in P$, we must have,
+ Reflexivity: $a \leq a$, i.e. every element is related to itself. Antisymmetry: $a \leq b$ and $b \leq a$ then $a = b$, i.</description>
+      <content>&lt;blockquote&gt;
+&lt;p&gt;Without order, there is chaos.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h1 id=&#34;introduction&#34;&gt;Introduction&lt;/h1&gt;
+&lt;p&gt;&lt;a href=&#34;https://en.wikipedia.org/wiki/Partially_ordered_set&#34;&gt;Wikipedia&lt;/a&gt;
+defines a partial order as,&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;A reflexive, weak, or non-strict partial order is a homogeneous relation
+$\leq$ on a set $P$ that is reflexive, antisymmetric, and transitive.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;In other words, we have that
+in a set $P$, for all $a, b, c \in P$, we must have,&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Reflexivity&lt;/strong&gt;: $a \leq a$, i.e. every element is related to itself.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Antisymmetry&lt;/strong&gt;: $a \leq b$ and $b \leq a$ then $a = b$, i.e. no two distinct
+elements precede each other.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Transitivity&lt;/strong&gt;: If $a \leq b$ and $b \leq c$ then $a \leq c$.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Wow! Quite a definition. But what does it actually mean&amp;hellip;?&lt;/p&gt;
+&lt;h1 id=&#34;the-scenario&#34;&gt;The scenario&lt;/h1&gt;
+&lt;p&gt;Suppose that you want to buy a new fancy umbrella for you and your friend. These umbrellas differ in size and you would like the one which can fit both you and your friend.&lt;/p&gt;
+&lt;p&gt;Instantly, you have a perspective from which you start seeing things. You apply a filter according to your use cases, and judge the objects according to them. In your case, the filter is &lt;strong&gt;size&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;Defining an &lt;em&gt;order&lt;/em&gt; on a set is the same thing!&lt;/p&gt;
+&lt;p&gt;Defining an order gives us a sense of comparison between objects of that particular set. In the example stated before, the &lt;em&gt;set&lt;/em&gt; is the entire category of umbrellas and the &lt;em&gt;objects&lt;/em&gt; are the umbrellas.&lt;/p&gt;
+&lt;h2 id=&#34;formalizing-the-idea&#34;&gt;Formalizing the idea&lt;/h2&gt;
+&lt;p&gt;Continuing with the umbrella mould, let us state the same thing in a proper manner, so that Wikipedia&amp;rsquo;s definition fits our example, at least intuitively.&lt;/p&gt;
+&lt;p&gt;Let us define an order on the set of umbrellas. The set is $U$ and the objects of this set are umbrellas.&lt;/p&gt;
+&lt;p&gt;$$U = \{ u_1, u_2, u_3, \cdots, u_n \}$$&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s define an operator $\leq$ on set $U$ which defines a partial order. This operator gives us a comparison between sizes of umbrellas. The operator $\leq$ must satisfy the 3 rules stated in the opening section. Let&amp;rsquo;s see if we can explain them according to our scenario.&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Reflexivity&lt;/strong&gt;: An umbrella $u_a$ is related to itself. In terms of the size, this would mean that the umbrella is similarly sized to say, an exact copy of $u_a$.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Antisymmetry&lt;/strong&gt;: If two umbrellas are approximately equally sized, it&amp;rsquo;s confusing at a cursory glance whether if one really is smaller than the other. The situation can then be thought of as a scenario where both $u_a \leq u_b$  and $u_b \leq u_a$ are &amp;rsquo;true&amp;rsquo;. So $u_a = u_b$ must be true.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Transitivity&lt;/strong&gt;: This is pretty obvious. Among a small, a medium and a large umbrella, there&amp;rsquo;s a clear hierarchy. If $u_a \leq u_b$ and $u_b \leq u_c$ then $u_a \leq u_c$.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h1 id=&#34;ordering-in-rust&#34;&gt;Ordering in Rust&lt;/h1&gt;
+&lt;p&gt;Ordering a data structure in Rust allows us to do abstract comparisons between objects of the same data structure. Let&amp;rsquo;s continue the umbrella saga.&lt;/p&gt;
+&lt;p&gt;Suppose we create a &lt;code&gt;struct&lt;/code&gt; for describing an umbrella. The &lt;code&gt;size&lt;/code&gt; field
+is of the &lt;code&gt;Size&lt;/code&gt; type, which is user-defined.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-rust&#34; data-lang=&#34;rust&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;enum&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Size&lt;/span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  Small,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  Medium,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  Large,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;struct&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Umbrella&lt;/span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  size : &lt;span style=&#34;color:#a6e22e&#34;&gt;Size&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  cost : &lt;span style=&#34;color:#66d9ef&#34;&gt;u16&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Now, we would like to say that an umbrella is &amp;lsquo;better&amp;rsquo; (for us) if the size is maximum. As a side effect, we would also love that the cost gets minimized. In other words, we&amp;rsquo;d like to define a clear notion of comparison.&lt;/p&gt;
+&lt;p&gt;In Rust, we can implement some &lt;a href=&#34;https://doc.rust-lang.org/book/ch10-02-traits.html&#34;&gt;traits&lt;/a&gt;, described below.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;PartialOrd&lt;/code&gt; :  This trait implements the &lt;code&gt;partial_cmp&lt;/code&gt; method where we describe what fields will be compared.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;PartialEq&lt;/code&gt; : This defines equality between objects.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Let&amp;rsquo;s do this.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-rust&#34; data-lang=&#34;rust&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;impl&lt;/span&gt; PartialOrd &lt;span style=&#34;color:#66d9ef&#34;&gt;for&lt;/span&gt; Umbrella {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;fn&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;partial_cmp&lt;/span&gt;(&lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&lt;/span&gt;self, other: &lt;span style=&#34;color:#66d9ef&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;Self&lt;/span&gt;) -&amp;gt; Option&lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt;Ordering&lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        self.size.partial_cmp(&lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&lt;/span&gt;other.size)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;impl&lt;/span&gt; PartialEq &lt;span style=&#34;color:#66d9ef&#34;&gt;for&lt;/span&gt; Umbrella {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;fn&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;eq&lt;/span&gt;(&lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&lt;/span&gt;self, other: &lt;span style=&#34;color:#66d9ef&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;Self&lt;/span&gt;) -&amp;gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;bool&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        self.size &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; other.size
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;but we run into a problem as soon as we run this.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;error[E0599]&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;the method `partial_cmp` exists for enum `Size`, but its &lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;trait bounds were not satisfied&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Oops! We forgot a really important thing here. We never defined a partial order on the &lt;code&gt;Size&lt;/code&gt; enum in the first place, so the compiler doesn&amp;rsquo;t know how to compare its members. Let&amp;rsquo;s fix this.&lt;/p&gt;
+&lt;p&gt;We can define the traits described above for the &lt;code&gt;enum&lt;/code&gt; as well. But, we&amp;rsquo;ll take a shortcut this time. We can use the &lt;code&gt;#derive&lt;/code&gt; attribute to tell the compiler to infer the traits onto the data type without manually defining them.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-rust&#34; data-lang=&#34;rust&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// Small &amp;lt; Medium &amp;lt; Large is inferred due to discriminants.
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// Implement `PartialOrd` and `PartialEq`
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#[derive(PartialOrd, PartialEq)]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;enum&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Size&lt;/span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  Small,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  Medium,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  Large,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Note that variants ordered in this way are ordered by their &lt;em&gt;discriminants&lt;/em&gt;, which are like indices. So a &lt;code&gt;enum&lt;/code&gt; member at the top has lower index than the one at bottom and is considered lesser. (&lt;a href=&#34;https://doc.rust-lang.org/std/cmp/trait.PartialOrd.html&#34;&gt;See here&lt;/a&gt;)&lt;/p&gt;
+&lt;p&gt;Neat! Let&amp;rsquo;s try running this now.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-rust&#34; data-lang=&#34;rust&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;fn&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;main&lt;/span&gt;(){
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;let&lt;/span&gt; u1 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; Umbrella{ size: &lt;span style=&#34;color:#a6e22e&#34;&gt;Size&lt;/span&gt;::Small, cost: &lt;span style=&#34;color:#ae81ff&#34;&gt;20&lt;/span&gt;};
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;let&lt;/span&gt; u2 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; Umbrella{ size: &lt;span style=&#34;color:#a6e22e&#34;&gt;Size&lt;/span&gt;::Medium, cost: &lt;span style=&#34;color:#ae81ff&#34;&gt;20&lt;/span&gt;};
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;let&lt;/span&gt; u3 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; Umbrella{ size: &lt;span style=&#34;color:#a6e22e&#34;&gt;Size&lt;/span&gt;::Medium, cost: &lt;span style=&#34;color:#ae81ff&#34;&gt;30&lt;/span&gt;};
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;let&lt;/span&gt; u4 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; Umbrella{ size: &lt;span style=&#34;color:#a6e22e&#34;&gt;Size&lt;/span&gt;::Large, cost: &lt;span style=&#34;color:#ae81ff&#34;&gt;40&lt;/span&gt;};
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  assert!(u1 &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt; u2);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  assert!(u1 &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt; u3);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  assert!(u1 &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt; u2 &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; u2 &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt; u3);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  assert!(u4 &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; u3);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  println!(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Passed all checks!&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ cargo run
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Finished dev &lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;unoptimized + debuginfo&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; target&lt;span style=&#34;color:#f92672&#34;&gt;(&lt;/span&gt;s&lt;span style=&#34;color:#f92672&#34;&gt;)&lt;/span&gt; in 0.00s
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Running &lt;span style=&#34;color:#e6db74&#34;&gt;`&lt;/span&gt;target/debug/partialeq&lt;span style=&#34;color:#e6db74&#34;&gt;`&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Passed all checks!
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Awesome! We just implemented a partial order on a custom data type. The entire code can be found here: &lt;a href=&#34;https://github.com/CrystalSage/Rust-PartialEq&#34;&gt;Code&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;exercise-to-the-reader&#34;&gt;Exercise to the reader&lt;/h2&gt;
+&lt;p&gt;The reader is invited to solve the following problems.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;What happens if the size of an umbrella is unknown? How will you rewrite the code to handle the situation?&lt;/li&gt;
+&lt;li&gt;You&amp;rsquo;ll find that $u2$ is actually better than $u3$ because you can get a medium sized umbrella at lesser price. Recall that we never used &lt;code&gt;cost&lt;/code&gt; field in our code. Rewrite the code so we can find larger umbrellas at equal or lesser price.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;further-reading&#34;&gt;Further reading&lt;/h2&gt;
+&lt;p&gt;Ordering is a fascinating topic. Many mathematicians and enthusiasts infinitely better than myself have spent much ink and chalk explaining what it means.&lt;/p&gt;
+&lt;p&gt;For starters, refer to the &lt;em&gt;Order relations&lt;/em&gt; (Section 4.4) from &lt;a href=&#34;https://www.amazon.in/Learning-Reason-Introduction-Logic-Relations/dp/047137122X&#34;&gt;Learning To Reason&lt;/a&gt;, where the authors offer a brief but completely sufficient explanation of ordering.&lt;/p&gt;
+&lt;p&gt;[\blacksquare\blacksquare\blacksquare]&lt;/p&gt;
+</content>
+    </item>
+    
     <item>
       <title>CSI-CTF Writeup (Part-3)</title>
       <link>https://crystalsage.github.io/posts/ctf-3/</link>
@@ -65,8 +211,8 @@ which is clearly the letter &lt;code&gt;c&lt;/code&gt;. This must be the &amp;ls
 &lt;p&gt;Since we know the flag format, we can actually skip the first 8 lines and
 assume them to be &lt;code&gt;csi-ctf{&lt;/code&gt;. To decode everything inside the brackets, we can
 extract the dits and dahs from the lines, with some simple Python.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;extract_symbols &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;lambda&lt;/span&gt; line: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;join([i &lt;span style=&#34;color:#66d9ef&#34;&gt;for&lt;/span&gt; i &lt;span style=&#34;color:#f92672&#34;&gt;in&lt;/span&gt; line &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; i &lt;span style=&#34;color:#f92672&#34;&gt;in&lt;/span&gt; (&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;-&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;.&amp;#34;&lt;/span&gt;)])
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Once we extract all dits and dahs, we can put them in a morse &amp;ndash;&amp;gt; text converter.
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;extract_symbols &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;lambda&lt;/span&gt; line: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;join([i &lt;span style=&#34;color:#66d9ef&#34;&gt;for&lt;/span&gt; i &lt;span style=&#34;color:#f92672&#34;&gt;in&lt;/span&gt; line &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; i &lt;span style=&#34;color:#f92672&#34;&gt;in&lt;/span&gt; (&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;-&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;.&amp;#34;&lt;/span&gt;)])
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Once we extract all dits and dahs, we can put them in a morse &amp;ndash;&amp;gt; text converter.
 I happened to have a script on my machine for this.&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/di-morse-ans.png&#34; alt=&#34;di-morse-ans&#34;&gt;&lt;/p&gt;
 &lt;p&gt;Which is the text inside the brackets, so the flag is
@@ -80,33 +226,33 @@ the combination is wrong.&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/cts-wrong.png&#34; alt=&#34;ctf-fail&#34;&gt;&lt;/p&gt;
 &lt;p&gt;Let&amp;rsquo;s see what&amp;rsquo;s going on under the hood. On the page&amp;rsquo;s source,  we find the
 following Javascript code.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;store&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;;
-    &lt;span style=&#34;color:#66d9ef&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;count&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;;
-    &lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;card&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;res&lt;/span&gt;) {
-      &lt;span style=&#34;color:#a6e22e&#34;&gt;store&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;store&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;res&lt;/span&gt;;
-      &lt;span style=&#34;color:#a6e22e&#34;&gt;count&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;++&lt;/span&gt;;
-      &lt;span style=&#34;color:#a6e22e&#34;&gt;console&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;log&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;store&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;length&lt;/span&gt;);
-
-      &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#a6e22e&#34;&gt;count&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;===&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;4&lt;/span&gt;) {
-        &lt;span style=&#34;color:#a6e22e&#34;&gt;setTimeout&lt;/span&gt;(() =&amp;gt; {
-          &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#f92672&#34;&gt;!&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;store&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;===&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;d8c2436e262448af3043fde3d652726a&amp;#34;&lt;/span&gt;)) {
-            &lt;span style=&#34;color:#a6e22e&#34;&gt;alert&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;wrong&amp;#34;&lt;/span&gt;);
-            window.&lt;span style=&#34;color:#a6e22e&#34;&gt;location&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;reload&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;true&lt;/span&gt;);
-          }
-          &lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt; {
-            &lt;span style=&#34;color:#a6e22e&#34;&gt;alert&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;congratulations you found the flag : &amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;`csi-ctf{&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;${&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;store&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;}&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;}`&lt;/span&gt;);
-            window.&lt;span style=&#34;color:#a6e22e&#34;&gt;location&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;reload&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;true&lt;/span&gt;);
-          }
-        }, &lt;span style=&#34;color:#ae81ff&#34;&gt;300&lt;/span&gt;);
-      }
-    }
-    &lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;flip&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;event&lt;/span&gt;) {
-      &lt;span style=&#34;color:#66d9ef&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;element&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;event&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;currentTarget&lt;/span&gt;;
-      &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#a6e22e&#34;&gt;element&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;className&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;===&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;cards col-md-4 col-sm-6 col-12&amp;#34;&lt;/span&gt;) {
-        &lt;span style=&#34;color:#a6e22e&#34;&gt;element&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;style&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;transform&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;rotateY(180deg)&amp;#34;&lt;/span&gt;;
-      }
-    }
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The &lt;code&gt;card()&lt;/code&gt; appends &amp;lsquo;something&amp;rsquo; to &lt;code&gt;store&lt;/code&gt;. Once we flip 5 cards, we check if
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;store&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;count&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;card&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;res&lt;/span&gt;) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#a6e22e&#34;&gt;store&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;store&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;res&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#a6e22e&#34;&gt;count&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;++&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#a6e22e&#34;&gt;console&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;log&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;store&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;length&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#a6e22e&#34;&gt;count&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;===&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;4&lt;/span&gt;) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#a6e22e&#34;&gt;setTimeout&lt;/span&gt;(() =&amp;gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;          &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#f92672&#34;&gt;!&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;store&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;===&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;d8c2436e262448af3043fde3d652726a&amp;#34;&lt;/span&gt;)) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            &lt;span style=&#34;color:#a6e22e&#34;&gt;alert&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;wrong&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            window.&lt;span style=&#34;color:#a6e22e&#34;&gt;location&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;reload&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;true&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;          }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;          &lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            &lt;span style=&#34;color:#a6e22e&#34;&gt;alert&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;congratulations you found the flag : &amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;`csi-ctf{&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;${&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;store&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;}&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;}`&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            window.&lt;span style=&#34;color:#a6e22e&#34;&gt;location&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;reload&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;true&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;          }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        }, &lt;span style=&#34;color:#ae81ff&#34;&gt;300&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;flip&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;event&lt;/span&gt;) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#66d9ef&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;element&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;event&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;currentTarget&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#a6e22e&#34;&gt;element&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;className&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;===&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;cards col-md-4 col-sm-6 col-12&amp;#34;&lt;/span&gt;) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#a6e22e&#34;&gt;element&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;style&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;transform&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;rotateY(180deg)&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The &lt;code&gt;card()&lt;/code&gt; appends &amp;lsquo;something&amp;rsquo; to &lt;code&gt;store&lt;/code&gt;. Once we flip 5 cards, we check if
 the &amp;lsquo;something&amp;rsquo; of the cards form the sequence
 &lt;code&gt;d8c2436e262448af3043fde3d652726a&lt;/code&gt;. If so, we get the flag.&lt;/p&gt;
 &lt;p&gt;But hey!!! The
@@ -127,15 +273,15 @@ seem like fragments of the entire sequence, these are the &amp;lsquo;something&a
 we notice for the first card that &lt;code&gt;card(&#39;d8c2436e&#39;)&lt;/code&gt; is called. This matches
 with the first few characters of our resulting sequence.&lt;/p&gt;
 &lt;p&gt;So we collect all the &lt;code&gt;onClick&lt;/code&gt; snippets.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;onclick&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;[flip(event),card(&amp;#39;d8c2436e&amp;#39;)] //1
-&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;    onclick=&amp;#34;&lt;/span&gt;[&lt;span style=&#34;color:#a6e22e&#34;&gt;flip&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;event&lt;/span&gt;),&lt;span style=&#34;color:#a6e22e&#34;&gt;card&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;)] &lt;span style=&#34;color:#75715e&#34;&gt;//2
-&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;onclick&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;[flip(event),card(&amp;#39;&amp;#39;)] //3
-&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;    onclick=&amp;#34;&lt;/span&gt;[&lt;span style=&#34;color:#a6e22e&#34;&gt;flip&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;event&lt;/span&gt;),&lt;span style=&#34;color:#a6e22e&#34;&gt;card&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;)] &lt;span style=&#34;color:#75715e&#34;&gt;//4
-&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;onclick&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;[flip(event),card(&amp;#39;262448af&amp;#39;)] //5
-&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;    onclick=&amp;#34;&lt;/span&gt;[&lt;span style=&#34;color:#a6e22e&#34;&gt;flip&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;event&lt;/span&gt;),&lt;span style=&#34;color:#a6e22e&#34;&gt;card&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;652726a&amp;#39;&lt;/span&gt;)] &lt;span style=&#34;color:#75715e&#34;&gt;//6
-&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;onclick&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;[flip(event),card(&amp;#39;&amp;#39;)] //7 
-&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;    onclick=&amp;#34;&lt;/span&gt;[&lt;span style=&#34;color:#a6e22e&#34;&gt;flip&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;event&lt;/span&gt;),&lt;span style=&#34;color:#a6e22e&#34;&gt;card&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;3043fde3d&amp;#39;&lt;/span&gt;)] &lt;span style=&#34;color:#75715e&#34;&gt;//8
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;We notice that some of these are empty. So, if we were to flip the cards in
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;onclick&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;[flip(event),card(&amp;#39;d8c2436e&amp;#39;)] //1
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;    onclick=&amp;#34;&lt;/span&gt;[&lt;span style=&#34;color:#a6e22e&#34;&gt;flip&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;event&lt;/span&gt;),&lt;span style=&#34;color:#a6e22e&#34;&gt;card&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;)] &lt;span style=&#34;color:#75715e&#34;&gt;//2
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;onclick&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;[flip(event),card(&amp;#39;&amp;#39;)] //3
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;    onclick=&amp;#34;&lt;/span&gt;[&lt;span style=&#34;color:#a6e22e&#34;&gt;flip&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;event&lt;/span&gt;),&lt;span style=&#34;color:#a6e22e&#34;&gt;card&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;)] &lt;span style=&#34;color:#75715e&#34;&gt;//4
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;onclick&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;[flip(event),card(&amp;#39;262448af&amp;#39;)] //5
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;    onclick=&amp;#34;&lt;/span&gt;[&lt;span style=&#34;color:#a6e22e&#34;&gt;flip&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;event&lt;/span&gt;),&lt;span style=&#34;color:#a6e22e&#34;&gt;card&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;652726a&amp;#39;&lt;/span&gt;)] &lt;span style=&#34;color:#75715e&#34;&gt;//6
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;onclick&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;[flip(event),card(&amp;#39;&amp;#39;)] //7 
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;    onclick=&amp;#34;&lt;/span&gt;[&lt;span style=&#34;color:#a6e22e&#34;&gt;flip&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;event&lt;/span&gt;),&lt;span style=&#34;color:#a6e22e&#34;&gt;card&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;3043fde3d&amp;#39;&lt;/span&gt;)] &lt;span style=&#34;color:#75715e&#34;&gt;//8
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;We notice that some of these are empty. So, if we were to flip the cards in
 the order &lt;code&gt;1-5-8-6&lt;/code&gt;, it&amp;rsquo;ll form the sequence that we want and we&amp;rsquo;ll get our hash, which is the same sequence.&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/cts-flag-hashed.png&#34; alt=&#34;cts-flag&#34;&gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Challenge Idea/Solution&lt;/strong&gt;: An alternate solution to this challenge, if the flag was something else, would be to set a breakpoint where we check if the &lt;code&gt;store&lt;/code&gt; is equivalent to the sequence, and (by)pass the check entirely by modifying the &lt;code&gt;store&lt;/code&gt; variable to be equal to the hash. Alternate challenge idea!&lt;/p&gt;
@@ -200,19 +346,19 @@ But this yielded nothing even after 5-6 minutes of trying, so I eventually gave 
 &lt;p&gt;If we visit this page&amp;rsquo;s source, we can find a file at the bottom named
 &lt;code&gt;index.js&lt;/code&gt; referenced in there. This &lt;code&gt;index.js&lt;/code&gt; file contains some Javascript
 code.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;checkData&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;event&lt;/span&gt;) {
-    &lt;span style=&#34;color:#a6e22e&#34;&gt;console&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;log&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;click&amp;#34;&lt;/span&gt;);
-    &lt;span style=&#34;color:#a6e22e&#34;&gt;event&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;preventDefault&lt;/span&gt;();
-    &lt;span style=&#34;color:#66d9ef&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;x&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; document.&lt;span style=&#34;color:#a6e22e&#34;&gt;forms&lt;/span&gt;[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;login-form&amp;#34;&lt;/span&gt;][&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;username&amp;#34;&lt;/span&gt;].&lt;span style=&#34;color:#a6e22e&#34;&gt;value&lt;/span&gt;;
-    &lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;p&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; document.&lt;span style=&#34;color:#a6e22e&#34;&gt;forms&lt;/span&gt;[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;login-form&amp;#34;&lt;/span&gt;][&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;password&amp;#34;&lt;/span&gt;].&lt;span style=&#34;color:#a6e22e&#34;&gt;value&lt;/span&gt;;
-    &lt;span style=&#34;color:#75715e&#34;&gt;// oh no! Client side validation always fails! thank god I have encrypted it!
-&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#a6e22e&#34;&gt;x&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;===&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;John&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;||&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;SHA1&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;p&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;b89356ff6151527e89c4f3e3d30c8e6586c63962&amp;#34;&lt;/span&gt;) {;
-    } &lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt; {
-        &lt;span style=&#34;color:#a6e22e&#34;&gt;alert&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Invalid username or password&amp;#34;&lt;/span&gt;);
-    }
-
-};
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Oh. We get the username and SHA-1 hash of our password. So I guess we have
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;checkData&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;event&lt;/span&gt;) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;console&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;log&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;click&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;event&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;preventDefault&lt;/span&gt;();
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;x&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; document.&lt;span style=&#34;color:#a6e22e&#34;&gt;forms&lt;/span&gt;[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;login-form&amp;#34;&lt;/span&gt;][&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;username&amp;#34;&lt;/span&gt;].&lt;span style=&#34;color:#a6e22e&#34;&gt;value&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;p&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; document.&lt;span style=&#34;color:#a6e22e&#34;&gt;forms&lt;/span&gt;[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;login-form&amp;#34;&lt;/span&gt;][&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;password&amp;#34;&lt;/span&gt;].&lt;span style=&#34;color:#a6e22e&#34;&gt;value&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#75715e&#34;&gt;// oh no! Client side validation always fails! thank god I have encrypted it!
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#a6e22e&#34;&gt;x&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;===&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;John&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;||&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;SHA1&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;p&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;b89356ff6151527e89c4f3e3d30c8e6586c63962&amp;#34;&lt;/span&gt;) {;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    } &lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#a6e22e&#34;&gt;alert&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Invalid username or password&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;};
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Oh. We get the username and SHA-1 hash of our password. So I guess we have
 to crack SHA-1 now. We can do this using a tool such as hashcat and crack this
 password using a wordlist. But I didn&amp;rsquo;t happen to have my machine with me,
 so I had to use &lt;a href=&#34;https://crackstation.net/&#34;&gt;crackstation&lt;/a&gt; to do this. Fortunately,
@@ -348,21 +494,21 @@ For instance, consider a scenario where I want to spawn VLC from my terminal.</d
 &lt;p&gt;My solution, whether if inefficient or dumb, most importantly works and has never failed me.&lt;/p&gt;
 &lt;p&gt;I combine a BASH script + a Fish shell function (alias) + a Fish shell keyboard shortcut that swallows a window. Code explained below. Please don&amp;rsquo;t mind the names.&lt;/p&gt;
 &lt;h2 id=&#34;bash-script-rbgsh&#34;&gt;Bash script: &lt;code&gt;rbg.sh&lt;/code&gt;&lt;/h2&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#!/bin/sh
-&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
-$@ &amp;amp;
-disown
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This is just doing automatically the stuff that would require manual efforts. The first line takes in the entire &lt;code&gt;argv&lt;/code&gt;, symbolized with &lt;code&gt;@&lt;/code&gt; variable, puts it in background with &lt;code&gt;&amp;amp;&lt;/code&gt; and disowns it.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#!/bin/sh
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$@ &amp;amp;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;disown
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This is just doing automatically the stuff that would require manual efforts. The first line takes in the entire &lt;code&gt;argv&lt;/code&gt;, symbolized with &lt;code&gt;@&lt;/code&gt; variable, puts it in background with &lt;code&gt;&amp;amp;&lt;/code&gt; and disowns it.&lt;/p&gt;
 &lt;p&gt;The script is meant to be placed in one of the directories in your &lt;code&gt;$PATH&lt;/code&gt;.&lt;/p&gt;
 &lt;h2 id=&#34;fish-function-sdffish&#34;&gt;Fish function: &lt;code&gt;sdf.fish&lt;/code&gt;&lt;/h2&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; sdf
-  rbg $argv &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; exit
-end
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Which calls the &lt;code&gt;rbg&lt;/code&gt; binary with your command.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; sdf
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  rbg $argv &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; exit
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;end
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Which calls the &lt;code&gt;rbg&lt;/code&gt; binary with your command.&lt;/p&gt;
 &lt;p&gt;This function allows us to wrap over the &lt;code&gt;rbg.sh&lt;/code&gt; script as well as close the actual terminal window. This only exists because I couldn&amp;rsquo;t find a way to both exit the BASH script and close the terminal window without messing with Xorg tools.&lt;/p&gt;
 &lt;h2 id=&#34;fish-shortcut-goes-in-configfish&#34;&gt;Fish shortcut: goes in &lt;code&gt;config.fish&lt;/code&gt;&lt;/h2&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;bind &lt;span style=&#34;color:#ae81ff&#34;&gt;\c&lt;/span&gt;s &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;fish_commandline_prepend sdf&amp;#39;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Which just prepends &lt;code&gt;sdf&lt;/code&gt; to your command in the terminal. Note that typing &lt;code&gt;sdf &amp;lt;command&amp;gt;&lt;/code&gt; is kind of awkward and feels unnatural (I always forget to do it), so typing the command first and prepending is the most natural flow.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;bind &lt;span style=&#34;color:#ae81ff&#34;&gt;\c&lt;/span&gt;s &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;fish_commandline_prepend sdf&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Which just prepends &lt;code&gt;sdf&lt;/code&gt; to your command in the terminal. Note that typing &lt;code&gt;sdf &amp;lt;command&amp;gt;&lt;/code&gt; is kind of awkward and feels unnatural (I always forget to do it), so typing the command first and prepending is the most natural flow.&lt;/p&gt;
 &lt;h1 id=&#34;results&#34;&gt;Results&lt;/h1&gt;
 &lt;p&gt;Now, when I type &lt;code&gt;vlc ./video.mp4&lt;/code&gt; and press &lt;code&gt;C-s&lt;/code&gt; the resulting command becomes &lt;code&gt;sdf vlc ./video.mp4&lt;/code&gt;, which successfully swallows the terminal when executed. It&amp;rsquo;s instantaneous with really no lag.&lt;/p&gt;
 &lt;section class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
@@ -396,22 +542,21 @@ getdents() syscall The getdents syscall takes in 3 parameters. So the prototype 
 &lt;/ol&gt;
 &lt;h1 id=&#34;dirent-structs&#34;&gt;Dirent structs&lt;/h1&gt;
 &lt;p&gt;A &lt;em&gt;dirent&lt;/em&gt; or &lt;em&gt;linux_dirent&lt;/em&gt; struct is defined as follows.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-c++&#34; data-lang=&#34;c++&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;struct&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;linux_dirent&lt;/span&gt; {
-       &lt;span style=&#34;color:#66d9ef&#34;&gt;unsigned&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;long&lt;/span&gt;  d_ino;     &lt;span style=&#34;color:#75715e&#34;&gt;/* File inode*/&lt;/span&gt;
-       &lt;span style=&#34;color:#66d9ef&#34;&gt;unsigned&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;long&lt;/span&gt;  d_off;     &lt;span style=&#34;color:#75715e&#34;&gt;/* Offset of the next linux_dirent */&lt;/span&gt;
-       &lt;span style=&#34;color:#66d9ef&#34;&gt;unsigned&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;short&lt;/span&gt; d_reclen;  &lt;span style=&#34;color:#75715e&#34;&gt;/* Size of the current dirent struct*/&lt;/span&gt;
-       &lt;span style=&#34;color:#66d9ef&#34;&gt;char&lt;/span&gt;           d_name[];  &lt;span style=&#34;color:#75715e&#34;&gt;// The filename of the file
-&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
-       &lt;span style=&#34;color:#66d9ef&#34;&gt;char&lt;/span&gt;           pad;       &lt;span style=&#34;color:#75715e&#34;&gt;// Zero padding byte
-&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;       &lt;span style=&#34;color:#66d9ef&#34;&gt;char&lt;/span&gt;           d_type;    &lt;span style=&#34;color:#75715e&#34;&gt;// File types such as block devices, named pipes, sockets etc.
-&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;   }
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;So anytime we call the &lt;code&gt;getdents&lt;/code&gt; syscall, we are populating with &lt;code&gt;dirent&lt;/code&gt; structures, the buffer that &lt;code&gt;dirp&lt;/code&gt; points to. Notice how the struct also involves the filename of the file that the struct is for. We can use this for directory listing!&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-c++&#34; data-lang=&#34;c++&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;struct&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;linux_dirent&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;       &lt;span style=&#34;color:#66d9ef&#34;&gt;unsigned&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;long&lt;/span&gt;  d_ino;     &lt;span style=&#34;color:#75715e&#34;&gt;/* File inode*/&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;       &lt;span style=&#34;color:#66d9ef&#34;&gt;unsigned&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;long&lt;/span&gt;  d_off;     &lt;span style=&#34;color:#75715e&#34;&gt;/* Offset of the next linux_dirent */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;       &lt;span style=&#34;color:#66d9ef&#34;&gt;unsigned&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;short&lt;/span&gt; d_reclen;  &lt;span style=&#34;color:#75715e&#34;&gt;/* Size of the current dirent struct*/&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;       &lt;span style=&#34;color:#66d9ef&#34;&gt;char&lt;/span&gt;           d_name[];  &lt;span style=&#34;color:#75715e&#34;&gt;// The filename of the file
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;       &lt;span style=&#34;color:#66d9ef&#34;&gt;char&lt;/span&gt;           pad;       &lt;span style=&#34;color:#75715e&#34;&gt;// Zero padding byte
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;       &lt;span style=&#34;color:#66d9ef&#34;&gt;char&lt;/span&gt;           d_type;    &lt;span style=&#34;color:#75715e&#34;&gt;// File types such as block devices, named pipes, sockets etc.
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;   }
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;So anytime we call the &lt;code&gt;getdents&lt;/code&gt; syscall, we are populating with &lt;code&gt;dirent&lt;/code&gt; structures, the buffer that &lt;code&gt;dirp&lt;/code&gt; points to. Notice how the struct also involves the filename of the file that the struct is for. We can use this for directory listing!&lt;/p&gt;
 &lt;h1 id=&#34;the-program&#34;&gt;The program&lt;/h1&gt;
 &lt;p&gt;The program that we are building lists the directory contents of the current directory. We allocate a 512 bytes buffer for storing the dirent structs. (Which is sufficient for a toy implementation)&lt;/p&gt;
 &lt;p&gt;Based on the info above, we define the &lt;code&gt;.bss&lt;/code&gt; and the &lt;code&gt;.data&lt;/code&gt; sections as follows:&lt;/p&gt;
 &lt;pre tabindex=&#34;0&#34;&gt;&lt;code class=&#34;language-x86asm&#34; data-lang=&#34;x86asm&#34;&gt;[SECTION .data]
-dirname: db &#39;.&#39;
+dirname: db &amp;#39;.&amp;#39;
 
 [SECTION .bss]
 msgbuf:
@@ -488,15 +633,15 @@ main:
 &lt;li&gt;The filename sits at &lt;code&gt;struct_index + 8*2 + 2 = 0x12&lt;/code&gt;bytes. 1 &lt;code&gt;unsigned short&lt;/code&gt; is considered for. Note that we just add &lt;code&gt;0x2&lt;/code&gt; to the struct size offset when outputting the filename.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h1 id=&#34;results&#34;&gt;Results&lt;/h1&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&amp;gt;&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&amp;gt; ls
-file1.txt  file2.txt  main
-&amp;gt;&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&amp;gt; ./main
-.
-file2.txt
-main
-..
-file1.txt
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Thus we get a barebones directory listing.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&amp;gt;&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&amp;gt; ls
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;file1.txt  file2.txt  main
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&amp;gt;&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&amp;gt; ./main
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;.
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;file2.txt
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;main
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;..
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;file1.txt
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Thus we get a barebones directory listing.&lt;/p&gt;
 &lt;p&gt;The compile script and code is available : &lt;a href=&#34;https://github.com/CrystalSage/Direntries&#34;&gt;Here&lt;/a&gt;&lt;/p&gt;
 &lt;h1 id=&#34;ps&#34;&gt;P.S&lt;/h1&gt;
 &lt;p&gt;I originally intended to write some malware in assembly with this, but got sidetracked and this was made ;)&lt;/p&gt;
