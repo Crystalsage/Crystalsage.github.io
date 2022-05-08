@@ -104,7 +104,7 @@ is of the &lt;code&gt;Size&lt;/code&gt; type, which is user-defined.&lt;/p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  Medium,
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  Large,
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Note that variants ordered in this way are ordered by their &lt;em&gt;discriminants&lt;/em&gt;, which are like indices. So a &lt;code&gt;enum&lt;/code&gt; member at the top has lower index than the one at bottom and is considered lesser. (&lt;a href=&#34;https://doc.rust-lang.org/std/cmp/trait.PartialOrd.html&#34;&gt;See here&lt;/a&gt;)&lt;/p&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Note that variants ordered in this way are ordered by their &lt;em&gt;discriminants&lt;/em&gt;, which are like indices. So an &lt;code&gt;enum&lt;/code&gt; member at the top has a lower index than the one below it and is considered lesser. (&lt;a href=&#34;https://doc.rust-lang.org/std/cmp/trait.PartialOrd.html&#34;&gt;See here&lt;/a&gt;)&lt;/p&gt;
 &lt;p&gt;Neat! Let&amp;rsquo;s try running this now.&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-rust&#34; data-lang=&#34;rust&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;fn&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;main&lt;/span&gt;(){
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;let&lt;/span&gt; u1 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; Umbrella{ size: &lt;span style=&#34;color:#a6e22e&#34;&gt;Size&lt;/span&gt;::Small, cost: &lt;span style=&#34;color:#ae81ff&#34;&gt;20&lt;/span&gt;};
@@ -129,7 +129,7 @@ is of the &lt;code&gt;Size&lt;/code&gt; type, which is user-defined.&lt;/p&gt;
 &lt;p&gt;The reader is invited to solve the following problems.&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;What happens if the size of an umbrella is unknown? How will you rewrite the code to handle the situation?&lt;/li&gt;
-&lt;li&gt;You&amp;rsquo;ll find that $u2$ is actually better than $u3$ because you can get a medium sized umbrella at lesser price. Recall that we never used &lt;code&gt;cost&lt;/code&gt; field in our code. Rewrite the code so we can find larger umbrellas at equal or lesser price.&lt;/li&gt;
+&lt;li&gt;You&amp;rsquo;ll find that $u2$ is actually better than $u3$ because you can get a medium sized umbrella at lesser price. Recall that we never used the &lt;code&gt;cost&lt;/code&gt; field in our code. Rewrite the code so we can find larger umbrellas at equal or lesser price.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id=&#34;further-reading&#34;&gt;Further reading&lt;/h2&gt;
 &lt;p&gt;Ordering is a fascinating topic. Many mathematicians and enthusiasts infinitely better than myself have spent much ink and chalk explaining what it means.&lt;/p&gt;
