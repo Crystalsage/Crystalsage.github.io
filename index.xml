@@ -47,7 +47,8 @@ elements precede each other.&lt;/li&gt;
 &lt;p&gt;Continuing with the umbrella mould, let us state the same thing in a proper manner, so that Wikipedia&amp;rsquo;s definition fits our example, at least intuitively.&lt;/p&gt;
 &lt;p&gt;Let us define an order on the set of umbrellas. The set is $U$ and the objects of this set are umbrellas.&lt;/p&gt;
 &lt;p&gt;$$U = \{ u_1, u_2, u_3, \cdots, u_n \}$$&lt;/p&gt;
-&lt;p&gt;Let&amp;rsquo;s define an operator $\leq$ on set $U$ which defines a partial order. This operator gives us a comparison between sizes of umbrellas. The operator $\leq$ must satisfy the 3 rules stated in the opening section. Let&amp;rsquo;s see if we can explain them according to our scenario.&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s define an operator $\leq$ on set $U$ which defines a partial order. This operator gives us a comparison between sizes of umbrellas. The operator $\leq$ must satisfy the 3 rules stated in the opening section. Let&amp;rsquo;s see if we can explain them according to our scenario. (Note: A partially ordered set is
+also known as a &lt;em&gt;poset&lt;/em&gt;.)&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;
 &lt;p&gt;&lt;strong&gt;Reflexivity&lt;/strong&gt;: An umbrella $u_a$ is related to itself. In terms of the size, this would mean that the umbrella is similarly sized to say, an exact copy of $u_a$.&lt;/p&gt;
