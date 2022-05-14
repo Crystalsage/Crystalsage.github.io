@@ -47,14 +47,14 @@ For instance, consider a scenario where I want to spawn VLC from my terminal.</d
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Which just prepends &lt;code&gt;sdf&lt;/code&gt; to your command in the terminal. Note that typing &lt;code&gt;sdf &amp;lt;command&amp;gt;&lt;/code&gt; is kind of awkward and feels unnatural (I always forget to do it), so typing the command first and prepending is the most natural flow.&lt;/p&gt;
 &lt;h1 id=&#34;results&#34;&gt;Results&lt;/h1&gt;
 &lt;p&gt;Now, when I type &lt;code&gt;vlc ./video.mp4&lt;/code&gt; and press &lt;code&gt;C-s&lt;/code&gt; the resulting command becomes &lt;code&gt;sdf vlc ./video.mp4&lt;/code&gt;, which successfully swallows the terminal when executed. It&amp;rsquo;s instantaneous with really no lag.&lt;/p&gt;
-&lt;section class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
+&lt;div class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
 &lt;hr&gt;
 &lt;ol&gt;
-&lt;li id=&#34;fn:1&#34; role=&#34;doc-endnote&#34;&gt;
+&lt;li id=&#34;fn:1&#34;&gt;
 &lt;p&gt;You can close the window by putting the process to background, disowning it and then closing the terminal. The problem with this approach is that it is slow and just doesn&amp;rsquo;t feel right.&amp;#160;&lt;a href=&#34;#fnref:1&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ol&gt;
-&lt;/section&gt;
+&lt;/div&gt;
 </content>
     </item>
     
