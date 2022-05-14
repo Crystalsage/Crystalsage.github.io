@@ -634,6 +634,36 @@ main:
     </item>
     
     <item>
+      <title>About</title>
+      <link>https://crystalsage.github.io/about/</link>
+      <pubDate>Mon, 15 Nov 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://crystalsage.github.io/about/</guid>
+      <description>Greetings I&amp;rsquo;m Amit, also known as Bourbon by my online presence.
+I am passionate programmer and computer security enthusiast. I love computers! I play cybersecurity CTFs regularly and have a big interest in security research and programming. I have a liking for mathematical cryptography and reverse engineering. I spend a lot of time self-learning any and every thing I set my eyes on.
+On my blog, you&amp;rsquo;ll find things related to computers and IT security.</description>
+      <content>&lt;h1 id=&#34;greetings&#34;&gt;Greetings&lt;/h1&gt;
+&lt;p&gt;I&amp;rsquo;m Amit, also known as Bourbon by my online presence.&lt;/p&gt;
+&lt;p&gt;I am passionate programmer and computer security enthusiast. I love computers!
+I play cybersecurity CTFs regularly and have a big interest in security research
+and programming. I have a liking for mathematical cryptography and reverse
+engineering. I spend a lot of time self-learning any and every thing I set my
+eyes on.&lt;/p&gt;
+&lt;p&gt;On my blog, you&amp;rsquo;ll find things related to computers and IT security. They are
+all byproducts of my time with computers.&lt;/p&gt;
+&lt;p&gt;My other interests include classical music and pixel art.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Name: Bourbon&lt;/li&gt;
+&lt;li&gt;Twitter: &lt;a href=&#34;https://twitter.com/brownbourbon&#34;&gt;@brownbourbon&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Discord: Bourbon#0902&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;A chain is no stronger than its weakest link - Thomas Reid&lt;/p&gt;
+&lt;/blockquote&gt;
+</content>
+    </item>
+    
+    <item>
       <title>Setup</title>
       <link>https://crystalsage.github.io/setup/</link>
       <pubDate>Mon, 15 Nov 2021 00:00:00 +0000</pubDate>
