@@ -7,7 +7,147 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>Licensed to Bourbon</copyright>
-    <lastBuildDate>Sun, 08 May 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://crystalsage.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 19 May 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://crystalsage.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>A case of parameter injection MiTM on DHKE</title>
+      <link>https://crystalsage.github.io/posts/pidh/</link>
+      <pubDate>Thu, 19 May 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://crystalsage.github.io/posts/pidh/</guid>
+      <description>You can read up on Diffie-Hellman Key Exchange in various articles, books or get started on Wikipedia. We&amp;rsquo;ll begin the discourse with a short intro anyway.
+Background In DH key exchange scheme, two interested parties Alice and Bob participate in an exchange, at the end of which both have a shared secret. This secret is jointly computed over their inputs, one of which is kept private.
+Let the two parties be Alice and Bob.</description>
+      <content>&lt;p&gt;You can read up on Diffie-Hellman Key Exchange in various articles, books or
+get started on &lt;a href=&#34;https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange&#34;&gt;Wikipedia&lt;/a&gt;.
+We&amp;rsquo;ll begin the discourse with a short intro anyway.&lt;/p&gt;
+&lt;h1 id=&#34;background&#34;&gt;Background&lt;/h1&gt;
+&lt;p&gt;In DH key exchange scheme, two interested parties Alice and Bob participate in an
+exchange, at the end of which both have a shared secret. This secret is jointly computed over their inputs, one of which is kept private.&lt;/p&gt;
+&lt;p&gt;Let the two parties be Alice and Bob. Two global parameters $g$ and $p$ are decided upon at the start of the exchange. $g$ is the generator of the group $(\mathbb{Z}/p\mathbb{Z})^\times$. $p$ is a prime integer. $g$ is then said to be the primitive root modulo $p$.&lt;/p&gt;
+&lt;p&gt;Once the exchange begins,&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Alice chooses an integer $a$, which is her private key. Alice then calculates $A \equiv g^{a} \pmod{p}$, which is declared as her public key, and is sent to Bob.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Bob does the same and chooses $b$, his private key and calculates $B \equiv g^{b} \pmod{p}$, his public key. This is sent to Alice.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;The shared secret $S$ is computed by Alice as $S = B^a \pmod{p}$ and by Bob as $S = A^b \pmod{p}$. Both values are found to be equal.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div style=&#34;padding: 0.5rem;border-top:2px solid white;border-bottom:2px solid white;border-left:2px solid white;border-right:2px solid white;&#34; &gt;
+&lt;b style=&#34;color: #78e2a0&#34; &gt;Remember&lt;/b&gt;&lt;br&gt;&lt;br&gt;
+$X \equiv g^x \pmod{p}$ is hard to reverse because of discrete logarithm problem.
+&lt;p&gt;$A$, $B$, $g$ and $p$ are public. $a$ and $b$ are kept private by the respective parties.&lt;/p&gt;
+&lt;/div&gt;
+&lt;h1 id=&#34;the-challenge&#34;&gt;The challenge&lt;/h1&gt;
+&lt;p&gt;The challenge is served to us through a Python script. I&amp;rsquo;ve snipped
+away some part of it to maintain focus and left some comments. Take a read.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# The flag is a dummy one. The real flag is set on the server.&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;FLAG &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;CTF{--REDACTED--}&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;DEBUG_MSG &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;DEBUG MSG - &amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# The prime and base&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;p &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x509efab16c5e2772fa00fc180766b6e62c09bdbd65637793c70b6094f6a7bb8189172685d2bddf87564fe2a6bc596ce28867fd7bbc300fd241b8e3348df6a0b076a0b438824517e0a87c38946fa69511f4201505fca11bc08f257e7a4bb009b4f16b34b3c15ec63c55a9dac306f4daa6f4e8b31ae700eba47766d0d907e2b9633a957f19398151111a879563cbe719ddb4a4078dd4ba42ebbf15203d75a4ed3dcd126cb86937222d2ee8bddc973df44435f3f9335f062b7b68c3da300e88bf1013847af1203402a3147b6f7ddab422d29d56fc7dcb8ad7297b04ccc52f7bc5fdd90bf9e36d01902e0e16aa4c387294c1605c6859b40dad12ae28fdfd3250a2e9&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;g &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# Decrypt with AES. &lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;decrypt&lt;/span&gt;(encrypted, shared_secret):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    key &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; hashlib&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;md5(long_to_bytes(shared_secret))&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;digest()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    cipher &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; AES&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;new(key, AES&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;MODE_ECB)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    message &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; cipher&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;decrypt(encrypted)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; message
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;main&lt;/span&gt;(s):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#75715e&#34;&gt;# Server calculates its keys&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    c &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; random&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;randrange(&lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;, p &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    C &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; pow(g, c, p)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#75715e&#34;&gt;# Enter our public key here&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    M &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; receiveMessage(s, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Enter The Public Key of The Memory: &amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    shared_secret &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; pow(M, c, p)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    encrypted_sequence &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; receiveMessage(s, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Enter The Encrypted Initialization Sequence: &amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#75715e&#34;&gt;# The cipher text should be a hex digest&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;try&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        encrypted_sequence &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; bytes&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;fromhex(encrypted_sequence)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#66d9ef&#34;&gt;assert&lt;/span&gt; len(encrypted_sequence) &lt;span style=&#34;color:#f92672&#34;&gt;%&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;16&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    sequence &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; decrypt(encrypted_sequence, shared_secret)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; sequence &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;b&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Initialization Sequence - Code 0&amp;#34;&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        sendMessage(s, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;\n&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; DEBUG_MSG &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Reseting The Protocol With The New Shared Key&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;\n&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        sendMessage(s, DEBUG_MSG &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;f&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;{&lt;/span&gt;FLAG&lt;span style=&#34;color:#e6db74&#34;&gt;}&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        exit()
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;So we know the plaintext! We need to encrypt the string &lt;code&gt;Initialization Sequence - Code 0&lt;/code&gt; such that it decrypts correctly. But, to our dismay, we find that we &lt;strong&gt;don&amp;rsquo;t know the shared secret&lt;/strong&gt; and there&amp;rsquo;s no way to derive it since we never received server&amp;rsquo;s public key $C$. How can we hope to find the
+shared secret then?&lt;/p&gt;
+&lt;div style=&#34;padding: 0.5rem;border-top:2px solid white;border-bottom:2px solid white;border-left:2px solid white;border-right:2px solid white;&#34; &gt;
+&lt;b style=&#34;color: #78e2a0&#34;&gt;&lt;u&gt;Halt&lt;/u&gt;&lt;/b&gt;&lt;br&gt;&lt;br&gt;
+Ponder over the problem and try to figure out the flaw in the script before heading further.
+&lt;/div&gt;
+&lt;h1 id=&#34;the-solution&#34;&gt;The solution&lt;/h1&gt;
+&lt;p&gt;We don&amp;rsquo;t need to &lt;em&gt;derive&lt;/em&gt; the shared secret if we can just make it
+predictable! The way to do this would be send a &amp;lsquo;bad&amp;rsquo; public key.&lt;/p&gt;
+&lt;p&gt;If you see how the shared secret is being derived,&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;shared_secret &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; pow(M,c,p)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;you&amp;rsquo;ll notice that our public key is used as the &lt;em&gt;base&lt;/em&gt; here, which means
+we have complete control over &lt;a href=&#34;https://en.wikipedia.org/wiki/Group_(mathematics)&#34;&gt;group&lt;/a&gt; that is being formed. So, if
+[
+M \equiv 0 \pmod{p}
+]
+then&lt;/p&gt;
+&lt;p&gt;[
+S \equiv M^{b} \equiv 0 \pmod{p}
+]&lt;/p&gt;
+&lt;p&gt;And we made $S$ predictable! This is because powers of $M$ are also
+congruent to 0 mod p.&lt;/p&gt;
+&lt;p&gt;This means we can send in a ciphertext
+encrypted with the key &amp;lsquo;0&amp;rsquo; and it should decrypt correctly!&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;from&lt;/span&gt; Crypto.Cipher &lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; AES
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;from&lt;/span&gt; Crypto.Util.number &lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; long_to_bytes
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; hashlib
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# Send in 0 as our key (shared secret)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;key &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; hashlib&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;md5(long_to_bytes(&lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;))&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;digest()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;cipher &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; AES&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;new(key, AES&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;MODE_ECB)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;message &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; cipher&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;encrypt(&lt;span style=&#34;color:#e6db74&#34;&gt;b&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Initialization Sequence - Code 0&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;print(message&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;hex())
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# Returns the following digest. This is our encrypted text.&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# 1af761314a07bf79f31aeb53bc9e1335e1749e1142b326d82a3c29ac37a042bf&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Once we submit the ciphertext to the server, we get our flag! Notice that we entered our public key $M$ as 0.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/conn.png&#34; alt=&#34;di&#34;&gt;&lt;/p&gt;
+&lt;h1 id=&#34;key-takeaway&#34;&gt;Key takeaway&lt;/h1&gt;
+&lt;p&gt;&lt;em&gt;(Pun intended)&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;While the order of operations does not matter mathematically, i.e.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;$S = A^b = (g^a)^b = (g^b)^a = B^a \pmod{p}$&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;It clearly did matter to us. This vulnerability was only possible because
+we had control over the base (And subsequently, the group that was formed).&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Note&lt;/strong&gt;: Instead of 0, we could have also chosen a value of $M$ that is divisible by $p$, and it would have meant the same thing. (Why?)&lt;/p&gt;
+&lt;h1 id=&#34;exercise-to-the-reader&#34;&gt;Exercise to the reader&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;The full challenge is here: &lt;a href=&#34;https://gist.github.com/CrystalSage/910c26588dc8337bf8485d93209e0a5f&#34;&gt;Code&lt;/a&gt;. Try solving the challenge yourself by retracing my steps! :)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;The reader is invited to solve a similar Cryptopals challenge based on parameter injection: &lt;a href=&#34;https://cryptopals.com/sets/5/challenges/34&#34;&gt;Challenge&lt;/a&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;What&amp;rsquo;s the group that we formed?&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;[\blacksquare\blacksquare\blacksquare]&lt;/p&gt;
+</content>
+    </item>
+    
     <item>
       <title>Partial ordering and Rust</title>
       <link>https://crystalsage.github.io/posts/partialord/</link>
