@@ -217,11 +217,11 @@ away some part of it to maintain focus and left some comments. Take a read.</p>
 shared secret then?</p>
 <div style="padding: 0.5rem;border-top:2px solid white;border-bottom:2px solid white;border-left:2px solid white;border-right:2px solid white;" >
 <b style="color: #78e2a0"><u>Halt</u></b><br><br>
-Ponder over the problem and try to figure out the flaw in the script before heading further.
+Ponder over the problem and try to figure out the flaw in the script before heading further. (Hint: It's somewhere in `main()`)
 </div>
 <h1 id="the-solution">The solution<a href="#the-solution" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
 <p>We don&rsquo;t need to <em>derive</em> the shared secret if we can just make it
-predictable! The way to do this would be send a &lsquo;bad&rsquo; public key.</p>
+predictable! The way to do this would be to send a &lsquo;bad&rsquo; public key.</p>
 <p>If you see how the shared secret is being derived,</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>shared_secret <span style="color:#f92672">=</span> pow(M,c,p)
 </span></span></code></pre></div><p>you&rsquo;ll notice that our public key is used as the <em>base</em> here, which means

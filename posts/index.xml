@@ -88,11 +88,11 @@ away some part of it to maintain focus and left some comments. Take a read.&lt;/
 shared secret then?&lt;/p&gt;
 &lt;div style=&#34;padding: 0.5rem;border-top:2px solid white;border-bottom:2px solid white;border-left:2px solid white;border-right:2px solid white;&#34; &gt;
 &lt;b style=&#34;color: #78e2a0&#34;&gt;&lt;u&gt;Halt&lt;/u&gt;&lt;/b&gt;&lt;br&gt;&lt;br&gt;
-Ponder over the problem and try to figure out the flaw in the script before heading further.
+Ponder over the problem and try to figure out the flaw in the script before heading further. (Hint: It&#39;s somewhere in `main()`)
 &lt;/div&gt;
 &lt;h1 id=&#34;the-solution&#34;&gt;The solution&lt;/h1&gt;
 &lt;p&gt;We don&amp;rsquo;t need to &lt;em&gt;derive&lt;/em&gt; the shared secret if we can just make it
-predictable! The way to do this would be send a &amp;lsquo;bad&amp;rsquo; public key.&lt;/p&gt;
+predictable! The way to do this would be to send a &amp;lsquo;bad&amp;rsquo; public key.&lt;/p&gt;
 &lt;p&gt;If you see how the shared secret is being derived,&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;shared_secret &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; pow(M,c,p)
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;you&amp;rsquo;ll notice that our public key is used as the &lt;em&gt;base&lt;/em&gt; here, which means
