@@ -33,7 +33,7 @@ exchange, at the end of which both have a shared secret. This secret is jointly 
 &lt;p&gt;Bob does the same and chooses $b$, his private key and calculates $B \equiv g^{b} \pmod{p}$, his public key. This is sent to Alice.&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;The shared secret $S$ is computed by Alice as $S = B^a \pmod{p}$ and by Bob as $S = A^b \pmod{p}$. Both values are found to be equal.&lt;/p&gt;
+&lt;p&gt;The shared secret $S$ is computed by Alice as $S \equiv B^a \pmod{p}$ and by Bob as $S \equiv A^b \pmod{p}$. Both values are found to be equal.&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ol&gt;
 &lt;div style=&#34;padding: 0.5rem;border-top:2px solid white;border-bottom:2px solid white;border-left:2px solid white;border-right:2px solid white;&#34; &gt;
