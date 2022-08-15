@@ -1,2 +1,7 @@
-# blog-source
-The version-controlled sourcecode of my blog
+# Blog-source
+The version-controlled source code of my blog.
+
+# Running
+`hugo server -D` to run a debug build.
+
+`hugo` to publish
