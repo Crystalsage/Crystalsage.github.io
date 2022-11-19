@@ -1,12 +1,12 @@
 +++
 title = "A case of parameter injection MiTM on DHKE"
 date=2022-05-19
-description = "Documenting a small varient of MiTM attcak on Diffie-HellmanKey Exchange."
+description = "Documenting a small variant of MiTM attack on Diffie-Hellman Key Exchange."
 showFullContent = false
 readingTime = false
 +++
 
-You can read up on Diffie-Hellman Key Exchange in various articles, books or get started on [Wikipedia](https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange). We’ll begin the discourse with a short intro anyway.
+You can read up on Diffie-Hellman Key Exchange in various articles, books or get started on [Wikipedia](https://en.wikipedia.corg/wiki/Diffie%E2%80%93Hellman_key_exchange). We’ll begin the discourse with a short intro anyway.
 
 # Background
 In DH key exchange scheme, two interested parties Alice and Bob participate in an exchange, at the end of which both have a shared secret. This secret is jointly computed over their inputs, one of which is kept private.

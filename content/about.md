@@ -11,16 +11,11 @@ regularly and have a big interest in security research. I have a liking for cryp
 
 Welcome to my blog. This website aims to be a technical blog documenting any interesting stuff about computers and IT security.
 
-
-## Projects
-## Volunteering
-## Freelance
-## Open source
-
 - Name: Bourbon
 - Twitter: [@brownbourbon](https://twitter.com/brownbourbon)
 - Discord: Bourbon#0902
 - Github: [Crystalsage](https://github.com/Crystalsage)
+- Resume: [Link](https://drive.google.com/file/d/1p0Yuw7DpyxwYi_6yU55VXxxW_t5lnUMM/view?usp=sharing)
 
 
 > A chain is no stronger than its weakest link - Thomas Reid
