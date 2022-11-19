@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+    <title>CSI-CTF Writeup (Part-3) :: /home/bourbon</title>
+  
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="The final part of the 3-part writeup for CSI-CTF 2022" />
+<meta name="keywords" content="" />
+<meta name="robots" content="noodp" />
+<link rel="canonical" href="https://crystalsage.github.io/posts/ctf-3/" />
+
+
+
+
+<link rel="stylesheet" href="https://crystalsage.github.io/assets/style.css">
+
+  <link rel="stylesheet" href="https://crystalsage.github.io/assets/green.css">
+
+
+
+
+
+
+<link rel="apple-touch-icon" href="https://crystalsage.github.io/img/apple-touch-icon-192x192.png">
+
+  <link rel="shortcut icon" href="https://crystalsage.github.io/favicon.png">
+
+
+
+<meta name="twitter:card" content="summary" />
+
+  
+    <meta name="twitter:site" content="" />
+  
+    <meta name="twitter:creator" content="" />
+
+
+
+<meta property="og:locale" content="en" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="CSI-CTF Writeup (Part-3)">
+<meta property="og:description" content="The final part of the 3-part writeup for CSI-CTF 2022" />
+<meta property="og:url" content="https://crystalsage.github.io/posts/ctf-3/" />
+<meta property="og:site_name" content="/home/bourbon" />
+
+  
+    <meta property="og:image" content="https://crystalsage.github.io/favicon.png">
+  
+
+<meta property="og:image:width" content="2048">
+<meta property="og:image:height" content="1024">
+
+
+  <meta property="article:published_time" content="2022-02-23 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+<body class="green">
+
+
+<div class="container center headings--one-size">
+
+  <header class="header">
+  <div class="header__inner">
+    <div class="header__logo">
+      <a href="/">
+  <div class="logo">
+    /home/bourbon
+  </div>
+</a>
+
+    </div>
+    
+      <div class="menu-trigger">menu</div>
+    
+  </div>
+  
+    <nav class="menu">
+  <ul class="menu__inner menu__inner--desktop">
+    
+      
+        
+          <li><a href="/about">About</a></li>
+        
+      
+        
+          <li><a href="/setup">Setup</a></li>
+        
+      
+      
+    
+
+    
+  </ul>
+
+  <ul class="menu__inner menu__inner--mobile">
+    
+      
+        <li><a href="/about">About</a></li>
+      
+    
+      
+        <li><a href="/setup">Setup</a></li>
+      
+    
+    
+  </ul>
+</nav>
+
+  
+</header>
+
+
+  <div class="content">
+    
+<div class="post">
+  <h1 class="post-title">
+    <a href="https://crystalsage.github.io/posts/ctf-3/">CSI-CTF Writeup (Part-3)</a></h1>
+  <div class="post-meta">
+    
+      <span class="post-date">
+        2022-02-23
+        
+      </span>
+    
+    
+    
+  </div>
+
+  
+  
+
+
+  
+
+  <div class="post-content"><div>
+        <p>This is the 3rd and final part of the 3-part series for the CSI-CTF writeup.
+Click here to read <a href="https://crystalsage.github.io/posts/ctf-1/">1st part</a> or
+<a href="https://crystalsage.github.io/posts/ctf-2/">2nd part</a>.</p>
+<p>You can <a href="https://tinyurl.com/2t6kwcxe">register</a> and
+<a href="https://tinyurl.com/ms95pajv">play</a> this CTF. It&rsquo;s open to everyone.</p>
+<p>In this 3-part series, we will see my method of approaching these challenges
+and how I solved them. The 9 challenges are divided into 3 posts.</p>
+<h1 id="decode-it">Decode It<a href="#decode-it" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<p><img src="/ctf/di.png" alt="di"></p>
+<p>The challenge gives us a pretty clear hint that each line is mapped to <em>the</em> single
+character (The hint is ambiguous, character could either mean the person or
+a character in the flag).</p>
+<p>And so, we are given some lines of text in a PDF file. We can quickly notice
+some things.</p>
+<p><img src="/ctf/di-morse.png" alt="di-morse"></p>
+<ol>
+<li>
+<p>There are two lines with just brackets. These are obviously the brackets
+from the flag itself. We can conclude that each line somehow maps to a single
+character in the flag.</p>
+</li>
+<li>
+<p>There&rsquo;s no type of encoding in play here. No character/word limit for the
+line either.</p>
+</li>
+<li>
+<p>There&rsquo;s no obvious pattern that stands out. Things such as skip cipher seem
+out of the question.</p>
+</li>
+</ol>
+<p>I was a bit thrown off at first. I tried things such as measuring character
+frequency to calculate any remapped letters. But then, I decided to actually
+take a moment to read the content of the paragraph (Seems obvious, isn&rsquo;t.).
+The paragraph actually mentions Samuel Morse, the creator of Morse Code. Aha!</p>
+<p>If we notice carefully, we see that each line contains either dits (.) or dahs
+(-). Maybe we can extract all the dits and dahs from each line.</p>
+<p>e.g. The very first line,</p>
+<blockquote>
+<p>There is a town known for cryptography named Encoder-Decoder.
+And it&rsquo;s not just one person skilled with cryptography, it&rsquo;s just
+fully-filled with all of them.</p>
+</blockquote>
+<p>contains 1 dah, a dot, a dah and a dot again, in that order. So, <code>-.-.</code>,
+which is clearly the letter <code>c</code>. This must be the &lsquo;c&rsquo; of <code>csi-ctf</code>!</p>
+<p>Since we know the flag format, we can actually skip the first 8 lines and
+assume them to be <code>csi-ctf{</code>. To decode everything inside the brackets, we can
+extract the dits and dahs from the lines, with some simple Python.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">extract_symbols <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> line: <span style="color:#e6db74">&#34;&#34;</span><span style="color:#f92672">.</span>join([i <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> line <span style="color:#66d9ef">if</span> i <span style="color:#f92672">in</span> (<span style="color:#e6db74">&#34;-&#34;</span>, <span style="color:#e6db74">&#34;.&#34;</span>)])
+</code></pre></div><p>Once we extract all dits and dahs, we can put them in a morse &ndash;&gt; text converter.
+I happened to have a script on my machine for this.</p>
+<p><img src="/ctf/di-morse-ans.png" alt="di-morse-ans"></p>
+<p>Which is the text inside the brackets, so the flag is
+<code>csi-ctf{MORSEINTERSTELLAR}</code> $\blacksquare$</p>
+<h1 id="crack-the-sequence">Crack the Sequence<a href="#crack-the-sequence" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<p><img src="/ctf/cts.png" alt="cts"></p>
+<p>The challenge description tells us that we need to crack a sequence of four
+cards, and decrypt it. Cool.</p>
+<p>If we click around on some 5 cards randomly, we get an alert box saying that
+the combination is wrong.</p>
+<p><img src="/ctf/cts-wrong.png" alt="ctf-fail"></p>
+<p>Let&rsquo;s see what&rsquo;s going on under the hood. On the page&rsquo;s source,  we find the
+following Javascript code.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js">    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">store</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>;
+    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">count</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+    <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">card</span>(<span style="color:#a6e22e">res</span>) {
+      <span style="color:#a6e22e">store</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">store</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">res</span>;
+      <span style="color:#a6e22e">count</span><span style="color:#f92672">++</span>;
+      <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">store</span>.<span style="color:#a6e22e">length</span>);
+
+      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">count</span> <span style="color:#f92672">===</span> <span style="color:#ae81ff">4</span>) {
+        <span style="color:#a6e22e">setTimeout</span>(() =&gt; {
+          <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>(<span style="color:#a6e22e">store</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#34;d8c2436e262448af3043fde3d652726a&#34;</span>)) {
+            <span style="color:#a6e22e">alert</span>(<span style="color:#e6db74">&#34;wrong&#34;</span>);
+            window.<span style="color:#a6e22e">location</span>.<span style="color:#a6e22e">reload</span>(<span style="color:#66d9ef">true</span>);
+          }
+          <span style="color:#66d9ef">else</span> {
+            <span style="color:#a6e22e">alert</span>(<span style="color:#e6db74">&#34;congratulations you found the flag : &#34;</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">`csi-ctf{</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">store</span><span style="color:#e6db74">}</span><span style="color:#e6db74">}`</span>);
+            window.<span style="color:#a6e22e">location</span>.<span style="color:#a6e22e">reload</span>(<span style="color:#66d9ef">true</span>);
+          }
+        }, <span style="color:#ae81ff">300</span>);
+      }
+    }
+    <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">flip</span>(<span style="color:#a6e22e">event</span>) {
+      <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">element</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">event</span>.<span style="color:#a6e22e">currentTarget</span>;
+      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">element</span>.<span style="color:#a6e22e">className</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#34;cards col-md-4 col-sm-6 col-12&#34;</span>) {
+        <span style="color:#a6e22e">element</span>.<span style="color:#a6e22e">style</span>.<span style="color:#a6e22e">transform</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;rotateY(180deg)&#34;</span>;
+      }
+    }
+</code></pre></div><p>The <code>card()</code> appends &lsquo;something&rsquo; to <code>store</code>. Once we flip 5 cards, we check if
+the &lsquo;something&rsquo; of the cards form the sequence
+<code>d8c2436e262448af3043fde3d652726a</code>. If so, we get the flag.</p>
+<p>But hey!!! The
+flag is the <code>store</code> variable itself, as evident by the
+&ldquo;congratulations&rdquo; message. So the flag is the hex sequence
+<code>d8c2436e262448af3043fde3d652726a</code>. But this doesn&rsquo;t make sense. If you try
+submitting this, it fails. Let&rsquo;s try decrypting this.</p>
+<p>Since the total length of the hex sequence is 32, I can safely assume this
+to be the MD5 hash of the flag. We can crack this using a mask with hashcat
+or a wordlist. The easiest way is to check the online databases for the
+password. After checking some, I found a hit.</p>
+<img src="/ctf/cts-decrypted.png" alt="drawing" width="500"/>
+<p>This should be our flag. <code>csi-ctf{sequential_flag}</code> $\blacksquare$</p>
+<p>If you want to do this the proper way:
+The idea is to flip the cards in correct order. We notice that the
+<code>onClick()</code> events for the cards are called with specific arguments. These
+seem like fragments of the entire sequence, these are the &lsquo;something&rsquo;.  e.g.
+we notice for the first card that <code>card('d8c2436e')</code> is called. This matches
+with the first few characters of our resulting sequence.</p>
+<p>So we collect all the <code>onClick</code> snippets.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js">    <span style="color:#a6e22e">onclick</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;[flip(event),card(&#39;d8c2436e&#39;)] //1
+</span><span style="color:#e6db74">    onclick=&#34;</span>[<span style="color:#a6e22e">flip</span>(<span style="color:#a6e22e">event</span>),<span style="color:#a6e22e">card</span>(<span style="color:#e6db74">&#39;&#39;</span>)] <span style="color:#75715e">//2
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">onclick</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;[flip(event),card(&#39;&#39;)] //3
+</span><span style="color:#e6db74">    onclick=&#34;</span>[<span style="color:#a6e22e">flip</span>(<span style="color:#a6e22e">event</span>),<span style="color:#a6e22e">card</span>(<span style="color:#e6db74">&#39;&#39;</span>)] <span style="color:#75715e">//4
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">onclick</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;[flip(event),card(&#39;262448af&#39;)] //5
+</span><span style="color:#e6db74">    onclick=&#34;</span>[<span style="color:#a6e22e">flip</span>(<span style="color:#a6e22e">event</span>),<span style="color:#a6e22e">card</span>(<span style="color:#e6db74">&#39;652726a&#39;</span>)] <span style="color:#75715e">//6
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">onclick</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;[flip(event),card(&#39;&#39;)] //7 
+</span><span style="color:#e6db74">    onclick=&#34;</span>[<span style="color:#a6e22e">flip</span>(<span style="color:#a6e22e">event</span>),<span style="color:#a6e22e">card</span>(<span style="color:#e6db74">&#39;3043fde3d&#39;</span>)] <span style="color:#75715e">//8
+</span></code></pre></div><p>We notice that some of these are empty. So, if we were to flip the cards in
+the order <code>1-5-8-6</code>, it&rsquo;ll form the sequence that we want and we&rsquo;ll get our hash, which is the same sequence.</p>
+<p><img src="/ctf/cts-flag-hashed.png" alt="cts-flag"></p>
+<p><strong>Challenge Idea/Solution</strong>: An alternate solution to this challenge, if the flag was something else, would be to set a breakpoint where we check if the <code>store</code> is equivalent to the sequence, and (by)pass the check entirely by modifying the <code>store</code> variable to be equal to the hash. Alternate challenge idea!</p>
+<h1 id="one-zero-one">One Zero One<a href="#one-zero-one" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<p><img src="/ctf/ozo.png" alt="ozo"></p>
+<p>This is easy. We just need to decode the binary. In fact, the hardest part
+of this challenge is to write down the binary in a text editor. The full binary
+is,</p>
+<pre tabindex="0"><code>0100000001000011
+0101001101001001
+0100010001001101
+0100001101000101
+0100001101010100
+0100011000100011
+</code></pre><p>which decodes to, <code>@CSIDMCECTF#</code>. The challenge deviates from other challenges
+to give us the text inside the brackets. I found it surprising that there
+was no indication about this. The full flag is <code>csi-ctf{@CSIDMCECTF#}</code>
+$\blacksquare$</p>
+<p><strong>Note</strong>: In theory, it&rsquo;s much convenient to use OCR on the image to extract the
+binary digits, but I could not find one reliable OCR service which could do so.
+So I ended up writing them by hand.</p>
+<hr style="border:2px solid gray"> </hr>
+This marks the end of the writeups.
+
+      </div></div>
+
+  
+  
+<div class="pagination">
+    <div class="pagination__title">
+        <span class="pagination__title-h">Read other posts</span>
+        <hr />
+    </div>
+    <div class="pagination__buttons">
+        
+        <span class="button previous">
+            <a href="https://crystalsage.github.io/posts/partialeq/">
+                <span class="button__icon">←</span>
+                <span class="button__text">Partial ordering and Rust</span>
+            </a>
+        </span>
+        
+        
+        <span class="button next">
+            <a href="https://crystalsage.github.io/posts/ctf-2/">
+                <span class="button__text">CSI-CTF Writeup (Part-2)</span>
+                <span class="button__icon">→</span>
+            </a>
+        </span>
+        
+    </div>
+</div>
+
+  
+
+  
+
+</div>
+
+  </div>
+
+  
+    <footer class="footer">
+  <div class="footer__inner">
+    
+      <div class="copyright copyright--user">
+        <span>Licensed to Bourbon</span>
+    
+        <span>:: Theme made by <a href="https://twitter.com/panr">panr</a></span>
+      </div>
+  </div>
+</footer>
+
+
+
+<script src="https://crystalsage.github.io/assets/main.js"></script>
+<script src="https://crystalsage.github.io/assets/prism.js"></script>
+<script type="text/javascript"
+  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\[','\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+           extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    }
+  });
+  </script>
+
+
+
+
+
+
+  
+</div>
+
+</body>
+</html>

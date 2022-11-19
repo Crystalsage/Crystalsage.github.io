@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+    <title>Setup :: /home/bourbon</title>
+  
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="All technologies are cool
+This page describes the setup that I use in my desktop experience while describing the decisions that were made while selecting the components. It is irregularly updated.
+OS: Arch Linux Arch is a fantastic Linux distribution that&amp;rsquo;s pretty lean and mean for all sorts of use cases. It&amp;rsquo;s primary advantage to me is the fact that I have to perform least amount of configuration, in the case where I ever need to reinstall my system." />
+<meta name="keywords" content="" />
+<meta name="robots" content="noodp" />
+<link rel="canonical" href="https://crystalsage.github.io/setup/" />
+
+
+
+
+<link rel="stylesheet" href="https://crystalsage.github.io/assets/style.css">
+
+  <link rel="stylesheet" href="https://crystalsage.github.io/assets/green.css">
+
+
+
+
+
+
+<link rel="apple-touch-icon" href="https://crystalsage.github.io/img/apple-touch-icon-192x192.png">
+
+  <link rel="shortcut icon" href="https://crystalsage.github.io/favicon.png">
+
+
+
+<meta name="twitter:card" content="summary" />
+
+  
+    <meta name="twitter:site" content="" />
+  
+    <meta name="twitter:creator" content="" />
+
+
+
+<meta property="og:locale" content="en" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Setup">
+<meta property="og:description" content="All technologies are cool
+This page describes the setup that I use in my desktop experience while describing the decisions that were made while selecting the components. It is irregularly updated.
+OS: Arch Linux Arch is a fantastic Linux distribution that&amp;rsquo;s pretty lean and mean for all sorts of use cases. It&amp;rsquo;s primary advantage to me is the fact that I have to perform least amount of configuration, in the case where I ever need to reinstall my system." />
+<meta property="og:url" content="https://crystalsage.github.io/setup/" />
+<meta property="og:site_name" content="/home/bourbon" />
+
+  
+    <meta property="og:image" content="https://crystalsage.github.io/favicon.png">
+  
+
+<meta property="og:image:width" content="2048">
+<meta property="og:image:height" content="1024">
+
+
+  <meta property="article:published_time" content="2021-11-15 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+<body class="green">
+
+
+<div class="container center headings--one-size">
+
+  <header class="header">
+  <div class="header__inner">
+    <div class="header__logo">
+      <a href="/">
+  <div class="logo">
+    /home/bourbon
+  </div>
+</a>
+
+    </div>
+    
+      <div class="menu-trigger">menu</div>
+    
+  </div>
+  
+    <nav class="menu">
+  <ul class="menu__inner menu__inner--desktop">
+    
+      
+        
+          <li><a href="/about">About</a></li>
+        
+      
+        
+          <li><a href="/setup">Setup</a></li>
+        
+      
+      
+    
+
+    
+  </ul>
+
+  <ul class="menu__inner menu__inner--mobile">
+    
+      
+        <li><a href="/about">About</a></li>
+      
+    
+      
+        <li><a href="/setup">Setup</a></li>
+      
+    
+    
+  </ul>
+</nav>
+
+  
+</header>
+
+
+  <div class="content">
+    
+<div class="post">
+  <h1 class="post-title">
+    <a href="https://crystalsage.github.io/setup/">Setup</a></h1>
+  <div class="post-meta">
+    
+      <span class="post-date">
+        2021-11-15
+        
+      </span>
+    
+    
+    
+  </div>
+
+  
+  
+
+
+  
+
+  <div class="post-content"><div>
+        <p><strong>All technologies are cool</strong></p>
+<p>This page describes the setup that I use in my desktop experience while describing the decisions that were made while selecting the components.  It is irregularly updated.</p>
+<h1 id="os-arch-linux">OS: Arch Linux<a href="#os-arch-linux" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<p><a href="https://archlinux.org/">Arch</a> is a fantastic Linux distribution that&rsquo;s pretty lean and mean for all sorts of use cases. It&rsquo;s primary advantage to me is the fact that I have to perform least amount of configuration, in the case where I ever need to reinstall my system. Quite fortunately, it has rarely broken down on me.</p>
+<h1 id="desktop">Desktop<a href="#desktop" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<h2 id="wm-bspwm">WM: BSPWM<a href="#wm-bspwm" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>BSPWM is the most vanilla WM experience you can get, in my opinion. I do not care much for the modularity aspect of it. I love i3 as well, but prefer to stick with BSPWM, because it feels more stable.</p>
+<p>I have a very terminal oriented workflow and prefer to do everything in terminal. 1 window per workspace works for me.</p>
+<p>Some components that I use along with BSPWM:</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Software</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Bar</td>
+<td>polybar</td>
+</tr>
+<tr>
+<td>Terminal</td>
+<td>alacritty + fish shell + tmux</td>
+</tr>
+<tr>
+<td>Notifications</td>
+<td>dunst</td>
+</tr>
+<tr>
+<td>Image viewer</td>
+<td>feh</td>
+</tr>
+<tr>
+<td>Music</td>
+<td>mpd + ncmpcpp</td>
+</tr>
+<tr>
+<td>PDFs</td>
+<td>zathura</td>
+</tr>
+<tr>
+<td>Email</td>
+<td>Neomutt</td>
+</tr>
+</tbody>
+</table>
+<h2 id="text-editor-neovim">Text editor: Neovim<a href="#text-editor-neovim" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>Vim fits my terminal oriented workflow really well. I use NeoVim&rsquo;s built-in LSP.</p>
+<h2 id="writing">Writing<a href="#writing" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<ol>
+<li>
+<p><strong>Assignments and other academic material</strong> <br>
+$\LaTeX$ is my personal favorite. I use the VimTeX plugin + Zathura. It produces very clean and beautiful PDFs that are otherwise very missed.</p>
+</li>
+<li>
+<p><strong>Notes</strong> <br>
+Casual notes are preferred while learning stuff. I take such notes in Markdown. Simple and universal.</p>
+</li>
+</ol>
+<p><em>Obiter dictum</em>: I love both markdown and Org-mode. I alternate between them from time to time, preferring markdown for smaller files and Org-mode when I want to build a knowledge base. However, I have not fully switched to Emacs and I prefer other tools for other functions.</p>
+
+      </div></div>
+
+  
+
+  
+
+</div>
+
+  </div>
+
+  
+    <footer class="footer">
+  <div class="footer__inner">
+    
+      <div class="copyright copyright--user">
+        <span>Licensed to Bourbon</span>
+    
+        <span>:: Theme made by <a href="https://twitter.com/panr">panr</a></span>
+      </div>
+  </div>
+</footer>
+
+
+
+<script src="https://crystalsage.github.io/assets/main.js"></script>
+<script src="https://crystalsage.github.io/assets/prism.js"></script>
+<script type="text/javascript"
+  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\[','\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+           extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    }
+  });
+  </script>
+
+
+
+
+
+
+  
+</div>
+
+</body>
+</html>

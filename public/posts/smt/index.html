@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+    <title>SMT solvers for fun and CTFs :: /home/bourbon</title>
+  
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Satisfiability modulo theories, solvers and how Conda uses them." />
+<meta name="keywords" content="" />
+<meta name="robots" content="noodp" />
+<link rel="canonical" href="https://crystalsage.github.io/posts/smt/" />
+
+
+
+
+<link rel="stylesheet" href="https://crystalsage.github.io/assets/style.css">
+
+  <link rel="stylesheet" href="https://crystalsage.github.io/assets/green.css">
+
+
+
+
+
+
+<link rel="apple-touch-icon" href="https://crystalsage.github.io/img/apple-touch-icon-192x192.png">
+
+  <link rel="shortcut icon" href="https://crystalsage.github.io/favicon.png">
+
+
+
+<meta name="twitter:card" content="summary" />
+
+  
+    <meta name="twitter:site" content="" />
+  
+    <meta name="twitter:creator" content="" />
+
+
+
+<meta property="og:locale" content="en" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="SMT solvers for fun and CTFs">
+<meta property="og:description" content="Satisfiability modulo theories, solvers and how Conda uses them." />
+<meta property="og:url" content="https://crystalsage.github.io/posts/smt/" />
+<meta property="og:site_name" content="/home/bourbon" />
+
+  
+    <meta property="og:image" content="https://crystalsage.github.io/favicon.png">
+  
+
+<meta property="og:image:width" content="2048">
+<meta property="og:image:height" content="1024">
+
+
+  <meta property="article:published_time" content="2022-11-04 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+<body class="green">
+
+
+<div class="container center headings--one-size">
+
+  <header class="header">
+  <div class="header__inner">
+    <div class="header__logo">
+      <a href="/">
+  <div class="logo">
+    /home/bourbon
+  </div>
+</a>
+
+    </div>
+    
+      <div class="menu-trigger">menu</div>
+    
+  </div>
+  
+    <nav class="menu">
+  <ul class="menu__inner menu__inner--desktop">
+    
+      
+        
+          <li><a href="/about">About</a></li>
+        
+      
+        
+          <li><a href="/setup">Setup</a></li>
+        
+      
+      
+    
+
+    
+  </ul>
+
+  <ul class="menu__inner menu__inner--mobile">
+    
+      
+        <li><a href="/about">About</a></li>
+      
+    
+      
+        <li><a href="/setup">Setup</a></li>
+      
+    
+    
+  </ul>
+</nav>
+
+  
+</header>
+
+
+  <div class="content">
+    
+<div class="post">
+  <h1 class="post-title">
+    <a href="https://crystalsage.github.io/posts/smt/">SMT solvers for fun and CTFs</a></h1>
+  <div class="post-meta">
+    
+      <span class="post-date">
+        2022-11-04
+        
+      </span>
+    
+    
+    
+  </div>
+
+  
+  
+
+
+  
+
+  <div class="post-content"><div>
+        <h1 id="introduction">Introduction<a href="#introduction" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<p>It is no surprise even to an amateur that computer systems are built on
+steadfast grounds of mathematical theory. Indulging in computers over the
+course of many years leads many into finding very niche fields where
+computers and mathematics intersect directly.</p>
+<p>In this post, we turn our attention to one of such systems known as
+Satisfiability Modulo Theories (SMT), which prove satisfiability of first-order logical equations. We&rsquo;ll then visit Conda to see how they use a SMT solver for a neatly practical cause.</p>
+<h1 id="mathematical-logic">Mathematical logic<a href="#mathematical-logic" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<p>While peeking into the history of computers, we find that mathematical
+logic first entered into computing through lambda calculus and combinatory logic.</p>
+<p>In modern times, mathematical logic has evolved into a solid tool used
+for discussing semantics of programming languages. Incidentally, if you want to peek into the action, there&rsquo;s no better window than Ralf Jung&rsquo;s
+brilliant <a href="https://research.ralfj.de/thesis.html">PhD thesis</a> on Rust&rsquo;s semantics. Although interesting, it is a PhD thesis, so we our attention
+to more digestible examples.</p>
+<p>If you&rsquo;ve trudged your way through the terrible education of the country I live in, you&rsquo;ve probably encountered something called <a href="https://en.wikipedia.org/wiki/Linear_programming">Linear Programming</a>. It poses optimization problems by presenting equations constrained to specific conditions and asks us to deliver the most optimal solution under those specific conditions. A classic problem consists of a linear function $f(x, y) = ax + by$
+and a set of $n$ constraints $a_nx + b_ny \leq c_n$.</p>
+<p>What they don&rsquo;t teach you in school, is that those $n$ constraints can be
+modeled as first-order logic equations as well. For example, consider a
+system of three linear equations:</p>
+<p>$$
+\begin{align*}
+-3x + 2y - 5z &amp;= -14  \\
+2x - 3y + 4z  &amp;= 10  \\
+x + y + z &amp;= 4<br>
+\end{align*}
+$$</p>
+<p>Since it is absolutely necessary that we satisfy all three of these
+constraints to find values of $x$, $y$ and $z$. A &lsquo;winning&rsquo; condition for
+us would be when a solution to such a system exists, and can be
+calculated. If the winning condition is denoted with $W$, then we can
+express $W$ as:</p>
+<p>$$
+(-3x + 2y - 5z = -14) \wedge (2x - 3y + 4z  = 10) \wedge (x + y + z = 4)<br>
+$$</p>
+<p>The $\wedge$ symbol is the usual conjunction (AND condition).</p>
+<p>Now that we&rsquo;ve modeled this as a logic problem, we can finally talk about Satisfiability Modulo Theories.</p>
+<h2 id="satisfiability-modulo-theories">Satisfiability Modulo Theories<a href="#satisfiability-modulo-theories" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>Abbreviated as SMT, the instance of such a system is a formula in
+first-order logic (such as the one above), and SMT determines whether if
+this system is indeed solvable.</p>
+<p>SMT systems can include more complex data formats such as integers or data
+structures like lists, strings and arrays.</p>
+<p>Now let&rsquo;s talk about SAT systems, of which SMT systems are a generalization.</p>
+<h1 id="sat-and-z3">SAT and Z3<a href="#sat-and-z3" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<p>Boolean <strong>SAT</strong>isfiability problem is a specialization of SMT that only
+concerns itself with satisfiability of a boolean formula.</p>
+<p>SAT systems try to find a solution to a system of first-order logic equations. If a solution exists, then the system is evaluated to a SATisfiable status. Otherwise, it is UNSATisfiable.</p>
+<p>A condition on SAT systems is that they only operate on first order logical systems in <a href="https://en.wikipedia.org/wiki/Conjunctive_normal_form">Conjunctive Normal Form</a>. Do you see how that applies to our example above? We&rsquo;ll bubble this example through the entire section.</p>
+<p>If you dig further into SAT, you&rsquo;re bound to discover that there are
+automated solvers for it. SAT problem is NP-complete and automated solvers have been able to massively contribute to complex systems such as microprocessors or scheduling problems, which involve hundreds and thousands of variables and constraints.</p>
+<p>A very popular automated theorem solver of this sort is <a href="https://github.com/Z3Prover/z3">Z3 by Microsoft</a>. Let&rsquo;s see how we can use Z3 to solve our problem that we discussed in the first section of this post. I like to use Z3 through Python. The code is pretty self-explanatory coupled with the comments.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># Import the Z3 library </span>
+<span style="color:#f92672">from</span> z3 <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
+
+<span style="color:#75715e"># Initialize the Solver </span>
+s <span style="color:#f92672">=</span> Solver()
+
+<span style="color:#75715e"># Describe our variables in the system</span>
+x, y, z <span style="color:#f92672">=</span> Ints(<span style="color:#e6db74">&#39;x y z&#39;</span>)
+
+<span style="color:#75715e"># Add all three equations into this system</span>
+<span style="color:#75715e"># These equations are assumed to be conjunctive</span>
+s<span style="color:#f92672">.</span>add(<span style="color:#f92672">-</span><span style="color:#ae81ff">3</span><span style="color:#f92672">*</span>x <span style="color:#f92672">+</span> <span style="color:#ae81ff">2</span><span style="color:#f92672">*</span>y <span style="color:#f92672">-</span> <span style="color:#ae81ff">5</span><span style="color:#f92672">*</span>z <span style="color:#f92672">==</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">14</span>)
+s<span style="color:#f92672">.</span>add(<span style="color:#ae81ff">2</span><span style="color:#f92672">*</span>x <span style="color:#f92672">-</span> <span style="color:#ae81ff">3</span><span style="color:#f92672">*</span>y <span style="color:#f92672">+</span> <span style="color:#ae81ff">4</span><span style="color:#f92672">*</span>z <span style="color:#f92672">==</span> <span style="color:#ae81ff">10</span>)
+s<span style="color:#f92672">.</span>add(x <span style="color:#f92672">+</span> y <span style="color:#f92672">+</span> z <span style="color:#f92672">==</span> <span style="color:#ae81ff">4</span>)
+
+<span style="color:#75715e"># Check if a solution exists</span>
+print(s<span style="color:#f92672">.</span>check())
+
+<span style="color:#75715e"># If it does, describe it</span>
+print(s<span style="color:#f92672">.</span>model())
+</code></pre></div><p>We then execute this script to find the following.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ python sat_equation.py
+sat
+<span style="color:#f92672">[</span>z <span style="color:#f92672">=</span> -4, y <span style="color:#f92672">=</span> -2, x <span style="color:#f92672">=</span> 10<span style="color:#f92672">]</span>
+</code></pre></div><p>The <code>check</code> method returns <code>sat</code>, which means our system is indeed solvable. We can also see that it calculated the solution for us too. Neat!</p>
+<p>You can try playing around different permutations of our script, to crash into various <code>unsat</code> results too. But how do we ever use this in real life?</p>
+<h2 id="a-toy-example-with-z3">A toy example with Z3<a href="#a-toy-example-with-z3" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>The example that follows models a pretty real-life situation.</p>
+<blockquote>
+<p><strong>Problem</strong>: You went to a fancy restaurant with your friends and you can pool together a sum of $1505. There are six dishes on the menu. You must decide with your friends, the quantity of each dish you can order so that you can eat well and still afford the entire course.</p>
+</blockquote>
+<p>This is a very neat problem to model in your brain. Does it remind you
+of linear programming? We can indeed solve this in Z3, and we will!</p>
+<p>Assume that the six dishes are boringly named $A, B, C, D, E$ and $F$ and have prices as described below. We label the quantity of each dish
+by the corresponding lower case letter.
+Thus, we can express the given problem as a series of linear equations. As the quantity of dishes is non-negative, it makes sense that $a \geq 0,\ b \geq 0,\ c \geq 0,\ d \geq 0,\ e \geq 0 \text{and} \ f \geq 0 $.</p>
+<p>Finally, we express our financial constraint as following. Notice that
+quantity of each dish is multiplied by its price.</p>
+<p>$$a*215 + b*275 + c*335 + d*355 + e*420 + f*580 = 1505$$</p>
+<p>You can further model these equations in CNF, like we did in the example we saw earlier. Cool! Let&rsquo;s turn to Z3 and Python.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">
+<span style="color:#75715e"># Import the Z3 library</span>
+<span style="color:#f92672">from</span> z3 <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
+
+
+<span style="color:#75715e"># Initialize the solver</span>
+s <span style="color:#f92672">=</span> Solver()
+
+<span style="color:#75715e"># Set up the variables (Dish quantities)</span>
+a, b, c, d, e, f <span style="color:#f92672">=</span> Ints(<span style="color:#e6db74">&#39;a b c d e f&#39;</span>)
+
+<span style="color:#75715e"># Add constraints</span>
+<span style="color:#75715e"># Quantity of dishes must be non-zero </span>
+s<span style="color:#f92672">.</span>add(a <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>)
+s<span style="color:#f92672">.</span>add(b <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>)
+s<span style="color:#f92672">.</span>add(c <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>)
+s<span style="color:#f92672">.</span>add(d <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>)
+s<span style="color:#f92672">.</span>add(e <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>)
+s<span style="color:#f92672">.</span>add(f <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>)
+
+<span style="color:#75715e"># Add our financial constraint </span>
+s<span style="color:#f92672">.</span>add(a<span style="color:#f92672">*</span><span style="color:#ae81ff">215</span> <span style="color:#f92672">+</span> b<span style="color:#f92672">*</span><span style="color:#ae81ff">275</span> <span style="color:#f92672">+</span> c<span style="color:#f92672">*</span><span style="color:#ae81ff">335</span> <span style="color:#f92672">+</span> d<span style="color:#f92672">*</span><span style="color:#ae81ff">355</span> <span style="color:#f92672">+</span> e<span style="color:#f92672">*</span><span style="color:#ae81ff">420</span> <span style="color:#f92672">+</span> f<span style="color:#f92672">*</span><span style="color:#ae81ff">580</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">1505</span>)
+</code></pre></div><p>It is important to understand that such problems can have multiple
+solutions, and we need to enumerate all of them. So, we write some more
+code which does exactly that. It is fine if you skip over this snippet.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># Enumerate all possible solutions:</span>
+results<span style="color:#f92672">=</span>[]
+
+<span style="color:#66d9ef">while</span> <span style="color:#66d9ef">True</span>:
+		<span style="color:#75715e"># If we found a solution, add it to the system </span>
+		<span style="color:#75715e"># and check for another</span>
+    <span style="color:#66d9ef">if</span> s<span style="color:#f92672">.</span>check() <span style="color:#f92672">==</span> sat:
+        m <span style="color:#f92672">=</span> s<span style="color:#f92672">.</span>model()
+        print(m)
+        results<span style="color:#f92672">.</span>append(m)
+        block <span style="color:#f92672">=</span> []
+        <span style="color:#66d9ef">for</span> d <span style="color:#f92672">in</span> m:
+            c<span style="color:#f92672">=</span>d()
+            block<span style="color:#f92672">.</span>append(c <span style="color:#f92672">!=</span> m[d])
+        s<span style="color:#f92672">.</span>add(Or(block))
+    <span style="color:#66d9ef">else</span>:
+        print(<span style="color:#e6db74">&#34;Total solutions: &#34;</span>, len(results))
+        <span style="color:#66d9ef">break</span>
+</code></pre></div><p>Running this code,</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ python sat_equation.py
+<span style="color:#f92672">[</span>d <span style="color:#f92672">=</span> 0, b <span style="color:#f92672">=</span> 0, a <span style="color:#f92672">=</span> 7, f <span style="color:#f92672">=</span> 0, c <span style="color:#f92672">=</span> 0, e <span style="color:#f92672">=</span> 0<span style="color:#f92672">]</span>
+<span style="color:#f92672">[</span>c <span style="color:#f92672">=</span> 0, d <span style="color:#f92672">=</span> 2, e <span style="color:#f92672">=</span> 0, f <span style="color:#f92672">=</span> 1, b <span style="color:#f92672">=</span> 0, a <span style="color:#f92672">=</span> 1<span style="color:#f92672">]</span>
+Total solutions:  <span style="color:#ae81ff">2</span>
+</code></pre></div><p>Turns out there are two ways for us to order our dishes! We can either:</p>
+<ul>
+<li>Order 7 of dishes $A$.</li>
+<li>OR order 1 dish of $A$, 2 of $D$ and 1 of $F$.</li>
+</ul>
+<p>Very neat Z3! This satisfies our curiosity for the more applicative aspect of such solvers.</p>
+<h2 id="ctf-experiences">CTF experiences<a href="#ctf-experiences" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>In computer applications, you&rsquo;ll often find anti-tamper or
+anti-cheating mechanisms. These mechanisms often place a lot of restrictions on what the user can and cannot do.</p>
+<p>A very toy-ish example finds its place in CTFs, where a very large number of constraints are given inside a binary, and we have to figure out a particular value for a variable that satisfies these constraints. For instance,</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c">(arg1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x14</span>) <span style="color:#f92672">^</span> <span style="color:#ae81ff">0x2b</span>) <span style="color:#f92672">==</span> <span style="color:#f92672">*</span>(arg1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">7</span>)) <span style="color:#f92672">&amp;&amp;</span>
+(<span style="color:#f92672">*</span>(arg1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x15</span>) <span style="color:#f92672">-</span> <span style="color:#f92672">*</span>(arg1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">3</span>) <span style="color:#f92672">==</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">0x14</span>)) <span style="color:#f92672">&amp;&amp;</span>
+(<span style="color:#f92672">*</span>(arg1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">2</span>) <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">6</span> <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;\0&#39;</span>)) <span style="color:#f92672">&amp;&amp;</span>
+((<span style="color:#f92672">*</span>(arg1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0xd</span>) <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;t&#39;</span> <span style="color:#f92672">&amp;&amp;</span> 
+((<span style="color:#f92672">*</span>(arg1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0xb</span>) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0x3fffffffU</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x5f</span>)))) <span style="color:#f92672">&amp;&amp;</span>
+
+<span style="color:#75715e">// .... HUNDREDS of such checks ....
+</span></code></pre></div><p>Notice how the <code>arg1</code> variable is constrained by all of these
+equations consisting of byte-level operations. To solve such a system, we use Z3 again in the hopes of finding a solution. The solution is a value
+of <code>arg1</code> that satisfies all these checks. Imagine finding it by hand!</p>
+<p>Apart from this classic scenario, there have been challenges implementing custom cryptography. Such as <a href="https://www.hackthebox.com/blog/memory-acceleration-ca-ctf-2022-crypto-writeup">this one</a>, which require you to use Z3 to solve them.</p>
+<h1 id="how-conda-uses-smt-solvers">How Conda uses SMT solvers<a href="#how-conda-uses-smt-solvers" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<p>Recently, I unexpectedly came across a <strong>very</strong> interesting application for SAT solving systems. Apparently, the Conda project uses them to improve their performance!</p>
+<p>Dependency management is a very interesting problem in computer science. If you have ever read a config file that describes dependencies, such as <code>package.json</code> for Javascript projects, or <code>requirements.txt</code> for Python projects or <code>Cargo.toml</code> for Rust projects, you know what dependency constraints look like! They&rsquo;re often something like this:</p>
+<pre tabindex="0"><code>docopt == 0.6.1             # Version Matching. Must be version 0.6.1
+keyring &gt;= 4.1.1            # Minimum version 4.1.1
+coverage != 3.5             # Version Exclusion. Anything except version 3.5
+Mopidy-Dirble ~= 1.1        # Compatible release. Same as &gt;= 1.1, == 1.*
+</code></pre><p>Conda isolated the performance issue to that specific dependency management module of theirs. They modeled dependency management as a SAT problem in first-order CNF logic, then used their in-house SAT solver to figure out valid dependency versions quickly during runtime and improve performance! How cool!</p>
+<p>You can read Conda&rsquo;s blog post on this: <a href="https://www.anaconda.com/blog/understanding-and-improving-condas-performance">Here</a></p>
+<h1 id="exercise-to-the-reader">Exercise to the reader<a href="#exercise-to-the-reader" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<p>I once played a very nice CTF. There was a reversing challenge in there,
+which I couldn&rsquo;t solve at that time for some very frustrating reason. A part of that challenge involved huge number of constraints in the binary.</p>
+<p>The system wouldn&rsquo;t return <code>sat</code>, even though it was supposed to.
+I&rsquo;ve snipped the challenge quite a bit.
+You&rsquo;re given a solution code for the challenge.
+The solution code is incomplete.
+Complete it.
+Does it return <code>sat</code>?
+What&rsquo;s the solution?</p>
+<p><a href="https://gist.github.com/Crystalsage/1536740eb0608458627569f2092f52f6">Solve me!</a></p>
+<p>$$
+\blacksquare
+\blacksquare
+\blacksquare
+$$</p>
+
+      </div></div>
+
+  
+  
+<div class="pagination">
+    <div class="pagination__title">
+        <span class="pagination__title-h">Read other posts</span>
+        <hr />
+    </div>
+    <div class="pagination__buttons">
+        
+        <span class="button previous">
+            <a href="https://crystalsage.github.io/posts/flare-1/">
+                <span class="button__icon">←</span>
+                <span class="button__text">Flare-on 9 Writeup (Part-1)</span>
+            </a>
+        </span>
+        
+        
+        <span class="button next">
+            <a href="https://crystalsage.github.io/posts/dhke/">
+                <span class="button__text">A case of parameter injection MiTM on DHKE</span>
+                <span class="button__icon">→</span>
+            </a>
+        </span>
+        
+    </div>
+</div>
+
+  
+
+  
+
+</div>
+
+  </div>
+
+  
+    <footer class="footer">
+  <div class="footer__inner">
+    
+      <div class="copyright copyright--user">
+        <span>Licensed to Bourbon</span>
+    
+        <span>:: Theme made by <a href="https://twitter.com/panr">panr</a></span>
+      </div>
+  </div>
+</footer>
+
+
+
+<script src="https://crystalsage.github.io/assets/main.js"></script>
+<script src="https://crystalsage.github.io/assets/prism.js"></script>
+<script type="text/javascript"
+  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\[','\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+           extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    }
+  });
+  </script>
+
+
+
+
+
+
+  
+</div>
+
+</body>
+</html>

@@ -1,0 +1,1299 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>/home/bourbon</title>
+    <link>https://crystalsage.github.io/</link>
+    <description>Recent content on /home/bourbon</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>Licensed to Bourbon</copyright>
+    <lastBuildDate>Sat, 19 Nov 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://crystalsage.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Flare-on 9 Writeup (Part-1)</title>
+      <link>https://crystalsage.github.io/posts/flare-1/</link>
+      <pubDate>Sat, 19 Nov 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://crystalsage.github.io/posts/flare-1/</guid>
+      <description>Introduction FLARE-On is a month-long annual CTF event by Mandiant. It focuses on Windows oriented reverse engineering and malware analysis.
+It is one of my most favorite CTF events throughout the year. And it&amp;rsquo;s really, really hard. This year, I managed to solve 4 out of 11 challenges.
+This series of blog posts focuses on my writeups for these challenges and attempts to trace my train of thoughts.
+Flaredle - Challenge 1 This is pretty much the easiest warm-up challenge.</description>
+      <content>&lt;h1 id=&#34;introduction&#34;&gt;Introduction&lt;/h1&gt;
+&lt;p&gt;FLARE-On is a month-long annual CTF event by Mandiant. It focuses on Windows
+oriented reverse engineering and malware analysis.&lt;/p&gt;
+&lt;p&gt;It is one of my most favorite CTF events throughout the year. And it&amp;rsquo;s really,
+really hard. This year, I managed to solve 4 out of 11 challenges.&lt;/p&gt;
+&lt;p&gt;This series of blog posts focuses on my writeups for these challenges and
+attempts to trace my train of thoughts.&lt;/p&gt;
+&lt;h2 id=&#34;flaredle---challenge-1&#34;&gt;Flaredle - Challenge 1&lt;/h2&gt;
+&lt;p&gt;This is pretty much the easiest warm-up challenge.&lt;/p&gt;
+&lt;p&gt;We&amp;rsquo;re given a 7z archive which contains the files necessary for this challenge.
+The 7z contains a typical collection of files used to run a website. It contains
+&lt;code&gt;index.html&lt;/code&gt;, &lt;code&gt;style.css&lt;/code&gt; and two javascript files - &lt;code&gt;script.js&lt;/code&gt; and &lt;code&gt;words.js&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;In a setup like this, I prefer setting up a local python server and playing
+around with the website first. We can setup a server in the same folder like this:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;$ python -m http.server
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This should start a server at the default port 8080. Cool!&lt;/p&gt;
+&lt;h3 id=&#34;wordle-and-code-review&#34;&gt;Wordle and code review&lt;/h3&gt;
+&lt;p&gt;The HTML page shows us a game setup.
+&lt;img src=&#34;https://crystalsage.github.io/flare/flare-1-wordle.png&#34; alt=&#34;Flaredle&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Many readers might recognize this setup to be the same of Wordle&amp;rsquo;s! Now the
+challenge&amp;rsquo;s name makes sense. But this version looks much harder. This being
+a CTF challenge, we&amp;rsquo;re not going to play the game. If we take a look at the
+source, you&amp;rsquo;ll find that the HTML sources the &lt;code&gt;script.js&lt;/code&gt; file. Let&amp;rsquo;s take a
+look inside.&lt;/p&gt;
+&lt;h3 id=&#34;scriptjs&#34;&gt;script.js&lt;/h3&gt;
+&lt;p&gt;The file contains multiple functions that are typical to a Wordle-like game
+implementation (Bonus question: Do you know how Wordle works?). The opening
+lines look like this:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;import&lt;/span&gt; { &lt;span style=&#34;color:#a6e22e&#34;&gt;WORDS&lt;/span&gt; } &lt;span style=&#34;color:#a6e22e&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;./words.js&amp;#34;&lt;/span&gt;;
+
+
+&lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;NUMBER_OF_GUESSES&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;6&lt;/span&gt;;
+&lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;WORD_LENGTH&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;21&lt;/span&gt;;
+
+&lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;CORRECT_GUESS&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;57&lt;/span&gt;;
+
+&lt;span style=&#34;color:#66d9ef&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;guessesRemaining&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;NUMBER_OF_GUESSES&lt;/span&gt;;
+&lt;span style=&#34;color:#66d9ef&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;currentGuess&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; [];
+&lt;span style=&#34;color:#66d9ef&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;nextLetter&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;;
+&lt;span style=&#34;color:#66d9ef&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;rightGuessString&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;WORDS&lt;/span&gt;[&lt;span style=&#34;color:#a6e22e&#34;&gt;CORRECT_GUESS&lt;/span&gt;];
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;We presumably import a set of words from the &lt;code&gt;words.js&lt;/code&gt; file and set some
+constants. It looks like we get 6 guesses at this. What&amp;rsquo;s interesting to us
+is that the &amp;lsquo;correct&amp;rsquo; guess is hardcoded and is the 57th word in the wordlist.&lt;/p&gt;
+&lt;p&gt;Once we enter a word and hit enter, we invoke the &lt;code&gt;checkGuess&lt;/code&gt; function due
+to this code:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;document.&lt;span style=&#34;color:#a6e22e&#34;&gt;addEventListener&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;keyup&amp;#34;&lt;/span&gt;, (&lt;span style=&#34;color:#a6e22e&#34;&gt;e&lt;/span&gt;) =&amp;gt; {
+
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#a6e22e&#34;&gt;guessesRemaining&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;===&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;) {
+        &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt;
+    }
+
+
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;pressedKey&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; String(&lt;span style=&#34;color:#a6e22e&#34;&gt;e&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;key&lt;/span&gt;)
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#a6e22e&#34;&gt;pressedKey&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;===&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Backspace&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;nextLetter&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;!==&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;) {
+
+        &lt;span style=&#34;color:#a6e22e&#34;&gt;deleteLetter&lt;/span&gt;()
+        &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt;
+    }
+
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#a6e22e&#34;&gt;pressedKey&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;===&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Enter&amp;#34;&lt;/span&gt;) {
+        &lt;span style=&#34;color:#a6e22e&#34;&gt;checkGuess&lt;/span&gt;()
+        &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt;
+    }
+
+
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;found&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;pressedKey&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;match&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;/[a-z]/gi&lt;/span&gt;)
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#f92672&#34;&gt;!&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;found&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;||&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;found&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;length&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;) {
+        &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt;
+    } &lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt; {
+        &lt;span style=&#34;color:#a6e22e&#34;&gt;insertLetter&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;pressedKey&lt;/span&gt;)
+    }
+})
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The &lt;code&gt;checkGuess&lt;/code&gt; function&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#a6e22e&#34;&gt;guessString&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;===&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;rightGuessString&lt;/span&gt;) {
+		&lt;span style=&#34;color:#66d9ef&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;flag&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;rightGuessString&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;@flare-on.com&amp;#39;&lt;/span&gt;;
+		&lt;span style=&#34;color:#a6e22e&#34;&gt;toastr&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;options&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;timeOut&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;;
+		&lt;span style=&#34;color:#a6e22e&#34;&gt;toastr&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;options&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;onclick&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt;() {&lt;span style=&#34;color:#a6e22e&#34;&gt;alert&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;flag&lt;/span&gt;);}
+        &lt;span style=&#34;color:#a6e22e&#34;&gt;toastr&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;success&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;You guessed right! The flag is &amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;flag&lt;/span&gt;);
+
+		&lt;span style=&#34;color:#a6e22e&#34;&gt;guessesRemaining&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;
+		&lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt;
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;So we obtain the flag for this challenge if we guess the word correctly. The
+&lt;code&gt;words.js&lt;/code&gt; file contains a long list of words.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;WORDS&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;acetylphenylhydrazine&amp;#39;&lt;/span&gt;,
+	&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;aerobacteriologically&amp;#39;&lt;/span&gt;,
+	&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;alkylbenzenesulfonate&amp;#39;&lt;/span&gt;,
+	&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;aminoacetophenetidine&amp;#39;&lt;/span&gt;,
+	&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;anatomicopathological&amp;#39;&lt;/span&gt;,
+	&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;anemometrographically&amp;#39;&lt;/span&gt;,
+	...
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;We check this file to locate the 58th word. It turns out to be
+&lt;code&gt;flareonisallaboutcats&lt;/code&gt;. Let&amp;rsquo;s try entering this word into Flaredle.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/flare/flare-1-flag.png&#34; alt=&#34;Flaredle flag&#34;&gt;&lt;/p&gt;
+&lt;p&gt;We get the flag!&lt;/p&gt;
+&lt;p&gt;$$
+\boxed{\text{Flag: flareonisallaboutcats@flare-on.com}}
+$$&lt;/p&gt;
+&lt;p&gt;Again, this was a really easy challenge that involves taking a look into
+source code.&lt;/p&gt;
+&lt;h2 id=&#34;pixelpoker---challenge-2&#34;&gt;PixelPoker - Challenge 2&lt;/h2&gt;
+&lt;p&gt;The difficulty of challenges grows rapidly from this challenge. Here, we
+encounter a proper 32-bit PE that we have to reverse. Let&amp;rsquo;s see.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Challenge: I said you wouldn&amp;rsquo;t win that last one. I lied. The last challenge was basically a captcha. Now the real work begins. Shall we play another game?&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;The challenge offers us a 7z again. Once we extract it, we&amp;rsquo;re left with 32-bit
+executable named &lt;code&gt;PixelPoker.exe&lt;/code&gt; and a readme file. The readme file tells us
+that our goal is to click a correct pixel. Running this executable, we are
+greeted with this screen.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/flare/flare-2-pixelpoker.png&#34; alt=&#34;PixelPoker&#34;&gt;&lt;/p&gt;
+&lt;p&gt;The main canvas seems to be filled an array of random pixels, reminiscent of a
+TV&amp;rsquo;s static noise. The title bar holds two interesting things.&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Position of the cursor in x and y co-ordinates.&lt;/li&gt;
+&lt;li&gt;Some sort of counter that keeps a count of how many clicks have been made
+on the canvas.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;e.g. In the screenshot visible above, the cursor was positioned at $x=743$ and
+$y=198$.&lt;/p&gt;
+&lt;p&gt;Exhausting the attempts leaves us with a dialog.
+&lt;img src=&#34;https://crystalsage.github.io/flare/flare-2-pixelpoker-fail.png&#34; alt=&#34;PixelPoker Attempt&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Now to make some guesses based on the observations and my intuition:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;It&amp;rsquo;s certain that we have to click the correct the pixel out of all of the possible
+combination of pixels on the canvas. The maximum size of canvas seems to be &lt;code&gt;(741, 641)&lt;/code&gt;.
+This means that there are 474981 unique pixels to click. No way we&amp;rsquo;re going to find
+that manually.&lt;/li&gt;
+&lt;li&gt;It&amp;rsquo;s possible that the array of pixels is either completely random, created
+at runtime. Or, it&amp;rsquo;s loaded from a Bitmap that&amp;rsquo;s present inside the binary. Such
+bitmaps are typically loaded using Win32 API&amp;rsquo;s&lt;sup&gt;1&lt;/sup&gt; &lt;code&gt;BitBlt&lt;/code&gt; and friend functions.&lt;/li&gt;
+&lt;li&gt;To find out the correct pixel, there&amp;rsquo;s probably some sort of calculation that
+happens at runtime. We&amp;rsquo;ll need to reverse engineer the application to find it out.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Let&amp;rsquo;s get our hands dirty. I love Ghidra, so I&amp;rsquo;ll use that. I very much miss
+the expensive licensing costs of IDA these days.&lt;/p&gt;
+&lt;h3 id=&#34;diving-into-the-pixel-soup&#34;&gt;Diving into the pixel soup&lt;/h3&gt;
+&lt;p&gt;Whenever I analyze a binary, I like to check the strings first, as they give me
+a good initial impression of what I&amp;rsquo;m analyzing (or not). Looking into the
+strings, we get some indicators right off the bat.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/flare/flare-2-strings.png&#34; alt=&#34;PixelPoker Strings&#34;&gt;&lt;/p&gt;
+&lt;p&gt;We see some typical functions such as &lt;code&gt;BitBlt&lt;/code&gt; (aha!) and &lt;code&gt;MessageBoxA&lt;/code&gt;. These
+functions definitely tell me that I&amp;rsquo;m dealing with Bitmaps and Win32 GUI functions.
+Tracing these functions into the imports of the application and examining their
+cross references lands us in the main function.&lt;/p&gt;
+&lt;p&gt;In the main function, we see a bunch of match statements matching different
+values. I was hoping to find something similar to this, since I had a hunch
+that the application would listen for mouse button down event somewhere. Our
+search is simplified by Ghidra&amp;rsquo;s decompilation and some very helpful strings.
+After all of the boilerplate code that manages menus and Bitmap loading, we have
+the stuff we really care about.
+&lt;img src=&#34;https://crystalsage.github.io/flare/flare-2-main.png&#34; alt=&#34;PixelPoker Main&#34;&gt;&lt;/p&gt;
+&lt;p&gt;The first thing that immediately stands out is the &lt;em&gt;Please play again&lt;/em&gt; message.
+Before that string, we even see a variable being compared to decimal value 10.
+This is probably our click counter!&lt;/p&gt;
+&lt;p&gt;The next thing that stands out is the comparisons of &lt;code&gt;param_2&lt;/code&gt; against different
+hardcoded constants. These are probably some kind of macro constants. If we
+look up those constants in the context of WIN32 API and events, it doesn&amp;rsquo;t take us very
+long to find out that &lt;code&gt;0x200&lt;/code&gt; is a &lt;code&gt;WM_MOUSEMOVE&lt;/code&gt; constant and &lt;code&gt;0x201&lt;/code&gt; is
+a &lt;code&gt;WM_LBUTTONDOWN&lt;/code&gt; (Mouse left button down) event. Just like we predicted! [&lt;a href=&#34;https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-mousemove&#34;&gt;Reference]&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Further down &lt;code&gt;else&lt;/code&gt; branch we see our click counter getting incremented. Then,
+we do some kind of check against some values. Let&amp;rsquo;s understand what these values are.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;uVar8&lt;/code&gt; and &lt;code&gt;uVar6&lt;/code&gt; are the input X and Y co-ordinates that we clicked.
+(Exercise to the reader: How did I arrive at that conclusion?).&lt;/p&gt;
+&lt;p&gt;The first argument to the modulo (&lt;code&gt;%&lt;/code&gt;) operator is seems to be a constant. You&amp;rsquo;ll
+see a Ghidra exclusive notation where, for example, the variable name ends with &lt;code&gt;._0_4_&lt;/code&gt;.
+This just means that only the first four bytes of that data source are considered.
+This roughly translates to $\text{MOV EAX, [s_FLARE-On_00412004]}$ in assembly (Add offset for the next 4 bytes).
+The entire modulo operation looks something like this in assembly.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-nasm&#34; data-lang=&#34;nasm&#34;&gt;        &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;00401472&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;a3&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;98&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;32&lt;/span&gt;        MOV        [DAT_00413298],EAX                               &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;=&lt;/span&gt; ??
+                 &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;41&lt;/span&gt; &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;00&lt;/span&gt;
+        &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;00401477&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;a1&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;04&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;20&lt;/span&gt;        MOV        EAX,[s_FLARE&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;On_00412004]                        &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;FLARE-On&amp;#34;&lt;/span&gt;
+                 &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;41&lt;/span&gt; &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;00&lt;/span&gt;
+        &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;0040147&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;c&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;8&lt;/span&gt;b &lt;span style=&#34;color:#ae81ff&#34;&gt;35&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;80&lt;/span&gt;        MOV        ESI,&lt;span style=&#34;color:#66d9ef&#34;&gt;dword&lt;/span&gt; ptr [DAT_00413280]                     &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;=&lt;/span&gt; ??
+                 &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;32&lt;/span&gt; &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;41&lt;/span&gt; &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;00&lt;/span&gt;
+        &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;00401482&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;f7&lt;/span&gt; f6           DIV        ESI
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;It turns out &lt;code&gt;s_FLARE-On_00412004&lt;/code&gt; is just a 8 byte string &lt;code&gt;&amp;quot;FLARE-On&amp;quot;&lt;/code&gt;. But since
+these are the first 4 bytes LE, it translates to the constant &lt;code&gt;0x52414c46&lt;/code&gt;.
+Further down, we see &lt;code&gt;s_E-On_00412004+4&lt;/code&gt; getting referenced. These are probably
+the next 4 bytes LE which are &lt;code&gt;0x6e4f2d45&lt;/code&gt; (LE: Little Endian).&lt;/p&gt;
+&lt;p&gt;Next, we care about what &lt;code&gt;DAT_00413280&lt;/code&gt; and &lt;code&gt;DAT_00413284&lt;/code&gt; is. I went into the
+cross references of these data pointers to find out these are also used for
+creating window and are provided as dimensions to &lt;code&gt;CreateWindowExW&lt;/code&gt; which has
+a signature as &lt;a href=&#34;https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-createwindowexa&#34;&gt;described here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/flare/flare-2-create_window.png&#34; alt=&#34;PixelPoker CreateWindow&#34;&gt;&lt;/p&gt;
+&lt;p&gt;So these are the window height and width, which we know to be 741 and 641!
+This is also probably the check to find out the correct pixel.&lt;/p&gt;
+&lt;p&gt;It&amp;rsquo;s a common practice in reverse engineering to rename everything in the decompilation as we go along.
+The entire code, after renaming constants and variables looks something like this:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/flare/flare-2-code-untangled.png&#34; alt=&#34;PixelPoker CreateWindow&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Much better!&lt;/p&gt;
+&lt;h3 id=&#34;wrapping-up&#34;&gt;Wrapping up&lt;/h3&gt;
+&lt;p&gt;So we know that the actual check to see if clicked the correct pixel happens
+where the modulo operation happens. The two checks actually look like this.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (INPUT_X_PIXEL &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x52414c46&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;%&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;741&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;and&lt;/span&gt; (INPUT_Y_PIXEL &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x6e4f2d45&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;%&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;641&lt;/span&gt;):
+    &lt;span style=&#34;color:#75715e&#34;&gt;# Success&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;We can actually calculate these values in a calculator.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&amp;gt;&amp;gt;&amp;gt; 0x52414C46 % &lt;span style=&#34;color:#ae81ff&#34;&gt;741&lt;/span&gt;
+&lt;span style=&#34;color:#ae81ff&#34;&gt;95&lt;/span&gt;
+&amp;gt;&amp;gt;&amp;gt; 0x6E4F2D45 % &lt;span style=&#34;color:#ae81ff&#34;&gt;641&lt;/span&gt;
+&lt;span style=&#34;color:#ae81ff&#34;&gt;313&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Once we click the pixel located at (95, 313), we succesfully get the flag.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/flare/flare-2-flag.png&#34; alt=&#34;PixelPoker flag&#34;&gt;&lt;/p&gt;
+&lt;p&gt;$$
+\boxed{\text{Flag: w!nN3r_W!NneR_cHick3n_d1nNer@flare-on.com}}
+$$&lt;/p&gt;
+&lt;p&gt;If you wish to retrace the steps to learn some reverse engineering, you can download these challenges &lt;a href=&#34;https://github.com/fareedfauzi/Flare-On-Challenges/tree/master/Challenges/2022&#34;&gt;from here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;With that, we conclude the first part of this series. In the
+next blog post, we&amp;rsquo;ll take a look at the third challenge.&lt;/p&gt;
+&lt;p&gt;$$
+\blacksquare
+\blacksquare
+\blacksquare
+$$&lt;/p&gt;
+</content>
+    </item>
+    
+    <item>
+      <title>SMT solvers for fun and CTFs</title>
+      <link>https://crystalsage.github.io/posts/smt/</link>
+      <pubDate>Fri, 04 Nov 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://crystalsage.github.io/posts/smt/</guid>
+      <description>Introduction It is no surprise even to an amateur that computer systems are built on steadfast grounds of mathematical theory. Indulging in computers over the course of many years leads many into finding very niche fields where computers and mathematics intersect directly.
+In this post, we turn our attention to one of such systems known as Satisfiability Modulo Theories (SMT), which prove satisfiability of first-order logical equations. We&amp;rsquo;ll then visit Conda to see how they use a SMT solver for a neatly practical cause.</description>
+      <content>&lt;h1 id=&#34;introduction&#34;&gt;Introduction&lt;/h1&gt;
+&lt;p&gt;It is no surprise even to an amateur that computer systems are built on
+steadfast grounds of mathematical theory. Indulging in computers over the
+course of many years leads many into finding very niche fields where
+computers and mathematics intersect directly.&lt;/p&gt;
+&lt;p&gt;In this post, we turn our attention to one of such systems known as
+Satisfiability Modulo Theories (SMT), which prove satisfiability of first-order logical equations. We&amp;rsquo;ll then visit Conda to see how they use a SMT solver for a neatly practical cause.&lt;/p&gt;
+&lt;h1 id=&#34;mathematical-logic&#34;&gt;Mathematical logic&lt;/h1&gt;
+&lt;p&gt;While peeking into the history of computers, we find that mathematical
+logic first entered into computing through lambda calculus and combinatory logic.&lt;/p&gt;
+&lt;p&gt;In modern times, mathematical logic has evolved into a solid tool used
+for discussing semantics of programming languages. Incidentally, if you want to peek into the action, there&amp;rsquo;s no better window than Ralf Jung&amp;rsquo;s
+brilliant &lt;a href=&#34;https://research.ralfj.de/thesis.html&#34;&gt;PhD thesis&lt;/a&gt; on Rust&amp;rsquo;s semantics. Although interesting, it is a PhD thesis, so we our attention
+to more digestible examples.&lt;/p&gt;
+&lt;p&gt;If you&amp;rsquo;ve trudged your way through the terrible education of the country I live in, you&amp;rsquo;ve probably encountered something called &lt;a href=&#34;https://en.wikipedia.org/wiki/Linear_programming&#34;&gt;Linear Programming&lt;/a&gt;. It poses optimization problems by presenting equations constrained to specific conditions and asks us to deliver the most optimal solution under those specific conditions. A classic problem consists of a linear function $f(x, y) = ax + by$
+and a set of $n$ constraints $a_nx + b_ny \leq c_n$.&lt;/p&gt;
+&lt;p&gt;What they don&amp;rsquo;t teach you in school, is that those $n$ constraints can be
+modeled as first-order logic equations as well. For example, consider a
+system of three linear equations:&lt;/p&gt;
+&lt;p&gt;$$
+\begin{align*}
+-3x + 2y - 5z &amp;amp;= -14  \\
+2x - 3y + 4z  &amp;amp;= 10  \\
+x + y + z &amp;amp;= 4&lt;br&gt;
+\end{align*}
+$$&lt;/p&gt;
+&lt;p&gt;Since it is absolutely necessary that we satisfy all three of these
+constraints to find values of $x$, $y$ and $z$. A &amp;lsquo;winning&amp;rsquo; condition for
+us would be when a solution to such a system exists, and can be
+calculated. If the winning condition is denoted with $W$, then we can
+express $W$ as:&lt;/p&gt;
+&lt;p&gt;$$
+(-3x + 2y - 5z = -14) \wedge (2x - 3y + 4z  = 10) \wedge (x + y + z = 4)&lt;br&gt;
+$$&lt;/p&gt;
+&lt;p&gt;The $\wedge$ symbol is the usual conjunction (AND condition).&lt;/p&gt;
+&lt;p&gt;Now that we&amp;rsquo;ve modeled this as a logic problem, we can finally talk about Satisfiability Modulo Theories.&lt;/p&gt;
+&lt;h2 id=&#34;satisfiability-modulo-theories&#34;&gt;Satisfiability Modulo Theories&lt;/h2&gt;
+&lt;p&gt;Abbreviated as SMT, the instance of such a system is a formula in
+first-order logic (such as the one above), and SMT determines whether if
+this system is indeed solvable.&lt;/p&gt;
+&lt;p&gt;SMT systems can include more complex data formats such as integers or data
+structures like lists, strings and arrays.&lt;/p&gt;
+&lt;p&gt;Now let&amp;rsquo;s talk about SAT systems, of which SMT systems are a generalization.&lt;/p&gt;
+&lt;h1 id=&#34;sat-and-z3&#34;&gt;SAT and Z3&lt;/h1&gt;
+&lt;p&gt;Boolean &lt;strong&gt;SAT&lt;/strong&gt;isfiability problem is a specialization of SMT that only
+concerns itself with satisfiability of a boolean formula.&lt;/p&gt;
+&lt;p&gt;SAT systems try to find a solution to a system of first-order logic equations. If a solution exists, then the system is evaluated to a SATisfiable status. Otherwise, it is UNSATisfiable.&lt;/p&gt;
+&lt;p&gt;A condition on SAT systems is that they only operate on first order logical systems in &lt;a href=&#34;https://en.wikipedia.org/wiki/Conjunctive_normal_form&#34;&gt;Conjunctive Normal Form&lt;/a&gt;. Do you see how that applies to our example above? We&amp;rsquo;ll bubble this example through the entire section.&lt;/p&gt;
+&lt;p&gt;If you dig further into SAT, you&amp;rsquo;re bound to discover that there are
+automated solvers for it. SAT problem is NP-complete and automated solvers have been able to massively contribute to complex systems such as microprocessors or scheduling problems, which involve hundreds and thousands of variables and constraints.&lt;/p&gt;
+&lt;p&gt;A very popular automated theorem solver of this sort is &lt;a href=&#34;https://github.com/Z3Prover/z3&#34;&gt;Z3 by Microsoft&lt;/a&gt;. Let&amp;rsquo;s see how we can use Z3 to solve our problem that we discussed in the first section of this post. I like to use Z3 through Python. The code is pretty self-explanatory coupled with the comments.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# Import the Z3 library &lt;/span&gt;
+&lt;span style=&#34;color:#f92672&#34;&gt;from&lt;/span&gt; z3 &lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;
+
+&lt;span style=&#34;color:#75715e&#34;&gt;# Initialize the Solver &lt;/span&gt;
+s &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; Solver()
+
+&lt;span style=&#34;color:#75715e&#34;&gt;# Describe our variables in the system&lt;/span&gt;
+x, y, z &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; Ints(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;x y z&amp;#39;&lt;/span&gt;)
+
+&lt;span style=&#34;color:#75715e&#34;&gt;# Add all three equations into this system&lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;# These equations are assumed to be conjunctive&lt;/span&gt;
+s&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;add(&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;3&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;x &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;y &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;5&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;z &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;14&lt;/span&gt;)
+s&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;add(&lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;x &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;3&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;y &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;4&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;z &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;10&lt;/span&gt;)
+s&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;add(x &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; y &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; z &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;4&lt;/span&gt;)
+
+&lt;span style=&#34;color:#75715e&#34;&gt;# Check if a solution exists&lt;/span&gt;
+print(s&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;check())
+
+&lt;span style=&#34;color:#75715e&#34;&gt;# If it does, describe it&lt;/span&gt;
+print(s&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;model())
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;We then execute this script to find the following.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;$ python sat_equation.py
+sat
+&lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;z &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; -4, y &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; -2, x &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; 10&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The &lt;code&gt;check&lt;/code&gt; method returns &lt;code&gt;sat&lt;/code&gt;, which means our system is indeed solvable. We can also see that it calculated the solution for us too. Neat!&lt;/p&gt;
+&lt;p&gt;You can try playing around different permutations of our script, to crash into various &lt;code&gt;unsat&lt;/code&gt; results too. But how do we ever use this in real life?&lt;/p&gt;
+&lt;h2 id=&#34;a-toy-example-with-z3&#34;&gt;A toy example with Z3&lt;/h2&gt;
+&lt;p&gt;The example that follows models a pretty real-life situation.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Problem&lt;/strong&gt;: You went to a fancy restaurant with your friends and you can pool together a sum of $1505. There are six dishes on the menu. You must decide with your friends, the quantity of each dish you can order so that you can eat well and still afford the entire course.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;This is a very neat problem to model in your brain. Does it remind you
+of linear programming? We can indeed solve this in Z3, and we will!&lt;/p&gt;
+&lt;p&gt;Assume that the six dishes are boringly named $A, B, C, D, E$ and $F$ and have prices as described below. We label the quantity of each dish
+by the corresponding lower case letter.
+Thus, we can express the given problem as a series of linear equations. As the quantity of dishes is non-negative, it makes sense that $a \geq 0,\ b \geq 0,\ c \geq 0,\ d \geq 0,\ e \geq 0 \text{and} \ f \geq 0 $.&lt;/p&gt;
+&lt;p&gt;Finally, we express our financial constraint as following. Notice that
+quantity of each dish is multiplied by its price.&lt;/p&gt;
+&lt;p&gt;$$a*215 + b*275 + c*335 + d*355 + e*420 + f*580 = 1505$$&lt;/p&gt;
+&lt;p&gt;You can further model these equations in CNF, like we did in the example we saw earlier. Cool! Let&amp;rsquo;s turn to Z3 and Python.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;# Import the Z3 library&lt;/span&gt;
+&lt;span style=&#34;color:#f92672&#34;&gt;from&lt;/span&gt; z3 &lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;
+
+
+&lt;span style=&#34;color:#75715e&#34;&gt;# Initialize the solver&lt;/span&gt;
+s &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; Solver()
+
+&lt;span style=&#34;color:#75715e&#34;&gt;# Set up the variables (Dish quantities)&lt;/span&gt;
+a, b, c, d, e, f &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; Ints(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;a b c d e f&amp;#39;&lt;/span&gt;)
+
+&lt;span style=&#34;color:#75715e&#34;&gt;# Add constraints&lt;/span&gt;
+&lt;span style=&#34;color:#75715e&#34;&gt;# Quantity of dishes must be non-zero &lt;/span&gt;
+s&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;add(a &lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;)
+s&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;add(b &lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;)
+s&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;add(c &lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;)
+s&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;add(d &lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;)
+s&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;add(e &lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;)
+s&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;add(f &lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;)
+
+&lt;span style=&#34;color:#75715e&#34;&gt;# Add our financial constraint &lt;/span&gt;
+s&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;add(a&lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;215&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; b&lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;275&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; c&lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;335&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; d&lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;355&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; e&lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;420&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; f&lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;580&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;1505&lt;/span&gt;)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;It is important to understand that such problems can have multiple
+solutions, and we need to enumerate all of them. So, we write some more
+code which does exactly that. It is fine if you skip over this snippet.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# Enumerate all possible solutions:&lt;/span&gt;
+results&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;[]
+
+&lt;span style=&#34;color:#66d9ef&#34;&gt;while&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;True&lt;/span&gt;:
+		&lt;span style=&#34;color:#75715e&#34;&gt;# If we found a solution, add it to the system &lt;/span&gt;
+		&lt;span style=&#34;color:#75715e&#34;&gt;# and check for another&lt;/span&gt;
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; s&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;check() &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; sat:
+        m &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; s&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;model()
+        print(m)
+        results&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;append(m)
+        block &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; []
+        &lt;span style=&#34;color:#66d9ef&#34;&gt;for&lt;/span&gt; d &lt;span style=&#34;color:#f92672&#34;&gt;in&lt;/span&gt; m:
+            c&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;d()
+            block&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;append(c &lt;span style=&#34;color:#f92672&#34;&gt;!=&lt;/span&gt; m[d])
+        s&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;add(Or(block))
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt;:
+        print(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Total solutions: &amp;#34;&lt;/span&gt;, len(results))
+        &lt;span style=&#34;color:#66d9ef&#34;&gt;break&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Running this code,&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;$ python sat_equation.py
+&lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;d &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; 0, b &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; 0, a &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; 7, f &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; 0, c &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; 0, e &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; 0&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt;
+&lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;c &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; 0, d &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; 2, e &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; 0, f &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; 1, b &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; 0, a &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; 1&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt;
+Total solutions:  &lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Turns out there are two ways for us to order our dishes! We can either:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Order 7 of dishes $A$.&lt;/li&gt;
+&lt;li&gt;OR order 1 dish of $A$, 2 of $D$ and 1 of $F$.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Very neat Z3! This satisfies our curiosity for the more applicative aspect of such solvers.&lt;/p&gt;
+&lt;h2 id=&#34;ctf-experiences&#34;&gt;CTF experiences&lt;/h2&gt;
+&lt;p&gt;In computer applications, you&amp;rsquo;ll often find anti-tamper or
+anti-cheating mechanisms. These mechanisms often place a lot of restrictions on what the user can and cannot do.&lt;/p&gt;
+&lt;p&gt;A very toy-ish example finds its place in CTFs, where a very large number of constraints are given inside a binary, and we have to figure out a particular value for a variable that satisfies these constraints. For instance,&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;(arg1 &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x14&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;^&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x2b&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;(arg1 &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;7&lt;/span&gt;)) &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt;
+(&lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;(arg1 &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x15&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;(arg1 &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;3&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;0x14&lt;/span&gt;)) &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt;
+(&lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;(arg1 &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;6&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;\0&amp;#39;&lt;/span&gt;)) &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt;
+((&lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;(arg1 &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0xd&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;t&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; 
+((&lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;(arg1 &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0xb&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x3fffffffU&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x5f&lt;/span&gt;)))) &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt;
+
+&lt;span style=&#34;color:#75715e&#34;&gt;// .... HUNDREDS of such checks ....
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Notice how the &lt;code&gt;arg1&lt;/code&gt; variable is constrained by all of these
+equations consisting of byte-level operations. To solve such a system, we use Z3 again in the hopes of finding a solution. The solution is a value
+of &lt;code&gt;arg1&lt;/code&gt; that satisfies all these checks. Imagine finding it by hand!&lt;/p&gt;
+&lt;p&gt;Apart from this classic scenario, there have been challenges implementing custom cryptography. Such as &lt;a href=&#34;https://www.hackthebox.com/blog/memory-acceleration-ca-ctf-2022-crypto-writeup&#34;&gt;this one&lt;/a&gt;, which require you to use Z3 to solve them.&lt;/p&gt;
+&lt;h1 id=&#34;how-conda-uses-smt-solvers&#34;&gt;How Conda uses SMT solvers&lt;/h1&gt;
+&lt;p&gt;Recently, I unexpectedly came across a &lt;strong&gt;very&lt;/strong&gt; interesting application for SAT solving systems. Apparently, the Conda project uses them to improve their performance!&lt;/p&gt;
+&lt;p&gt;Dependency management is a very interesting problem in computer science. If you have ever read a config file that describes dependencies, such as &lt;code&gt;package.json&lt;/code&gt; for Javascript projects, or &lt;code&gt;requirements.txt&lt;/code&gt; for Python projects or &lt;code&gt;Cargo.toml&lt;/code&gt; for Rust projects, you know what dependency constraints look like! They&amp;rsquo;re often something like this:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;docopt == 0.6.1             # Version Matching. Must be version 0.6.1
+keyring &amp;gt;= 4.1.1            # Minimum version 4.1.1
+coverage != 3.5             # Version Exclusion. Anything except version 3.5
+Mopidy-Dirble ~= 1.1        # Compatible release. Same as &amp;gt;= 1.1, == 1.*
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Conda isolated the performance issue to that specific dependency management module of theirs. They modeled dependency management as a SAT problem in first-order CNF logic, then used their in-house SAT solver to figure out valid dependency versions quickly during runtime and improve performance! How cool!&lt;/p&gt;
+&lt;p&gt;You can read Conda&amp;rsquo;s blog post on this: &lt;a href=&#34;https://www.anaconda.com/blog/understanding-and-improving-condas-performance&#34;&gt;Here&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id=&#34;exercise-to-the-reader&#34;&gt;Exercise to the reader&lt;/h1&gt;
+&lt;p&gt;I once played a very nice CTF. There was a reversing challenge in there,
+which I couldn&amp;rsquo;t solve at that time for some very frustrating reason. A part of that challenge involved huge number of constraints in the binary.&lt;/p&gt;
+&lt;p&gt;The system wouldn&amp;rsquo;t return &lt;code&gt;sat&lt;/code&gt;, even though it was supposed to.
+I&amp;rsquo;ve snipped the challenge quite a bit.
+You&amp;rsquo;re given a solution code for the challenge.
+The solution code is incomplete.
+Complete it.
+Does it return &lt;code&gt;sat&lt;/code&gt;?
+What&amp;rsquo;s the solution?&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://gist.github.com/Crystalsage/1536740eb0608458627569f2092f52f6&#34;&gt;Solve me!&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;$$
+\blacksquare
+\blacksquare
+\blacksquare
+$$&lt;/p&gt;
+</content>
+    </item>
+    
+    <item>
+      <title>A case of parameter injection MiTM on DHKE</title>
+      <link>https://crystalsage.github.io/posts/dhke/</link>
+      <pubDate>Thu, 19 May 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://crystalsage.github.io/posts/dhke/</guid>
+      <description>You can read up on Diffie-Hellman Key Exchange in various articles, books or get started on Wikipedia. We’ll begin the discourse with a short intro anyway.
+Background In DH key exchange scheme, two interested parties Alice and Bob participate in an exchange, at the end of which both have a shared secret. This secret is jointly computed over their inputs, one of which is kept private.
+Let the two parties be Alice and Bob.</description>
+      <content>&lt;p&gt;You can read up on Diffie-Hellman Key Exchange in various articles, books or get started on &lt;a href=&#34;https://en.wikipedia.corg/wiki/Diffie%E2%80%93Hellman_key_exchange&#34;&gt;Wikipedia&lt;/a&gt;. We’ll begin the discourse with a short intro anyway.&lt;/p&gt;
+&lt;h1 id=&#34;background&#34;&gt;Background&lt;/h1&gt;
+&lt;p&gt;In DH key exchange scheme, two interested parties Alice and Bob participate in an exchange, at the end of which both have a shared secret. This secret is jointly computed over their inputs, one of which is kept private.&lt;/p&gt;
+&lt;p&gt;Let the two parties be Alice and Bob. Two global parameters $g$
+and $p$ are decided upon at the start of the exchange. $g$ is the generator of the group $(\mathbb{Z}/p\mathbb{Z})^\times$. $p$ is a prime integer. $g$ is then said to be the primitive root modulo $p$.&lt;/p&gt;
+&lt;p&gt;Once the exchange begins,&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Alice chooses an integer $a$, which is her private key. Alice then calculates $A \equiv g^a \pmod{p}$, which is declared as her public key, and is sent to Bob.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Bob does the same and chooses b , his private key and calculates $B \equiv g^b \pmod{p}$, his public key. This is sent to Alice.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;The shared secret $S$ is computed by Alice as $S \equiv B^a \pmod{p}$ and by Bob as $S \equiv A^b \pmod{p}$. Both values are found to be equal.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div style=&#34;padding: 0.5rem;border-top:2px solid white;border-bottom:2px solid white;border-left:2px solid white;border-right:2px solid white;&#34; &gt;
+&lt;b style=&#34;color: #78e2a0&#34; &gt;Remember&lt;/b&gt;&lt;br&gt;&lt;br&gt;
+$X \equiv g^x \pmod{p}$ is hard to reverse because of discrete logarithm problem.
+&lt;p&gt;$A$, $B$, $g$ and $p$ are public. $a$ and $b$ are kept private by the respective parties.&lt;/p&gt;
+&lt;/div&gt;
+&lt;h1 id=&#34;the-challenge&#34;&gt;The challenge&lt;a href=&#34;#the-challenge&#34; class=&#34;hanchor&#34; ariaLabel=&#34;Anchor&#34;&gt;&amp;#8983;&lt;/a&gt; &lt;/h1&gt;
+&lt;p&gt;The challenge is served to us through a Python script. I&amp;rsquo;ve snipped
+away some part of it to maintain focus and left some comments. Take a read.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# The flag is a dummy one. The real flag is set on the server.&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;FLAG &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;CTF{--REDACTED--}&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;DEBUG_MSG &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;DEBUG MSG - &amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# The prime and base&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;p &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x509efab16c5e2772fa00fc180766b6e62c09bdbd65637793c70b6094f6a7bb8189172685d2bddf87564fe2a6bc596ce28867fd7bbc300fd241b8e3348df6a0b076a0b438824517e0a87c38946fa69511f4201505fca11bc08f257e7a4bb009b4f16b34b3c15ec63c55a9dac306f4daa6f4e8b31ae700eba47766d0d907e2b9633a957f19398151111a879563cbe719ddb4a4078dd4ba42ebbf15203d75a4ed3dcd126cb86937222d2ee8bddc973df44435f3f9335f062b7b68c3da300e88bf1013847af1203402a3147b6f7ddab422d29d56fc7dcb8ad7297b04ccc52f7bc5fdd90bf9e36d01902e0e16aa4c387294c1605c6859b40dad12ae28fdfd3250a2e9&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;g &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# Decrypt with AES. &lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;decrypt&lt;/span&gt;(encrypted, shared_secret):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    key &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; hashlib&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;md5(long_to_bytes(shared_secret))&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;digest()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    cipher &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; AES&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;new(key, AES&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;MODE_ECB)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    message &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; cipher&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;decrypt(encrypted)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; message
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;main&lt;/span&gt;(s):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#75715e&#34;&gt;# Server calculates its keys&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    c &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; random&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;randrange(&lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;, p &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    C &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; pow(g, c, p)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#75715e&#34;&gt;# Enter our public key here&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    M &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; receiveMessage(s, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Enter The Public Key of The Memory: &amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    shared_secret &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; pow(M, c, p)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    encrypted_sequence &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; receiveMessage(s, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Enter The Encrypted Initialization Sequence: &amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#75715e&#34;&gt;# The cipher text should be a hex digest&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;try&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        encrypted_sequence &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; bytes&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;fromhex(encrypted_sequence)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#66d9ef&#34;&gt;assert&lt;/span&gt; len(encrypted_sequence) &lt;span style=&#34;color:#f92672&#34;&gt;%&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;16&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    sequence &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; decrypt(encrypted_sequence, shared_secret)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; sequence &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;b&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Initialization Sequence - Code 0&amp;#34;&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        sendMessage(s, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;\n&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; DEBUG_MSG &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Reseting The Protocol With The New Shared Key&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;\n&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        sendMessage(s, DEBUG_MSG &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;f&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;{&lt;/span&gt;FLAG&lt;span style=&#34;color:#e6db74&#34;&gt;}&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        exit()
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;So we know the plaintext! We need to encrypt the string &lt;code&gt;Initialization Sequence - Code 0&lt;/code&gt; such that it decrypts correctly. But, to our dismay, we find that we &lt;strong&gt;don&amp;rsquo;t know the shared secret&lt;/strong&gt; and there&amp;rsquo;s no way to derive it since we never received server&amp;rsquo;s public key $C$. How can we hope to find the
+shared secret then?&lt;/p&gt;
+&lt;div style=&#34;padding: 0.5rem;border-top:2px solid white;border-bottom:2px solid white;border-left:2px solid white;border-right:2px solid white;&#34; &gt;
+&lt;b style=&#34;color: #78e2a0&#34;&gt;&lt;u&gt;Halt&lt;/u&gt;&lt;/b&gt;&lt;br&gt;&lt;br&gt;
+Ponder over the problem and try to figure out the flaw in the script before heading further. (Hint: It&#39;s somewhere in `main()`)
+&lt;/div&gt;
+&lt;h1 id=&#34;the-solution&#34;&gt;The solution&lt;a href=&#34;#the-solution&#34; class=&#34;hanchor&#34; ariaLabel=&#34;Anchor&#34;&gt;&amp;#8983;&lt;/a&gt; &lt;/h1&gt;
+&lt;p&gt;We don&amp;rsquo;t need to &lt;em&gt;derive&lt;/em&gt; the shared secret if we can just make it
+predictable! The way to do this would be to send a &amp;lsquo;bad&amp;rsquo; public key.&lt;/p&gt;
+&lt;p&gt;If you see how the shared secret is being derived,&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;shared_secret &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; pow(M,c,p)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;you&amp;rsquo;ll notice that our public key is used as the &lt;em&gt;base&lt;/em&gt; here, which means
+we have complete control over &lt;a href=&#34;https://en.wikipedia.org/wiki/Group_(mathematics)&#34;&gt;group&lt;/a&gt; that is being formed. So, if
+[
+M \equiv 0 \pmod{p}
+]
+then&lt;/p&gt;
+&lt;p&gt;[
+S \equiv M^{b} \equiv 0 \pmod{p}
+]&lt;/p&gt;
+&lt;p&gt;And we made $S$ predictable! This is because powers of $M$ are also
+congruent to 0 mod p.&lt;/p&gt;
+&lt;p&gt;This means we can send in a ciphertext
+encrypted with the key &amp;lsquo;0&amp;rsquo; and it should decrypt correctly!&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;from&lt;/span&gt; Crypto.Cipher &lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; AES
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;from&lt;/span&gt; Crypto.Util.number &lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; long_to_bytes
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; hashlib
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# Send in 0 as our key (shared secret)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;key &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; hashlib&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;md5(long_to_bytes(&lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;))&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;digest()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;cipher &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; AES&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;new(key, AES&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;MODE_ECB)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;message &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; cipher&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;encrypt(&lt;span style=&#34;color:#e6db74&#34;&gt;b&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Initialization Sequence - Code 0&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;print(message&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;hex())
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# Returns the following digest. This is our encrypted text.&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# 1af761314a07bf79f31aeb53bc9e1335e1749e1142b326d82a3c29ac37a042bf&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Once we submit the ciphertext to the server, we get our flag! Notice that we entered our public key $M$ as 0.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/conn.png&#34; alt=&#34;di&#34;&gt;&lt;/p&gt;
+&lt;h1 id=&#34;key-takeaway&#34;&gt;Key takeaway&lt;a href=&#34;#key-takeaway&#34; class=&#34;hanchor&#34; ariaLabel=&#34;Anchor&#34;&gt;&amp;#8983;&lt;/a&gt; &lt;/h1&gt;
+&lt;p&gt;&lt;em&gt;(Pun intended)&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;While the order of operations does not matter mathematically, i.e.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;$S = A^b = (g^a)^b = (g^b)^a = B^a \pmod{p}$&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;It clearly did matter to us. This vulnerability was only possible because
+we had control over the base (And subsequently, the group that was formed).&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Note&lt;/strong&gt;: Instead of 0, we could have also chosen a value of $M$ that is divisible by $p$, and it would have meant the same thing. (Why?)&lt;/p&gt;
+&lt;h1 id=&#34;exercise-to-the-reader&#34;&gt;Exercise to the reader&lt;a href=&#34;#exercise-to-the-reader&#34; class=&#34;hanchor&#34; ariaLabel=&#34;Anchor&#34;&gt;&amp;#8983;&lt;/a&gt; &lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;The full challenge is here: &lt;a href=&#34;https://gist.github.com/CrystalSage/910c26588dc8337bf8485d93209e0a5f&#34;&gt;Code&lt;/a&gt;. Try solving the challenge yourself by retracing my steps! :)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;The reader is invited to solve a similar Cryptopals challenge based on parameter injection: &lt;a href=&#34;https://cryptopals.com/sets/5/challenges/34&#34;&gt;Challenge&lt;/a&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;What&amp;rsquo;s the group that we formed?&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;[\blacksquare\blacksquare\blacksquare]&lt;/p&gt;
+</content>
+    </item>
+    
+    <item>
+      <title>Partial ordering and Rust</title>
+      <link>https://crystalsage.github.io/posts/partialeq/</link>
+      <pubDate>Mon, 28 Feb 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://crystalsage.github.io/posts/partialeq/</guid>
+      <description>Without order, there is chaos.
+ Introduction Wikipedia defines a partial order as,
+ A reflexive, weak, or non-strict partial order is a homogeneous relation ≤ on a set P that is reflexive, antisymmetric, and transitive.
+ In other words, we have that in a set $P$ , $\forall a,b,c \in P$ , we must have,
+ Reflexivity: a≤a , i.e. every element is related to itself. Antisymmetry: a≤b and b≤a then a=b , i.</description>
+      <content>&lt;blockquote&gt;
+&lt;p&gt;Without order, there is chaos.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;Wikipedia defines a partial order as,&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;A reflexive, weak, or non-strict partial order is a homogeneous relation ≤ on a set P that is reflexive, antisymmetric, and transitive.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;In other words, we have that in a set $P$ , $\forall a,b,c \in P$ , we must have,&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Reflexivity&lt;/strong&gt;: a≤a , i.e. every element is related to itself.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Antisymmetry&lt;/strong&gt;: a≤b and b≤a then a=b , i.e. no two distinct elements precede each other.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Transitivity&lt;/strong&gt;: If a≤b and b≤c then a≤c&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Wow! Quite a definition. But what does it actually mean…?&lt;/p&gt;
+&lt;h2 id=&#34;the-scenario&#34;&gt;The scenario&lt;/h2&gt;
+&lt;p&gt;Suppose that you want to buy a new fancy umbrella for you and your friend. These umbrellas differ in size and you would like the one which can fit both you and your friend.&lt;/p&gt;
+&lt;p&gt;Instantly, you have a perspective from which you start seeing things. You apply a filter according to your use cases, and judge the objects according to them. In your case, the filter is &lt;strong&gt;size&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;Defining an &lt;em&gt;order&lt;/em&gt; on a set is the same thing!&lt;/p&gt;
+&lt;p&gt;Defining an order gives us a sense of comparison between objects of that particular set. In the example stated before, the set is the entire category of umbrellas and the objects are the umbrellas.&lt;/p&gt;
+&lt;h2 id=&#34;formalizing-the-idea&#34;&gt;Formalizing the idea&lt;/h2&gt;
+&lt;p&gt;Continuing with the umbrella mould, let us state the same thing in a proper manner, so that Wikipedia’s definition fits our example, at least intuitively.&lt;/p&gt;
+&lt;p&gt;Let us define an order on the set of umbrellas. The set is $U$ and the objects of this set are umbrellas.&lt;/p&gt;
+&lt;p&gt;$$U={u_1,u_2,u_3,\cdots,u_n}$$&lt;/p&gt;
+&lt;p&gt;Let’s define an operator ≤
+on set U which defines a partial order. This operator gives us a comparison between sizes of umbrellas. The operator ≤&lt;/p&gt;
+&lt;p&gt;must satisfy the 3 rules stated in the opening section. Let’s see if we can explain them according to our scenario. (Note: A partially ordered set is also known as a poset.)&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Reflexivity: An umbrella ua is related to itself. In terms of the size, this would mean that the umbrella is similarly sized to say, an exact copy of ua .&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Antisymmetry: If two umbrellas are approximately equally sized, it’s confusing at a cursory glance whether if one really is smaller than the other. The situation can then be thought of as a scenario where both ua≤ub and ub≤ua are ’true’. So ua=ub must be true.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Transitivity: This is pretty obvious. Among a small, a medium and a large umbrella, there’s a clear hierarchy. If ua≤ub and ub≤uc then ua≤uc.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&#34;ordering-in-rust&#34;&gt;Ordering in Rust&lt;/h2&gt;
+&lt;p&gt;Ordering a data structure in Rust allows us to do abstract comparisons between objects of the same data structure. Let’s continue the umbrella saga.&lt;/p&gt;
+&lt;p&gt;Suppose we create a struct for describing an umbrella. The size field is of the Size type, which is user-defined.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-rust&#34; data-lang=&#34;rust&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;enum&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Size&lt;/span&gt;{
+  Small,
+  Medium,
+  Large,
+}
+
+&lt;span style=&#34;color:#66d9ef&#34;&gt;struct&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Umbrella&lt;/span&gt;{
+  size : &lt;span style=&#34;color:#a6e22e&#34;&gt;Size&lt;/span&gt;,
+  cost : &lt;span style=&#34;color:#66d9ef&#34;&gt;u16&lt;/span&gt;,
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Now, we would like to say that an umbrella is ‘better’ (for us) if the size is maximum. As a side effect, we would also love that the cost gets minimized. In other words, we’d like to define a clear notion of comparison.&lt;/p&gt;
+&lt;p&gt;In Rust, we can implement some traits, described below.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;PartialOrd&lt;/code&gt; : This trait implements the partial_cmp method where we describe what fields will be compared.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;PartialEq&lt;/code&gt; : This defines equality between objects.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Let’s do this.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-rust&#34; data-lang=&#34;rust&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;impl&lt;/span&gt; PartialOrd &lt;span style=&#34;color:#66d9ef&#34;&gt;for&lt;/span&gt; Umbrella {
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;fn&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;partial_cmp&lt;/span&gt;(&lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&lt;/span&gt;self, other: &lt;span style=&#34;color:#66d9ef&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;Self&lt;/span&gt;) -&amp;gt; Option&lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt;Ordering&lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&lt;/span&gt; {
+        self.size.partial_cmp(&lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&lt;/span&gt;other.size)
+    }
+}
+
+&lt;span style=&#34;color:#66d9ef&#34;&gt;impl&lt;/span&gt; PartialEq &lt;span style=&#34;color:#66d9ef&#34;&gt;for&lt;/span&gt; Umbrella {
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;fn&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;eq&lt;/span&gt;(&lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&lt;/span&gt;self, other: &lt;span style=&#34;color:#66d9ef&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;Self&lt;/span&gt;) -&amp;gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;bool&lt;/span&gt; {
+        self.size &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; other.size
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;but we run into a problem as soon as we run this.&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;error[E0599]: the method `partial_cmp` exists for enum `Size`, but its 
+trait bounds were not satisfied
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Oops! We forgot a really important thing here. We never defined a partial order on the &lt;code&gt;Size&lt;/code&gt; enum in the first place, so the compiler doesn’t know how to compare its members. Let’s fix this.&lt;/p&gt;
+&lt;p&gt;We can define the traits described above for the &lt;code&gt;enum&lt;/code&gt; as well. But, we’ll take a shortcut this time. We can use the &lt;code&gt;#derive&lt;/code&gt; attribute to tell the compiler to infer the traits onto the data type without manually defining them.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-rust&#34; data-lang=&#34;rust&#34;&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// Small &amp;lt; Medium &amp;lt; Large is inferred due to discriminants.
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// Implement `PartialOrd` and `PartialEq`
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#[derive(PartialOrd, PartialEq)]&lt;/span&gt;
+&lt;span style=&#34;color:#66d9ef&#34;&gt;enum&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Size&lt;/span&gt;{
+  Small,
+  Medium,
+  Large,
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Note that variants ordered in this way are ordered by their discriminants, which are like indices. So an enum member at the top has a lower index than the one below it and is considered lesser. (See here)&lt;/p&gt;
+&lt;p&gt;Neat! Let’s try running this now.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-rust&#34; data-lang=&#34;rust&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;fn&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;main&lt;/span&gt;(){
+  &lt;span style=&#34;color:#66d9ef&#34;&gt;let&lt;/span&gt; u1 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; Umbrella{ size: &lt;span style=&#34;color:#a6e22e&#34;&gt;Size&lt;/span&gt;::Small, cost: &lt;span style=&#34;color:#ae81ff&#34;&gt;20&lt;/span&gt;};
+  &lt;span style=&#34;color:#66d9ef&#34;&gt;let&lt;/span&gt; u2 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; Umbrella{ size: &lt;span style=&#34;color:#a6e22e&#34;&gt;Size&lt;/span&gt;::Medium, cost: &lt;span style=&#34;color:#ae81ff&#34;&gt;20&lt;/span&gt;};
+  &lt;span style=&#34;color:#66d9ef&#34;&gt;let&lt;/span&gt; u3 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; Umbrella{ size: &lt;span style=&#34;color:#a6e22e&#34;&gt;Size&lt;/span&gt;::Medium, cost: &lt;span style=&#34;color:#ae81ff&#34;&gt;30&lt;/span&gt;};
+  &lt;span style=&#34;color:#66d9ef&#34;&gt;let&lt;/span&gt; u4 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; Umbrella{ size: &lt;span style=&#34;color:#a6e22e&#34;&gt;Size&lt;/span&gt;::Large, cost: &lt;span style=&#34;color:#ae81ff&#34;&gt;40&lt;/span&gt;};
+
+  assert!(u1 &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt; u2);
+  assert!(u1 &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt; u3);
+  assert!(u1 &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt; u2 &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; u2 &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt; u3);
+  assert!(u4 &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; u3);
+
+  println!(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Passed all checks!&amp;#34;&lt;/span&gt;);
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;$ cargo run
+Finished dev &lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;unoptimized + debuginfo&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; target&lt;span style=&#34;color:#f92672&#34;&gt;(&lt;/span&gt;s&lt;span style=&#34;color:#f92672&#34;&gt;)&lt;/span&gt; in 0.00s
+Running &lt;span style=&#34;color:#e6db74&#34;&gt;`&lt;/span&gt;target/debug/partialeq&lt;span style=&#34;color:#e6db74&#34;&gt;`&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Passed all checks!&lt;/p&gt;
+&lt;p&gt;Awesome! We just implemented a partial order on a custom data type. The entire code can be found here: Code&lt;/p&gt;
+&lt;h2 id=&#34;exercise-to-the-reader&#34;&gt;Exercise to the reader&lt;/h2&gt;
+&lt;p&gt;The reader is invited to solve the following problems.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;What happens if the size of an umbrella is unknown? How will you rewrite the code to handle the situation?&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;You’ll find that u2 is actually better than u3 because you can get a medium sized umbrella at lesser price. Recall that we never used the cost field in our code. Rewrite the code so we can find larger umbrellas at equal or lesser price.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;further-reading&#34;&gt;Further reading&lt;/h2&gt;
+&lt;p&gt;Ordering is a fascinating topic. Many mathematicians and enthusiasts infinitely better than myself have spent much ink and chalk explaining what it means.&lt;/p&gt;
+&lt;p&gt;For starters, refer to the Order relations (Section 4.4) from Learning To Reason, where the authors offer a brief but completely sufficient explanation of ordering.&lt;/p&gt;
+&lt;p&gt;$$\blacksquare\blacksquare\blacksquare$$&lt;/p&gt;
+</content>
+    </item>
+    
+    <item>
+      <title>CSI-CTF Writeup (Part-3)</title>
+      <link>https://crystalsage.github.io/posts/ctf-3/</link>
+      <pubDate>Wed, 23 Feb 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://crystalsage.github.io/posts/ctf-3/</guid>
+      <description>This is the 3rd and final part of the 3-part series for the CSI-CTF writeup. Click here to read 1st part or 2nd part.
+You can register and play this CTF. It&amp;rsquo;s open to everyone.
+In this 3-part series, we will see my method of approaching these challenges and how I solved them. The 9 challenges are divided into 3 posts.
+Decode It The challenge gives us a pretty clear hint that each line is mapped to the single character (The hint is ambiguous, character could either mean the person or a character in the flag).</description>
+      <content>&lt;p&gt;This is the 3rd and final part of the 3-part series for the CSI-CTF writeup.
+Click here to read &lt;a href=&#34;https://crystalsage.github.io/posts/ctf-1/&#34;&gt;1st part&lt;/a&gt; or
+&lt;a href=&#34;https://crystalsage.github.io/posts/ctf-2/&#34;&gt;2nd part&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;You can &lt;a href=&#34;https://tinyurl.com/2t6kwcxe&#34;&gt;register&lt;/a&gt; and
+&lt;a href=&#34;https://tinyurl.com/ms95pajv&#34;&gt;play&lt;/a&gt; this CTF. It&amp;rsquo;s open to everyone.&lt;/p&gt;
+&lt;p&gt;In this 3-part series, we will see my method of approaching these challenges
+and how I solved them. The 9 challenges are divided into 3 posts.&lt;/p&gt;
+&lt;h1 id=&#34;decode-it&#34;&gt;Decode It&lt;/h1&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/di.png&#34; alt=&#34;di&#34;&gt;&lt;/p&gt;
+&lt;p&gt;The challenge gives us a pretty clear hint that each line is mapped to &lt;em&gt;the&lt;/em&gt; single
+character (The hint is ambiguous, character could either mean the person or
+a character in the flag).&lt;/p&gt;
+&lt;p&gt;And so, we are given some lines of text in a PDF file. We can quickly notice
+some things.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/di-morse.png&#34; alt=&#34;di-morse&#34;&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;There are two lines with just brackets. These are obviously the brackets
+from the flag itself. We can conclude that each line somehow maps to a single
+character in the flag.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;There&amp;rsquo;s no type of encoding in play here. No character/word limit for the
+line either.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;There&amp;rsquo;s no obvious pattern that stands out. Things such as skip cipher seem
+out of the question.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;I was a bit thrown off at first. I tried things such as measuring character
+frequency to calculate any remapped letters. But then, I decided to actually
+take a moment to read the content of the paragraph (Seems obvious, isn&amp;rsquo;t.).
+The paragraph actually mentions Samuel Morse, the creator of Morse Code. Aha!&lt;/p&gt;
+&lt;p&gt;If we notice carefully, we see that each line contains either dits (.) or dahs
+(-). Maybe we can extract all the dits and dahs from each line.&lt;/p&gt;
+&lt;p&gt;e.g. The very first line,&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;There is a town known for cryptography named Encoder-Decoder.
+And it&amp;rsquo;s not just one person skilled with cryptography, it&amp;rsquo;s just
+fully-filled with all of them.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;contains 1 dah, a dot, a dah and a dot again, in that order. So, &lt;code&gt;-.-.&lt;/code&gt;,
+which is clearly the letter &lt;code&gt;c&lt;/code&gt;. This must be the &amp;lsquo;c&amp;rsquo; of &lt;code&gt;csi-ctf&lt;/code&gt;!&lt;/p&gt;
+&lt;p&gt;Since we know the flag format, we can actually skip the first 8 lines and
+assume them to be &lt;code&gt;csi-ctf{&lt;/code&gt;. To decode everything inside the brackets, we can
+extract the dits and dahs from the lines, with some simple Python.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;extract_symbols &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;lambda&lt;/span&gt; line: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;join([i &lt;span style=&#34;color:#66d9ef&#34;&gt;for&lt;/span&gt; i &lt;span style=&#34;color:#f92672&#34;&gt;in&lt;/span&gt; line &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; i &lt;span style=&#34;color:#f92672&#34;&gt;in&lt;/span&gt; (&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;-&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;.&amp;#34;&lt;/span&gt;)])
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Once we extract all dits and dahs, we can put them in a morse &amp;ndash;&amp;gt; text converter.
+I happened to have a script on my machine for this.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/di-morse-ans.png&#34; alt=&#34;di-morse-ans&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Which is the text inside the brackets, so the flag is
+&lt;code&gt;csi-ctf{MORSEINTERSTELLAR}&lt;/code&gt; $\blacksquare$&lt;/p&gt;
+&lt;h1 id=&#34;crack-the-sequence&#34;&gt;Crack the Sequence&lt;/h1&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/cts.png&#34; alt=&#34;cts&#34;&gt;&lt;/p&gt;
+&lt;p&gt;The challenge description tells us that we need to crack a sequence of four
+cards, and decrypt it. Cool.&lt;/p&gt;
+&lt;p&gt;If we click around on some 5 cards randomly, we get an alert box saying that
+the combination is wrong.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/cts-wrong.png&#34; alt=&#34;ctf-fail&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s see what&amp;rsquo;s going on under the hood. On the page&amp;rsquo;s source,  we find the
+following Javascript code.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;store&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;;
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;count&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;;
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;card&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;res&lt;/span&gt;) {
+      &lt;span style=&#34;color:#a6e22e&#34;&gt;store&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;store&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;res&lt;/span&gt;;
+      &lt;span style=&#34;color:#a6e22e&#34;&gt;count&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;++&lt;/span&gt;;
+      &lt;span style=&#34;color:#a6e22e&#34;&gt;console&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;log&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;store&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;length&lt;/span&gt;);
+
+      &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#a6e22e&#34;&gt;count&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;===&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;4&lt;/span&gt;) {
+        &lt;span style=&#34;color:#a6e22e&#34;&gt;setTimeout&lt;/span&gt;(() =&amp;gt; {
+          &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#f92672&#34;&gt;!&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;store&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;===&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;d8c2436e262448af3043fde3d652726a&amp;#34;&lt;/span&gt;)) {
+            &lt;span style=&#34;color:#a6e22e&#34;&gt;alert&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;wrong&amp;#34;&lt;/span&gt;);
+            window.&lt;span style=&#34;color:#a6e22e&#34;&gt;location&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;reload&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;true&lt;/span&gt;);
+          }
+          &lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt; {
+            &lt;span style=&#34;color:#a6e22e&#34;&gt;alert&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;congratulations you found the flag : &amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;`csi-ctf{&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;${&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;store&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;}&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;}`&lt;/span&gt;);
+            window.&lt;span style=&#34;color:#a6e22e&#34;&gt;location&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;reload&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;true&lt;/span&gt;);
+          }
+        }, &lt;span style=&#34;color:#ae81ff&#34;&gt;300&lt;/span&gt;);
+      }
+    }
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;flip&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;event&lt;/span&gt;) {
+      &lt;span style=&#34;color:#66d9ef&#34;&gt;var&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;element&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;event&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;currentTarget&lt;/span&gt;;
+      &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#a6e22e&#34;&gt;element&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;className&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;===&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;cards col-md-4 col-sm-6 col-12&amp;#34;&lt;/span&gt;) {
+        &lt;span style=&#34;color:#a6e22e&#34;&gt;element&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;style&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;transform&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;rotateY(180deg)&amp;#34;&lt;/span&gt;;
+      }
+    }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The &lt;code&gt;card()&lt;/code&gt; appends &amp;lsquo;something&amp;rsquo; to &lt;code&gt;store&lt;/code&gt;. Once we flip 5 cards, we check if
+the &amp;lsquo;something&amp;rsquo; of the cards form the sequence
+&lt;code&gt;d8c2436e262448af3043fde3d652726a&lt;/code&gt;. If so, we get the flag.&lt;/p&gt;
+&lt;p&gt;But hey!!! The
+flag is the &lt;code&gt;store&lt;/code&gt; variable itself, as evident by the
+&amp;ldquo;congratulations&amp;rdquo; message. So the flag is the hex sequence
+&lt;code&gt;d8c2436e262448af3043fde3d652726a&lt;/code&gt;. But this doesn&amp;rsquo;t make sense. If you try
+submitting this, it fails. Let&amp;rsquo;s try decrypting this.&lt;/p&gt;
+&lt;p&gt;Since the total length of the hex sequence is 32, I can safely assume this
+to be the MD5 hash of the flag. We can crack this using a mask with hashcat
+or a wordlist. The easiest way is to check the online databases for the
+password. After checking some, I found a hit.&lt;/p&gt;
+&lt;img src=&#34;https://crystalsage.github.io/ctf/cts-decrypted.png&#34; alt=&#34;drawing&#34; width=&#34;500&#34;/&gt;
+&lt;p&gt;This should be our flag. &lt;code&gt;csi-ctf{sequential_flag}&lt;/code&gt; $\blacksquare$&lt;/p&gt;
+&lt;p&gt;If you want to do this the proper way:
+The idea is to flip the cards in correct order. We notice that the
+&lt;code&gt;onClick()&lt;/code&gt; events for the cards are called with specific arguments. These
+seem like fragments of the entire sequence, these are the &amp;lsquo;something&amp;rsquo;.  e.g.
+we notice for the first card that &lt;code&gt;card(&#39;d8c2436e&#39;)&lt;/code&gt; is called. This matches
+with the first few characters of our resulting sequence.&lt;/p&gt;
+&lt;p&gt;So we collect all the &lt;code&gt;onClick&lt;/code&gt; snippets.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;onclick&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;[flip(event),card(&amp;#39;d8c2436e&amp;#39;)] //1
+&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;    onclick=&amp;#34;&lt;/span&gt;[&lt;span style=&#34;color:#a6e22e&#34;&gt;flip&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;event&lt;/span&gt;),&lt;span style=&#34;color:#a6e22e&#34;&gt;card&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;)] &lt;span style=&#34;color:#75715e&#34;&gt;//2
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;onclick&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;[flip(event),card(&amp;#39;&amp;#39;)] //3
+&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;    onclick=&amp;#34;&lt;/span&gt;[&lt;span style=&#34;color:#a6e22e&#34;&gt;flip&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;event&lt;/span&gt;),&lt;span style=&#34;color:#a6e22e&#34;&gt;card&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;)] &lt;span style=&#34;color:#75715e&#34;&gt;//4
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;onclick&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;[flip(event),card(&amp;#39;262448af&amp;#39;)] //5
+&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;    onclick=&amp;#34;&lt;/span&gt;[&lt;span style=&#34;color:#a6e22e&#34;&gt;flip&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;event&lt;/span&gt;),&lt;span style=&#34;color:#a6e22e&#34;&gt;card&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;652726a&amp;#39;&lt;/span&gt;)] &lt;span style=&#34;color:#75715e&#34;&gt;//6
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;onclick&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;[flip(event),card(&amp;#39;&amp;#39;)] //7 
+&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;    onclick=&amp;#34;&lt;/span&gt;[&lt;span style=&#34;color:#a6e22e&#34;&gt;flip&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;event&lt;/span&gt;),&lt;span style=&#34;color:#a6e22e&#34;&gt;card&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;3043fde3d&amp;#39;&lt;/span&gt;)] &lt;span style=&#34;color:#75715e&#34;&gt;//8
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;We notice that some of these are empty. So, if we were to flip the cards in
+the order &lt;code&gt;1-5-8-6&lt;/code&gt;, it&amp;rsquo;ll form the sequence that we want and we&amp;rsquo;ll get our hash, which is the same sequence.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/cts-flag-hashed.png&#34; alt=&#34;cts-flag&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Challenge Idea/Solution&lt;/strong&gt;: An alternate solution to this challenge, if the flag was something else, would be to set a breakpoint where we check if the &lt;code&gt;store&lt;/code&gt; is equivalent to the sequence, and (by)pass the check entirely by modifying the &lt;code&gt;store&lt;/code&gt; variable to be equal to the hash. Alternate challenge idea!&lt;/p&gt;
+&lt;h1 id=&#34;one-zero-one&#34;&gt;One Zero One&lt;/h1&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/ozo.png&#34; alt=&#34;ozo&#34;&gt;&lt;/p&gt;
+&lt;p&gt;This is easy. We just need to decode the binary. In fact, the hardest part
+of this challenge is to write down the binary in a text editor. The full binary
+is,&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;0100000001000011
+0101001101001001
+0100010001001101
+0100001101000101
+0100001101010100
+0100011000100011
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;which decodes to, &lt;code&gt;@CSIDMCECTF#&lt;/code&gt;. The challenge deviates from other challenges
+to give us the text inside the brackets. I found it surprising that there
+was no indication about this. The full flag is &lt;code&gt;csi-ctf{@CSIDMCECTF#}&lt;/code&gt;
+$\blacksquare$&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Note&lt;/strong&gt;: In theory, it&amp;rsquo;s much convenient to use OCR on the image to extract the
+binary digits, but I could not find one reliable OCR service which could do so.
+So I ended up writing them by hand.&lt;/p&gt;
+&lt;hr style=&#34;border:2px solid gray&#34;&gt; &lt;/hr&gt;
+This marks the end of the writeups.
+</content>
+    </item>
+    
+    <item>
+      <title>CSI-CTF Writeup (Part-2)</title>
+      <link>https://crystalsage.github.io/posts/ctf-2/</link>
+      <pubDate>Sun, 20 Feb 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://crystalsage.github.io/posts/ctf-2/</guid>
+      <description>This is the part 2 of the 3-part series for the CSI-CTF writeup. Click Here to read the 1st part.
+You can register and play this CTF. It&amp;rsquo;s open to everyone.
+In this 3-part series, we will see my method of approaching these challenges and how I solved them. The 9 challenges are divided into 3 posts.
+Attack on Bank The challenge description gives us info about the encrypted text (Also notice how ECB abbreviation gives us a hint about 128-bit AES-ECB being the cryptosystem).</description>
+      <content>&lt;p&gt;This is the part 2 of the 3-part series for the CSI-CTF writeup. Click
+&lt;a href=&#34;https://crystalsage.github.io/posts/ctf-1/&#34;&gt;Here&lt;/a&gt; to read the 1st part.&lt;/p&gt;
+&lt;p&gt;You can &lt;a href=&#34;https://tinyurl.com/2t6kwcxe&#34;&gt;register&lt;/a&gt; and
+&lt;a href=&#34;https://tinyurl.com/ms95pajv&#34;&gt;play&lt;/a&gt; this CTF. It&amp;rsquo;s open to everyone.&lt;/p&gt;
+&lt;p&gt;In this 3-part series, we will see my method of approaching these challenges
+and how I solved them. The 9 challenges are divided into 3 posts.&lt;/p&gt;
+&lt;h1 id=&#34;attack-on-bank&#34;&gt;Attack on Bank&lt;/h1&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/AOB.png&#34; alt=&#34;here&#34;&gt;&lt;/p&gt;
+&lt;p&gt;The challenge description gives us info about the encrypted text (Also notice
+how ECB abbreviation gives us a hint about 128-bit AES-ECB being the cryptosystem).
+We also get an unique ID for the bank, which should be the decryption key, if my guess is correct.&lt;/p&gt;
+&lt;p&gt;The link given in the challenge leads us to a Paste(bin) where we can find some encrypted text, encoded in base64: &lt;code&gt;Keg7B3p7TENwcvdk2zsy+NXVQzMnMxg6ik2xO0M6A3c=&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Cool. This is easy. We can use what we assume to be the key as the key, and
+decrypt the text. I used my favorite tool, &lt;a href=&#34;https://gchq.github.io/CyberChef/&#34;&gt;CyberChef&lt;/a&gt;
+for this.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/aob-flag.png&#34; alt=&#34;aob-flag&#34;&gt;&lt;/p&gt;
+&lt;p&gt;We first decoded the base64 encoded plaintext, and decrypted the text using the
+key, and a blank IV. This gets us our flag! &lt;code&gt;csi-ctf{pR0videncE_$4ys_He110}&lt;/code&gt; $\blacksquare$&lt;/p&gt;
+&lt;h1 id=&#34;js-nerds&#34;&gt;JS Nerds&lt;/h1&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/jsn.png&#34; alt=&#34;jsn&#34;&gt;&lt;/p&gt;
+&lt;p&gt;We get login page right off the bat. I was initially thrown off by the obvious
+hints towards a Blind SQL injection. &lt;em&gt;You can&amp;rsquo;t see me&lt;/em&gt; is really
+suggestive. To test this if there&amp;rsquo;s any SQLi involved at all,
+I used typical payloads such as &lt;code&gt;&#39; OR 1=1 --&lt;/code&gt; and friends.
+But this yielded nothing even after 5-6 minutes of trying, so I eventually gave up on this.&lt;/p&gt;
+&lt;p&gt;If we visit this page&amp;rsquo;s source, we can find a file at the bottom named
+&lt;code&gt;index.js&lt;/code&gt; referenced in there. This &lt;code&gt;index.js&lt;/code&gt; file contains some Javascript
+code.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;checkData&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;event&lt;/span&gt;) {
+    &lt;span style=&#34;color:#a6e22e&#34;&gt;console&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;log&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;click&amp;#34;&lt;/span&gt;);
+    &lt;span style=&#34;color:#a6e22e&#34;&gt;event&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;preventDefault&lt;/span&gt;();
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;x&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; document.&lt;span style=&#34;color:#a6e22e&#34;&gt;forms&lt;/span&gt;[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;login-form&amp;#34;&lt;/span&gt;][&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;username&amp;#34;&lt;/span&gt;].&lt;span style=&#34;color:#a6e22e&#34;&gt;value&lt;/span&gt;;
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;p&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; document.&lt;span style=&#34;color:#a6e22e&#34;&gt;forms&lt;/span&gt;[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;login-form&amp;#34;&lt;/span&gt;][&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;password&amp;#34;&lt;/span&gt;].&lt;span style=&#34;color:#a6e22e&#34;&gt;value&lt;/span&gt;;
+    &lt;span style=&#34;color:#75715e&#34;&gt;// oh no! Client side validation always fails! thank god I have encrypted it!
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#a6e22e&#34;&gt;x&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;===&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;John&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;||&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;SHA1&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;p&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;b89356ff6151527e89c4f3e3d30c8e6586c63962&amp;#34;&lt;/span&gt;) {;
+    } &lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt; {
+        &lt;span style=&#34;color:#a6e22e&#34;&gt;alert&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Invalid username or password&amp;#34;&lt;/span&gt;);
+    }
+
+};
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Oh. We get the username and SHA-1 hash of our password. So I guess we have
+to crack SHA-1 now. We can do this using a tool such as hashcat and crack this
+password using a wordlist. But I didn&amp;rsquo;t happen to have my machine with me,
+so I had to use &lt;a href=&#34;https://crackstation.net/&#34;&gt;crackstation&lt;/a&gt; to do this. Fortunately,
+crackstation had this hash in their database, which reveals the password to be
+&lt;code&gt;adminz&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/jsn-hash.png&#34; alt=&#34;jsn-hash&#34;&gt;&lt;/p&gt;
+&lt;p&gt;We can log in to the site with our credentials now to get the flag.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/jsn-flag.png&#34; alt=&#34;jsn-flag&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Bread! &lt;code&gt;csi-ctf{eXploIted_wEb}&lt;/code&gt; $\blacksquare$&lt;/p&gt;
+&lt;h1 id=&#34;computer-engineering&#34;&gt;Computer Engineering&lt;/h1&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/ce1.png&#34; alt=&#34;ce-1&#34;&gt;&lt;/p&gt;
+&lt;p&gt;We get another Github page. Except this time, there is nothing in
+the 6 commits. We do notice the 6 branches though.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/ce2.png&#34; alt=&#34;ce-2&#34;&gt;&lt;/p&gt;
+&lt;p&gt;There are 6 branches, let&amp;rsquo;s visit CS first. There are 3 commits in
+there, one of which gives us the flag.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/ce3.png&#34; alt=&#34;ce-3&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Flag! &lt;code&gt;csi-ctf{this_is_the_flag_codecocomo}&lt;/code&gt; $\blacksquare$&lt;/p&gt;
+&lt;p&gt;This challenge was really more of a &amp;ldquo;click 50 times to get the flag&amp;rdquo; challenge.
+These types of challenges where flags are hidden in commit histories and
+branches are not included &lt;strong&gt;in CTFs&lt;/strong&gt; due to them having less of a problem
+solving aspect to them.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;However&lt;/strong&gt;, every often, some company get pwned or a bug hunter gets rewarded
+handsomely because he found an internal API key or SSH key in a Github
+commit history, which was accidentally pushed to the repo. So, it&amp;rsquo;s not
+unrealistic at all. There&amp;rsquo;s a lesson to be learned here.&lt;/p&gt;
+&lt;hr style=&#34;border:2px solid gray&#34;&gt; &lt;/hr&gt;
+This series is to be continued in part 3 where we&#39;ll solve more
+challenges...
+</content>
+    </item>
+    
+    <item>
+      <title>CSI-CTF Writeup (Part-1)</title>
+      <link>https://crystalsage.github.io/posts/ctf-1/</link>
+      <pubDate>Sun, 13 Feb 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://crystalsage.github.io/posts/ctf-1/</guid>
+      <description>I recently won 1st place at the CSI-CTF 2022. The CTF was basic, but still amazing (We find that the two things are often mutually exclusive in many CTFs). The challenges were easy, but not lame. The UI was fantastic. I was impressed by the CTF infrastructure. It is not easy to host a CTF this well.
+You can register and play this CTF. It&amp;rsquo;s open to everyone.
+In this 3-part series, we will see my method of approaching these challenges and how I solved them.</description>
+      <content>&lt;p&gt;I recently won 1st place at the CSI-CTF 2022. The CTF was basic, but still
+amazing (We find that the two things are often mutually exclusive in many CTFs).
+The challenges were easy, but not lame. The UI was fantastic. I was impressed
+by the CTF infrastructure. It is not easy to host a CTF this well.&lt;/p&gt;
+&lt;p&gt;You can &lt;a href=&#34;https://tinyurl.com/2t6kwcxe&#34;&gt;register&lt;/a&gt; and
+&lt;a href=&#34;https://tinyurl.com/ms95pajv&#34;&gt;play&lt;/a&gt; this CTF. It&amp;rsquo;s open to everyone.&lt;/p&gt;
+&lt;p&gt;In this 3-part series, we will see my method of approaching these challenges
+and how I solved them. The 9 challenges are divided into 3 posts.
+&lt;img src=&#34;https://crystalsage.github.io/ctf.jpg&#34; alt=&#34;Some&#34;&gt;&lt;/p&gt;
+&lt;p&gt;A tip for solving easy CTF challenges is that the name of the challenge
+often gives a hint to you. After that, you just need to keep your mind open to all
+the possibilities and think your way through. Keep the name in the back of
+your mind but don&amp;rsquo;t let it bias your thinking. Keep an open approach to any
+challenge which you&amp;rsquo;re aiming to solve.&lt;/p&gt;
+&lt;h1 id=&#34;what-lies-within&#34;&gt;What Lies Within&lt;/h1&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/whatlieswithin.png&#34; alt=&#34;challenge&#34;&gt;
+From the challenge&amp;rsquo;s name and some experience, we can immediately guess that the
+image has data inside it. The most preliminary test you can do to weed out
+some easy challenges is to run &lt;code&gt;strings&lt;/code&gt; on the image. &lt;code&gt;strings&lt;/code&gt; will yield us
+the plaintext strings inside the file.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/whatlieswithin-strings.png&#34; alt=&#34;wlw-strings&#34;&gt;&lt;/p&gt;
+&lt;p&gt;As you can see, it returns us all of the plaintext things inside the image. It
+would be a mad task to scroll down and find our flag in this haystack. So, we
+can find our flag using &lt;code&gt;grep&lt;/code&gt;. We can grep for the flag&amp;rsquo;s format since we
+definitely know it&amp;rsquo;s a part of the flag.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/whatlieswithin-flag.png&#34; alt=&#34;flag&#34;&gt;&lt;/p&gt;
+&lt;p&gt;The flag! &lt;code&gt;csi-ctf{Let&#39;s_go_to_the_subway_for_lunch}&lt;/code&gt; $\blacksquare$&lt;/p&gt;
+&lt;hr&gt;
+&lt;h1 id=&#34;luminous-hunt&#34;&gt;Luminous Hunt&lt;/h1&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/lh-chall.png&#34; alt=&#34;lh-chall&#34;&gt;
+In this challenge, we are again, starting with an image. And, the name gives
+us a hint about this being related to light.&lt;/p&gt;
+&lt;p&gt;My initial guess was that the image contained the flag, but it&amp;rsquo;s too small to
+see. I &lt;em&gt;really&lt;/em&gt; zoomed in on the image to see if there was a tiny flag somewhere
+in there, but nope. Thanks creators for not doing this!
+(This is actually a pretty common thing in CTFs!)&lt;/p&gt;
+&lt;p&gt;Next, I tried putting this image in an image editor and analyzed its RGB
+channels. The flag, if  hidden in one of the three channels, is only visible
+in that particular channel. But no.&lt;/p&gt;
+&lt;p&gt;I was out of my typical ideas when I enlarged the image a bit and noticed that
+the blackboard looked too black. Something seemed off about it. So, keeping the
+challenge name and the weird blackboard color in mind, I decided to brighten
+up the image, and play around with the contrast, which gives us our flag,
+hidden in the darkness of the blackboard.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/lh-brighten.png&#34; alt=&#34;lh-brighten&#34;&gt;&lt;/p&gt;
+&lt;p&gt;It&amp;rsquo;s still somewhat hard to read, but we can make out &lt;code&gt;csi-ctf{CPL-CSI}&lt;/code&gt;, which
+is our flag. $\blacksquare$&lt;/p&gt;
+&lt;hr&gt;
+&lt;h1 id=&#34;a-tribute&#34;&gt;A Tribute&lt;/h1&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/ctf/at-chall.png&#34; alt=&#34;at-chall&#34;&gt;
+We are given a GitHub page which tells us to find the name of a person. This
+obviously is an OSINT challenge, right? No! There&amp;rsquo;s a twist here.&lt;/p&gt;
+&lt;p&gt;If you find out the person&amp;rsquo;s name, and try to submit it as a flag, the
+submission gets denied.&lt;/p&gt;
+&lt;p&gt;If you take a look around the page, you&amp;rsquo;ll see that the repository&amp;rsquo;s commit
+history is pretty interesting. It contains some strings that could be useful
+to us.
+&lt;img src=&#34;https://crystalsage.github.io/ctf/at-commits.png&#34; alt=&#34;at-commits&#34;&gt;
+The letters look jumbled but they are still readable. This is probably encoded
+with some cipher. If you&amp;rsquo;ve had any sort of experience with ciphers, you&amp;rsquo;ve
+probably heard of the Caesar cipher, AKA rot-n cipher. One of the strings of
+the commit messages must be our encoded flag.&lt;/p&gt;
+&lt;p&gt;If you patiently try out some/all of these, you&amp;rsquo;ll find out that the 4th commit
+message from the top is actually our flag, with rot-18 encoding.
+&lt;img src=&#34;https://crystalsage.github.io/ctf/at-flag.png&#34; alt=&#34;at-flag&#34;&gt;&lt;/p&gt;
+&lt;p&gt;The flag is &lt;code&gt;csi-ctf{congratulations_the_flag_is_jira}&lt;/code&gt; $\blacksquare$&lt;/p&gt;
+&lt;hr style=&#34;border:2px solid gray&#34;&gt; &lt;/hr&gt;
+This series is to be continued in the part 2 and 3 where we&#39;ll solve more
+challenges...
+</content>
+    </item>
+    
+    <item>
+      <title>Swallow</title>
+      <link>https://crystalsage.github.io/posts/swallow/</link>
+      <pubDate>Thu, 13 Jan 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://crystalsage.github.io/posts/swallow/</guid>
+      <description>Throughout the discussion, C-x means Control + x keychord.
+Introduction Window swallowing is a mechanism in tiling window managers, by which a GUI application&amp;rsquo;s window can replace the terminal window in-place, when the application is called from the terminal.
+This avoids congestion in tiling WMs, and is a much preferred solution than zooming into the said GUI window (Also called monocle mode in some WMs)
+For instance, consider a scenario where I want to spawn VLC from my terminal.</description>
+      <content>&lt;p&gt;Throughout the discussion, &lt;code&gt;C-x&lt;/code&gt; means Control + x keychord.&lt;/p&gt;
+&lt;h1 id=&#34;introduction&#34;&gt;Introduction&lt;/h1&gt;
+&lt;p&gt;Window swallowing is a mechanism in tiling window managers, by which a GUI application&amp;rsquo;s window can replace the terminal window in-place, when the application is called from the terminal.&lt;/p&gt;
+&lt;p&gt;This avoids congestion in tiling WMs, and is a much preferred solution than zooming into the said GUI window (Also called &lt;em&gt;monocle mode&lt;/em&gt; in some WMs)&lt;/p&gt;
+&lt;p&gt;For instance, consider a scenario where I want to spawn VLC from my terminal. After I call VLC with &lt;code&gt;vlc ./video.mp4&lt;/code&gt;, I get a VLC window on my screen. But now, there&amp;rsquo;s a leftover terminal window that does nothing, and you can&amp;rsquo;t close it because it&amp;rsquo;s the parent window of VLC.&lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+&lt;p&gt;The following diagram illustrates the difference without and with swallowing, respectively:
+&lt;img src=&#34;https://crystalsage.github.io/swallow.png&#34; alt=&#34;Swallow_VLC&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Popular WMs such as DWM, BSPWM and i3 have patches available for swallowing a window. However, I prefer a native solution over patches. As a bonus, the solution that I was able to come up with is also universal.&lt;/p&gt;
+&lt;h1 id=&#34;my-solution&#34;&gt;My solution&lt;/h1&gt;
+&lt;p&gt;My solution, whether if inefficient or dumb, most importantly works and has never failed me.&lt;/p&gt;
+&lt;p&gt;I combine a BASH script + a Fish shell function (alias) + a Fish shell keyboard shortcut that swallows a window. Code explained below. Please don&amp;rsquo;t mind the names.&lt;/p&gt;
+&lt;h2 id=&#34;bash-script-rbgsh&#34;&gt;Bash script: &lt;code&gt;rbg.sh&lt;/code&gt;&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#!/bin/sh
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
+$@ &amp;amp;
+disown
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This is just doing automatically the stuff that would require manual efforts. The first line takes in the entire &lt;code&gt;argv&lt;/code&gt;, symbolized with &lt;code&gt;@&lt;/code&gt; variable, puts it in background with &lt;code&gt;&amp;amp;&lt;/code&gt; and disowns it.&lt;/p&gt;
+&lt;p&gt;The script is meant to be placed in one of the directories in your &lt;code&gt;$PATH&lt;/code&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;fish-function-sdffish&#34;&gt;Fish function: &lt;code&gt;sdf.fish&lt;/code&gt;&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; sdf
+  rbg $argv &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; exit
+end
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Which calls the &lt;code&gt;rbg&lt;/code&gt; binary with your command.&lt;/p&gt;
+&lt;p&gt;This function allows us to wrap over the &lt;code&gt;rbg.sh&lt;/code&gt; script as well as close the actual terminal window. This only exists because I couldn&amp;rsquo;t find a way to both exit the BASH script and close the terminal window without messing with Xorg tools.&lt;/p&gt;
+&lt;h2 id=&#34;fish-shortcut-goes-in-configfish&#34;&gt;Fish shortcut: goes in &lt;code&gt;config.fish&lt;/code&gt;&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;bind &lt;span style=&#34;color:#ae81ff&#34;&gt;\c&lt;/span&gt;s &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;fish_commandline_prepend sdf&amp;#39;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Which just prepends &lt;code&gt;sdf&lt;/code&gt; to your command in the terminal. Note that typing &lt;code&gt;sdf &amp;lt;command&amp;gt;&lt;/code&gt; is kind of awkward and feels unnatural (I always forget to do it), so typing the command first and prepending is the most natural flow.&lt;/p&gt;
+&lt;h1 id=&#34;results&#34;&gt;Results&lt;/h1&gt;
+&lt;p&gt;Now, when I type &lt;code&gt;vlc ./video.mp4&lt;/code&gt; and press &lt;code&gt;C-s&lt;/code&gt; the resulting command becomes &lt;code&gt;sdf vlc ./video.mp4&lt;/code&gt;, which successfully swallows the terminal when executed. It&amp;rsquo;s instantaneous with really no lag.&lt;/p&gt;
+&lt;section class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
+&lt;hr&gt;
+&lt;ol&gt;
+&lt;li id=&#34;fn:1&#34; role=&#34;doc-endnote&#34;&gt;
+&lt;p&gt;You can close the window by putting the process to background, disowning it and then closing the terminal. The problem with this approach is that it is slow and just doesn&amp;rsquo;t feel right.&amp;#160;&lt;a href=&#34;#fnref:1&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/section&gt;
+</content>
+    </item>
+    
+    <item>
+      <title>ls clone using getdents syscall</title>
+      <link>https://crystalsage.github.io/posts/fp/</link>
+      <pubDate>Mon, 15 Nov 2021 18:20:39 +0530</pubDate>
+      
+      <guid>https://crystalsage.github.io/posts/fp/</guid>
+      <description>Introduction In this short post, we’re building a barebones,toy implementation of the ls-like directory listing program in x86-64 assembly. We achieve this by using the getdents syscall.
+getdents() syscall The getdents syscall takes in 3 parameters. So the prototype of the syscall looks like: ssize_t getdents(int fd, void *dirp, size_t count), where:
+ fd : is the file descriptor of the directory (which is also just another file in Unix) dirp : is where all the dirent structs are copied during the syscall.</description>
+      <content>&lt;h1 id=&#34;introduction&#34;&gt;Introduction&lt;/h1&gt;
+&lt;p&gt;In this short post, we’re building a barebones,toy implementation of the &lt;code&gt;ls&lt;/code&gt;-like directory listing program in x86-64 assembly. We achieve this by using the &lt;code&gt;getdents&lt;/code&gt; syscall.&lt;/p&gt;
+&lt;h1 id=&#34;getdents-syscall&#34;&gt;getdents() syscall&lt;/h1&gt;
+&lt;p&gt;The &lt;code&gt;getdents&lt;/code&gt; syscall takes in 3 parameters. So the prototype of the syscall looks like: &lt;code&gt;ssize_t getdents(int fd, void *dirp, size_t count)&lt;/code&gt;, where:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;fd&lt;/code&gt; : is the file descriptor of the directory (which is also just another file in Unix)&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;dirp&lt;/code&gt; : is where all the &lt;code&gt;dirent&lt;/code&gt; structs are copied during the syscall.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;count&lt;/code&gt; : is the size of the buffer that &lt;code&gt;dirp&lt;/code&gt; points to.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h1 id=&#34;dirent-structs&#34;&gt;Dirent structs&lt;/h1&gt;
+&lt;p&gt;A &lt;em&gt;dirent&lt;/em&gt; or &lt;em&gt;linux_dirent&lt;/em&gt; struct is defined as follows.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-c++&#34; data-lang=&#34;c++&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;struct&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;linux_dirent&lt;/span&gt; {
+       &lt;span style=&#34;color:#66d9ef&#34;&gt;unsigned&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;long&lt;/span&gt;  d_ino;     &lt;span style=&#34;color:#75715e&#34;&gt;/* File inode*/&lt;/span&gt;
+       &lt;span style=&#34;color:#66d9ef&#34;&gt;unsigned&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;long&lt;/span&gt;  d_off;     &lt;span style=&#34;color:#75715e&#34;&gt;/* Offset of the next linux_dirent */&lt;/span&gt;
+       &lt;span style=&#34;color:#66d9ef&#34;&gt;unsigned&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;short&lt;/span&gt; d_reclen;  &lt;span style=&#34;color:#75715e&#34;&gt;/* Size of the current dirent struct*/&lt;/span&gt;
+       &lt;span style=&#34;color:#66d9ef&#34;&gt;char&lt;/span&gt;           d_name[];  &lt;span style=&#34;color:#75715e&#34;&gt;// The filename of the file
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
+       &lt;span style=&#34;color:#66d9ef&#34;&gt;char&lt;/span&gt;           pad;       &lt;span style=&#34;color:#75715e&#34;&gt;// Zero padding byte
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;       &lt;span style=&#34;color:#66d9ef&#34;&gt;char&lt;/span&gt;           d_type;    &lt;span style=&#34;color:#75715e&#34;&gt;// File types such as block devices, named pipes, sockets etc.
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;   }
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;So anytime we call the &lt;code&gt;getdents&lt;/code&gt; syscall, we are populating with &lt;code&gt;dirent&lt;/code&gt; structures, the buffer that &lt;code&gt;dirp&lt;/code&gt; points to. Notice how the struct also involves the filename of the file that the struct is for. We can use this for directory listing!&lt;/p&gt;
+&lt;h1 id=&#34;the-program&#34;&gt;The program&lt;/h1&gt;
+&lt;p&gt;The program that we are building lists the directory contents of the current directory. We allocate a 512 bytes buffer for storing the dirent structs. (Which is sufficient for a toy implementation)&lt;/p&gt;
+&lt;p&gt;Based on the info above, we define the &lt;code&gt;.bss&lt;/code&gt; and the &lt;code&gt;.data&lt;/code&gt; sections as follows:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code class=&#34;language-x86asm&#34; data-lang=&#34;x86asm&#34;&gt;[SECTION .data]
+dirname: db &#39;.&#39;
+
+[SECTION .bss]
+msgbuf:
+	resb 512
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Then in the &lt;code&gt;.text&lt;/code&gt; section, we write the actual program, which consists of 2 functions called &lt;code&gt;main&lt;/code&gt; and &lt;code&gt;next_dirent&lt;/code&gt;. We populate the &lt;code&gt;msgbuf&lt;/code&gt; in the &lt;code&gt;main&lt;/code&gt; function and then process the dirent structs in the &lt;code&gt;next_dirent&lt;/code&gt; function, which handles the buffer struct by struct.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;main&lt;/code&gt; function goes like:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code class=&#34;language-x86asm&#34; data-lang=&#34;x86asm&#34;&gt;[SECTION .text]
+extern puts
+global main
+
+main:
+	;Setup
+	push rbp
+	mov rbp, rsp
+	and rsp, 0xfffffffffffffff0
+
+	;Open the current directory using the open() syscall
+	mov rax, 2
+	mov rdi, dirname
+	mov rsi, 0x10000
+	syscall
+
+	;getdents(fd, buf, 64) syscall
+	mov rdi, rax  ;The open syscall returns the fd for the current directory
+	mov rax,78
+	mov rsi, msgbuf
+	mov rdx, 512
+	syscall
+	xchg rax,rdx  ;Syscall returns total size, save it somewhere safe
+
+	;setup registers for loop
+	xor rcx, rcx
+	xor rbx, rbx
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Now that we have the structs we need in the &lt;code&gt;msgbuf&lt;/code&gt;, we can iterate over them. Heading into the &lt;code&gt;next_dirent&lt;/code&gt; function:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code class=&#34;language-x86asm&#34; data-lang=&#34;x86asm&#34;&gt;next_dirent:
+	;We move to the 0th position of msgbuf every loop
+	;and absolute position of every struct from it
+	mov rax, msgbuf
+	add rax, rcx		
+
+	;Grab the length of current struct
+	;i.e reclen with offset adjustments
+	add rax, 0x10
+	movzx bx, byte [rax]
+
+	;puts modifies state of registers so save
+	;them on the stack
+	push rcx
+	push rdx
+
+	;Grab filename from its offset and print it
+	;to stdout
+	add rax, 0x2
+	mov rdi, rax
+	call puts
+
+	;Restore register states
+	pop rdx				
+	pop rcx
+
+	;Move to next struct if
+	;index(curr_struct) &amp;lt; total structs
+	add cx, bx			
+	cmp cx, dx			
+	jl next_dirent
+
+	;Leave
+	mov rsp, rbp
+	pop rbp
+	ret
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Offset calculation is:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The struct size sits at &lt;code&gt;struct_index + 8*2 = 0x10&lt;/code&gt; bytes. 2 &lt;code&gt;unsigned long&lt;/code&gt;s are considered for.&lt;/li&gt;
+&lt;li&gt;The filename sits at &lt;code&gt;struct_index + 8*2 + 2 = 0x12&lt;/code&gt;bytes. 1 &lt;code&gt;unsigned short&lt;/code&gt; is considered for. Note that we just add &lt;code&gt;0x2&lt;/code&gt; to the struct size offset when outputting the filename.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;results&#34;&gt;Results&lt;/h1&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&amp;gt;&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&amp;gt; ls
+file1.txt  file2.txt  main
+&amp;gt;&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&amp;gt; ./main
+.
+file2.txt
+main
+..
+file1.txt
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Thus we get a barebones directory listing.&lt;/p&gt;
+&lt;p&gt;The compile script and code is available : &lt;a href=&#34;https://github.com/CrystalSage/Direntries&#34;&gt;Here&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id=&#34;ps&#34;&gt;P.S&lt;/h1&gt;
+&lt;p&gt;I originally intended to write some malware in assembly with this, but got sidetracked and this was made ;)&lt;/p&gt;
+</content>
+    </item>
+    
+    <item>
+      <title>About</title>
+      <link>https://crystalsage.github.io/about/</link>
+      <pubDate>Mon, 15 Nov 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://crystalsage.github.io/about/</guid>
+      <description>Hello I am Amit. I also go by my online alias, Bourbon. I am passionate programmer, computer security enthusiast and I love computers! I play CTFs regularly and have a big interest in security research. I have a liking for cryptography and reverse engineering.
+Welcome to my blog. This website aims to be a technical blog documenting any interesting stuff about computers and IT security.
+ Name: Bourbon Twitter: @brownbourbon Discord: Bourbon#0902 Github: Crystalsage Resume: Link   A chain is no stronger than its weakest link - Thomas Reid</description>
+      <content>&lt;h1 id=&#34;hello&#34;&gt;Hello&lt;/h1&gt;
+&lt;p&gt;I am Amit. I also go by my online alias, &lt;strong&gt;Bourbon&lt;/strong&gt;. I am passionate
+programmer, computer security enthusiast and I love computers! I play CTFs
+regularly and have a big interest in security research. I have a liking for cryptography and reverse engineering.&lt;/p&gt;
+&lt;p&gt;Welcome to my blog. This website aims to be a technical blog documenting any interesting stuff about computers and IT security.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Name: Bourbon&lt;/li&gt;
+&lt;li&gt;Twitter: &lt;a href=&#34;https://twitter.com/brownbourbon&#34;&gt;@brownbourbon&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Discord: Bourbon#0902&lt;/li&gt;
+&lt;li&gt;Github: &lt;a href=&#34;https://github.com/Crystalsage&#34;&gt;Crystalsage&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Resume: &lt;a href=&#34;https://drive.google.com/file/d/1p0Yuw7DpyxwYi_6yU55VXxxW_t5lnUMM/view?usp=sharing&#34;&gt;Link&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;A chain is no stronger than its weakest link - Thomas Reid&lt;/p&gt;
+&lt;/blockquote&gt;
+</content>
+    </item>
+    
+    <item>
+      <title>Setup</title>
+      <link>https://crystalsage.github.io/setup/</link>
+      <pubDate>Mon, 15 Nov 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://crystalsage.github.io/setup/</guid>
+      <description>All technologies are cool
+This page describes the setup that I use in my desktop experience while describing the decisions that were made while selecting the components. It is irregularly updated.
+OS: Arch Linux Arch is a fantastic Linux distribution that&amp;rsquo;s pretty lean and mean for all sorts of use cases. It&amp;rsquo;s primary advantage to me is the fact that I have to perform least amount of configuration, in the case where I ever need to reinstall my system.</description>
+      <content>&lt;p&gt;&lt;strong&gt;All technologies are cool&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;This page describes the setup that I use in my desktop experience while describing the decisions that were made while selecting the components.  It is irregularly updated.&lt;/p&gt;
+&lt;h1 id=&#34;os-arch-linux&#34;&gt;OS: Arch Linux&lt;/h1&gt;
+&lt;p&gt;&lt;a href=&#34;https://archlinux.org/&#34;&gt;Arch&lt;/a&gt; is a fantastic Linux distribution that&amp;rsquo;s pretty lean and mean for all sorts of use cases. It&amp;rsquo;s primary advantage to me is the fact that I have to perform least amount of configuration, in the case where I ever need to reinstall my system. Quite fortunately, it has rarely broken down on me.&lt;/p&gt;
+&lt;h1 id=&#34;desktop&#34;&gt;Desktop&lt;/h1&gt;
+&lt;h2 id=&#34;wm-bspwm&#34;&gt;WM: BSPWM&lt;/h2&gt;
+&lt;p&gt;BSPWM is the most vanilla WM experience you can get, in my opinion. I do not care much for the modularity aspect of it. I love i3 as well, but prefer to stick with BSPWM, because it feels more stable.&lt;/p&gt;
+&lt;p&gt;I have a very terminal oriented workflow and prefer to do everything in terminal. 1 window per workspace works for me.&lt;/p&gt;
+&lt;p&gt;Some components that I use along with BSPWM:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Component&lt;/th&gt;
+&lt;th&gt;Software&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;Bar&lt;/td&gt;
+&lt;td&gt;polybar&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Terminal&lt;/td&gt;
+&lt;td&gt;alacritty + fish shell + tmux&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Notifications&lt;/td&gt;
+&lt;td&gt;dunst&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Image viewer&lt;/td&gt;
+&lt;td&gt;feh&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Music&lt;/td&gt;
+&lt;td&gt;mpd + ncmpcpp&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;PDFs&lt;/td&gt;
+&lt;td&gt;zathura&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Email&lt;/td&gt;
+&lt;td&gt;Neomutt&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id=&#34;text-editor-neovim&#34;&gt;Text editor: Neovim&lt;/h2&gt;
+&lt;p&gt;Vim fits my terminal oriented workflow really well. I use NeoVim&amp;rsquo;s built-in LSP.&lt;/p&gt;
+&lt;h2 id=&#34;writing&#34;&gt;Writing&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Assignments and other academic material&lt;/strong&gt; &lt;br&gt;
+$\LaTeX$ is my personal favorite. I use the VimTeX plugin + Zathura. It produces very clean and beautiful PDFs that are otherwise very missed.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Notes&lt;/strong&gt; &lt;br&gt;
+Casual notes are preferred while learning stuff. I take such notes in Markdown. Simple and universal.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;em&gt;Obiter dictum&lt;/em&gt;: I love both markdown and Org-mode. I alternate between them from time to time, preferring markdown for smaller files and Org-mode when I want to build a knowledge base. However, I have not fully switched to Emacs and I prefer other tools for other functions.&lt;/p&gt;
+</content>
+    </item>
+    
+  </channel>
+</rss>

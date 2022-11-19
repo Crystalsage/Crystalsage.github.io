@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+    <title>CSI-CTF Writeup (Part-2) :: /home/bourbon</title>
+  
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="The 2nd part of the 3-part writeup for CSI-CTF 2022" />
+<meta name="keywords" content="" />
+<meta name="robots" content="noodp" />
+<link rel="canonical" href="https://crystalsage.github.io/posts/ctf-2/" />
+
+
+
+
+<link rel="stylesheet" href="https://crystalsage.github.io/assets/style.css">
+
+  <link rel="stylesheet" href="https://crystalsage.github.io/assets/green.css">
+
+
+
+
+
+
+<link rel="apple-touch-icon" href="https://crystalsage.github.io/img/apple-touch-icon-192x192.png">
+
+  <link rel="shortcut icon" href="https://crystalsage.github.io/favicon.png">
+
+
+
+<meta name="twitter:card" content="summary" />
+
+  
+    <meta name="twitter:site" content="" />
+  
+    <meta name="twitter:creator" content="" />
+
+
+
+<meta property="og:locale" content="en" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="CSI-CTF Writeup (Part-2)">
+<meta property="og:description" content="The 2nd part of the 3-part writeup for CSI-CTF 2022" />
+<meta property="og:url" content="https://crystalsage.github.io/posts/ctf-2/" />
+<meta property="og:site_name" content="/home/bourbon" />
+
+  
+    <meta property="og:image" content="https://crystalsage.github.io/favicon.png">
+  
+
+<meta property="og:image:width" content="2048">
+<meta property="og:image:height" content="1024">
+
+
+  <meta property="article:published_time" content="2022-02-20 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+<body class="green">
+
+
+<div class="container center headings--one-size">
+
+  <header class="header">
+  <div class="header__inner">
+    <div class="header__logo">
+      <a href="/">
+  <div class="logo">
+    /home/bourbon
+  </div>
+</a>
+
+    </div>
+    
+      <div class="menu-trigger">menu</div>
+    
+  </div>
+  
+    <nav class="menu">
+  <ul class="menu__inner menu__inner--desktop">
+    
+      
+        
+          <li><a href="/about">About</a></li>
+        
+      
+        
+          <li><a href="/setup">Setup</a></li>
+        
+      
+      
+    
+
+    
+  </ul>
+
+  <ul class="menu__inner menu__inner--mobile">
+    
+      
+        <li><a href="/about">About</a></li>
+      
+    
+      
+        <li><a href="/setup">Setup</a></li>
+      
+    
+    
+  </ul>
+</nav>
+
+  
+</header>
+
+
+  <div class="content">
+    
+<div class="post">
+  <h1 class="post-title">
+    <a href="https://crystalsage.github.io/posts/ctf-2/">CSI-CTF Writeup (Part-2)</a></h1>
+  <div class="post-meta">
+    
+      <span class="post-date">
+        2022-02-20
+        
+      </span>
+    
+    
+    
+  </div>
+
+  
+  
+
+
+  
+
+  <div class="post-content"><div>
+        <p>This is the part 2 of the 3-part series for the CSI-CTF writeup. Click
+<a href="https://crystalsage.github.io/posts/ctf-1/">Here</a> to read the 1st part.</p>
+<p>You can <a href="https://tinyurl.com/2t6kwcxe">register</a> and
+<a href="https://tinyurl.com/ms95pajv">play</a> this CTF. It&rsquo;s open to everyone.</p>
+<p>In this 3-part series, we will see my method of approaching these challenges
+and how I solved them. The 9 challenges are divided into 3 posts.</p>
+<h1 id="attack-on-bank">Attack on Bank<a href="#attack-on-bank" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<p><img src="/ctf/AOB.png" alt="here"></p>
+<p>The challenge description gives us info about the encrypted text (Also notice
+how ECB abbreviation gives us a hint about 128-bit AES-ECB being the cryptosystem).
+We also get an unique ID for the bank, which should be the decryption key, if my guess is correct.</p>
+<p>The link given in the challenge leads us to a Paste(bin) where we can find some encrypted text, encoded in base64: <code>Keg7B3p7TENwcvdk2zsy+NXVQzMnMxg6ik2xO0M6A3c=</code></p>
+<p>Cool. This is easy. We can use what we assume to be the key as the key, and
+decrypt the text. I used my favorite tool, <a href="https://gchq.github.io/CyberChef/">CyberChef</a>
+for this.</p>
+<p><img src="/ctf/aob-flag.png" alt="aob-flag"></p>
+<p>We first decoded the base64 encoded plaintext, and decrypted the text using the
+key, and a blank IV. This gets us our flag! <code>csi-ctf{pR0videncE_$4ys_He110}</code> $\blacksquare$</p>
+<h1 id="js-nerds">JS Nerds<a href="#js-nerds" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<p><img src="/ctf/jsn.png" alt="jsn"></p>
+<p>We get login page right off the bat. I was initially thrown off by the obvious
+hints towards a Blind SQL injection. <em>You can&rsquo;t see me</em> is really
+suggestive. To test this if there&rsquo;s any SQLi involved at all,
+I used typical payloads such as <code>' OR 1=1 --</code> and friends.
+But this yielded nothing even after 5-6 minutes of trying, so I eventually gave up on this.</p>
+<p>If we visit this page&rsquo;s source, we can find a file at the bottom named
+<code>index.js</code> referenced in there. This <code>index.js</code> file contains some Javascript
+code.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">checkData</span>(<span style="color:#a6e22e">event</span>) {
+    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;click&#34;</span>);
+    <span style="color:#a6e22e">event</span>.<span style="color:#a6e22e">preventDefault</span>();
+    <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">x</span> <span style="color:#f92672">=</span> document.<span style="color:#a6e22e">forms</span>[<span style="color:#e6db74">&#34;login-form&#34;</span>][<span style="color:#e6db74">&#34;username&#34;</span>].<span style="color:#a6e22e">value</span>;
+    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">p</span> <span style="color:#f92672">=</span> document.<span style="color:#a6e22e">forms</span>[<span style="color:#e6db74">&#34;login-form&#34;</span>][<span style="color:#e6db74">&#34;password&#34;</span>].<span style="color:#a6e22e">value</span>;
+    <span style="color:#75715e">// oh no! Client side validation always fails! thank god I have encrypted it!
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">x</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#34;John&#34;</span> <span style="color:#f92672">||</span> <span style="color:#a6e22e">SHA1</span>(<span style="color:#a6e22e">p</span>) <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;b89356ff6151527e89c4f3e3d30c8e6586c63962&#34;</span>) {;
+    } <span style="color:#66d9ef">else</span> {
+        <span style="color:#a6e22e">alert</span>(<span style="color:#e6db74">&#34;Invalid username or password&#34;</span>);
+    }
+
+};
+</code></pre></div><p>Oh. We get the username and SHA-1 hash of our password. So I guess we have
+to crack SHA-1 now. We can do this using a tool such as hashcat and crack this
+password using a wordlist. But I didn&rsquo;t happen to have my machine with me,
+so I had to use <a href="https://crackstation.net/">crackstation</a> to do this. Fortunately,
+crackstation had this hash in their database, which reveals the password to be
+<code>adminz</code>.</p>
+<p><img src="/ctf/jsn-hash.png" alt="jsn-hash"></p>
+<p>We can log in to the site with our credentials now to get the flag.</p>
+<p><img src="/ctf/jsn-flag.png" alt="jsn-flag"></p>
+<p>Bread! <code>csi-ctf{eXploIted_wEb}</code> $\blacksquare$</p>
+<h1 id="computer-engineering">Computer Engineering<a href="#computer-engineering" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<p><img src="/ctf/ce1.png" alt="ce-1"></p>
+<p>We get another Github page. Except this time, there is nothing in
+the 6 commits. We do notice the 6 branches though.</p>
+<p><img src="/ctf/ce2.png" alt="ce-2"></p>
+<p>There are 6 branches, let&rsquo;s visit CS first. There are 3 commits in
+there, one of which gives us the flag.</p>
+<p><img src="/ctf/ce3.png" alt="ce-3"></p>
+<p>Flag! <code>csi-ctf{this_is_the_flag_codecocomo}</code> $\blacksquare$</p>
+<p>This challenge was really more of a &ldquo;click 50 times to get the flag&rdquo; challenge.
+These types of challenges where flags are hidden in commit histories and
+branches are not included <strong>in CTFs</strong> due to them having less of a problem
+solving aspect to them.</p>
+<p><strong>However</strong>, every often, some company get pwned or a bug hunter gets rewarded
+handsomely because he found an internal API key or SSH key in a Github
+commit history, which was accidentally pushed to the repo. So, it&rsquo;s not
+unrealistic at all. There&rsquo;s a lesson to be learned here.</p>
+<hr style="border:2px solid gray"> </hr>
+This series is to be continued in part 3 where we'll solve more
+challenges...
+
+      </div></div>
+
+  
+  
+<div class="pagination">
+    <div class="pagination__title">
+        <span class="pagination__title-h">Read other posts</span>
+        <hr />
+    </div>
+    <div class="pagination__buttons">
+        
+        <span class="button previous">
+            <a href="https://crystalsage.github.io/posts/ctf-3/">
+                <span class="button__icon">←</span>
+                <span class="button__text">CSI-CTF Writeup (Part-3)</span>
+            </a>
+        </span>
+        
+        
+        <span class="button next">
+            <a href="https://crystalsage.github.io/posts/ctf-1/">
+                <span class="button__text">CSI-CTF Writeup (Part-1)</span>
+                <span class="button__icon">→</span>
+            </a>
+        </span>
+        
+    </div>
+</div>
+
+  
+
+  
+
+</div>
+
+  </div>
+
+  
+    <footer class="footer">
+  <div class="footer__inner">
+    
+      <div class="copyright copyright--user">
+        <span>Licensed to Bourbon</span>
+    
+        <span>:: Theme made by <a href="https://twitter.com/panr">panr</a></span>
+      </div>
+  </div>
+</footer>
+
+
+
+<script src="https://crystalsage.github.io/assets/main.js"></script>
+<script src="https://crystalsage.github.io/assets/prism.js"></script>
+<script type="text/javascript"
+  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\[','\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+           extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    }
+  });
+  </script>
+
+
+
+
+
+
+  
+</div>
+
+</body>
+</html>
