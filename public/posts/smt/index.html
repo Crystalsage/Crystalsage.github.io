@@ -197,31 +197,31 @@ concerns itself with satisfiability of a boolean formula.</p>
 <p>If you dig further into SAT, you&rsquo;re bound to discover that there are
 automated solvers for it. SAT problem is NP-complete and automated solvers have been able to massively contribute to complex systems such as microprocessors or scheduling problems, which involve hundreds and thousands of variables and constraints.</p>
 <p>A very popular automated theorem solver of this sort is <a href="https://github.com/Z3Prover/z3">Z3 by Microsoft</a>. Let&rsquo;s see how we can use Z3 to solve our problem that we discussed in the first section of this post. I like to use Z3 through Python. The code is pretty self-explanatory coupled with the comments.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># Import the Z3 library </span>
-<span style="color:#f92672">from</span> z3 <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
-
-<span style="color:#75715e"># Initialize the Solver </span>
-s <span style="color:#f92672">=</span> Solver()
-
-<span style="color:#75715e"># Describe our variables in the system</span>
-x, y, z <span style="color:#f92672">=</span> Ints(<span style="color:#e6db74">&#39;x y z&#39;</span>)
-
-<span style="color:#75715e"># Add all three equations into this system</span>
-<span style="color:#75715e"># These equations are assumed to be conjunctive</span>
-s<span style="color:#f92672">.</span>add(<span style="color:#f92672">-</span><span style="color:#ae81ff">3</span><span style="color:#f92672">*</span>x <span style="color:#f92672">+</span> <span style="color:#ae81ff">2</span><span style="color:#f92672">*</span>y <span style="color:#f92672">-</span> <span style="color:#ae81ff">5</span><span style="color:#f92672">*</span>z <span style="color:#f92672">==</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">14</span>)
-s<span style="color:#f92672">.</span>add(<span style="color:#ae81ff">2</span><span style="color:#f92672">*</span>x <span style="color:#f92672">-</span> <span style="color:#ae81ff">3</span><span style="color:#f92672">*</span>y <span style="color:#f92672">+</span> <span style="color:#ae81ff">4</span><span style="color:#f92672">*</span>z <span style="color:#f92672">==</span> <span style="color:#ae81ff">10</span>)
-s<span style="color:#f92672">.</span>add(x <span style="color:#f92672">+</span> y <span style="color:#f92672">+</span> z <span style="color:#f92672">==</span> <span style="color:#ae81ff">4</span>)
-
-<span style="color:#75715e"># Check if a solution exists</span>
-print(s<span style="color:#f92672">.</span>check())
-
-<span style="color:#75715e"># If it does, describe it</span>
-print(s<span style="color:#f92672">.</span>model())
-</code></pre></div><p>We then execute this script to find the following.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ python sat_equation.py
-sat
-<span style="color:#f92672">[</span>z <span style="color:#f92672">=</span> -4, y <span style="color:#f92672">=</span> -2, x <span style="color:#f92672">=</span> 10<span style="color:#f92672">]</span>
-</code></pre></div><p>The <code>check</code> method returns <code>sat</code>, which means our system is indeed solvable. We can also see that it calculated the solution for us too. Neat!</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Import the Z3 library </span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> z3 <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Initialize the Solver </span>
+</span></span><span style="display:flex;"><span>s <span style="color:#f92672">=</span> Solver()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Describe our variables in the system</span>
+</span></span><span style="display:flex;"><span>x, y, z <span style="color:#f92672">=</span> Ints(<span style="color:#e6db74">&#39;x y z&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Add all three equations into this system</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># These equations are assumed to be conjunctive</span>
+</span></span><span style="display:flex;"><span>s<span style="color:#f92672">.</span>add(<span style="color:#f92672">-</span><span style="color:#ae81ff">3</span><span style="color:#f92672">*</span>x <span style="color:#f92672">+</span> <span style="color:#ae81ff">2</span><span style="color:#f92672">*</span>y <span style="color:#f92672">-</span> <span style="color:#ae81ff">5</span><span style="color:#f92672">*</span>z <span style="color:#f92672">==</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">14</span>)
+</span></span><span style="display:flex;"><span>s<span style="color:#f92672">.</span>add(<span style="color:#ae81ff">2</span><span style="color:#f92672">*</span>x <span style="color:#f92672">-</span> <span style="color:#ae81ff">3</span><span style="color:#f92672">*</span>y <span style="color:#f92672">+</span> <span style="color:#ae81ff">4</span><span style="color:#f92672">*</span>z <span style="color:#f92672">==</span> <span style="color:#ae81ff">10</span>)
+</span></span><span style="display:flex;"><span>s<span style="color:#f92672">.</span>add(x <span style="color:#f92672">+</span> y <span style="color:#f92672">+</span> z <span style="color:#f92672">==</span> <span style="color:#ae81ff">4</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Check if a solution exists</span>
+</span></span><span style="display:flex;"><span>print(s<span style="color:#f92672">.</span>check())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># If it does, describe it</span>
+</span></span><span style="display:flex;"><span>print(s<span style="color:#f92672">.</span>model())
+</span></span></code></pre></div><p>We then execute this script to find the following.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ python sat_equation.py
+</span></span><span style="display:flex;"><span>sat
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>z <span style="color:#f92672">=</span> -4, y <span style="color:#f92672">=</span> -2, x <span style="color:#f92672">=</span> 10<span style="color:#f92672">]</span>
+</span></span></code></pre></div><p>The <code>check</code> method returns <code>sat</code>, which means our system is indeed solvable. We can also see that it calculated the solution for us too. Neat!</p>
 <p>You can try playing around different permutations of our script, to crash into various <code>unsat</code> results too. But how do we ever use this in real life?</p>
 <h2 id="a-toy-example-with-z3">A toy example with Z3<a href="#a-toy-example-with-z3" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
 <p>The example that follows models a pretty real-life situation.</p>
@@ -237,55 +237,55 @@ Thus, we can express the given problem as a series of linear equations. As the q
 quantity of each dish is multiplied by its price.</p>
 <p>$$a*215 + b*275 + c*335 + d*355 + e*420 + f*580 = 1505$$</p>
 <p>You can further model these equations in CNF, like we did in the example we saw earlier. Cool! Let&rsquo;s turn to Z3 and Python.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">
-<span style="color:#75715e"># Import the Z3 library</span>
-<span style="color:#f92672">from</span> z3 <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
-
-
-<span style="color:#75715e"># Initialize the solver</span>
-s <span style="color:#f92672">=</span> Solver()
-
-<span style="color:#75715e"># Set up the variables (Dish quantities)</span>
-a, b, c, d, e, f <span style="color:#f92672">=</span> Ints(<span style="color:#e6db74">&#39;a b c d e f&#39;</span>)
-
-<span style="color:#75715e"># Add constraints</span>
-<span style="color:#75715e"># Quantity of dishes must be non-zero </span>
-s<span style="color:#f92672">.</span>add(a <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>)
-s<span style="color:#f92672">.</span>add(b <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>)
-s<span style="color:#f92672">.</span>add(c <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>)
-s<span style="color:#f92672">.</span>add(d <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>)
-s<span style="color:#f92672">.</span>add(e <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>)
-s<span style="color:#f92672">.</span>add(f <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>)
-
-<span style="color:#75715e"># Add our financial constraint </span>
-s<span style="color:#f92672">.</span>add(a<span style="color:#f92672">*</span><span style="color:#ae81ff">215</span> <span style="color:#f92672">+</span> b<span style="color:#f92672">*</span><span style="color:#ae81ff">275</span> <span style="color:#f92672">+</span> c<span style="color:#f92672">*</span><span style="color:#ae81ff">335</span> <span style="color:#f92672">+</span> d<span style="color:#f92672">*</span><span style="color:#ae81ff">355</span> <span style="color:#f92672">+</span> e<span style="color:#f92672">*</span><span style="color:#ae81ff">420</span> <span style="color:#f92672">+</span> f<span style="color:#f92672">*</span><span style="color:#ae81ff">580</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">1505</span>)
-</code></pre></div><p>It is important to understand that such problems can have multiple
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Import the Z3 library</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> z3 <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Initialize the solver</span>
+</span></span><span style="display:flex;"><span>s <span style="color:#f92672">=</span> Solver()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Set up the variables (Dish quantities)</span>
+</span></span><span style="display:flex;"><span>a, b, c, d, e, f <span style="color:#f92672">=</span> Ints(<span style="color:#e6db74">&#39;a b c d e f&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Add constraints</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Quantity of dishes must be non-zero </span>
+</span></span><span style="display:flex;"><span>s<span style="color:#f92672">.</span>add(a <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>s<span style="color:#f92672">.</span>add(b <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>s<span style="color:#f92672">.</span>add(c <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>s<span style="color:#f92672">.</span>add(d <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>s<span style="color:#f92672">.</span>add(e <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>s<span style="color:#f92672">.</span>add(f <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Add our financial constraint </span>
+</span></span><span style="display:flex;"><span>s<span style="color:#f92672">.</span>add(a<span style="color:#f92672">*</span><span style="color:#ae81ff">215</span> <span style="color:#f92672">+</span> b<span style="color:#f92672">*</span><span style="color:#ae81ff">275</span> <span style="color:#f92672">+</span> c<span style="color:#f92672">*</span><span style="color:#ae81ff">335</span> <span style="color:#f92672">+</span> d<span style="color:#f92672">*</span><span style="color:#ae81ff">355</span> <span style="color:#f92672">+</span> e<span style="color:#f92672">*</span><span style="color:#ae81ff">420</span> <span style="color:#f92672">+</span> f<span style="color:#f92672">*</span><span style="color:#ae81ff">580</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">1505</span>)
+</span></span></code></pre></div><p>It is important to understand that such problems can have multiple
 solutions, and we need to enumerate all of them. So, we write some more
 code which does exactly that. It is fine if you skip over this snippet.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># Enumerate all possible solutions:</span>
-results<span style="color:#f92672">=</span>[]
-
-<span style="color:#66d9ef">while</span> <span style="color:#66d9ef">True</span>:
-		<span style="color:#75715e"># If we found a solution, add it to the system </span>
-		<span style="color:#75715e"># and check for another</span>
-    <span style="color:#66d9ef">if</span> s<span style="color:#f92672">.</span>check() <span style="color:#f92672">==</span> sat:
-        m <span style="color:#f92672">=</span> s<span style="color:#f92672">.</span>model()
-        print(m)
-        results<span style="color:#f92672">.</span>append(m)
-        block <span style="color:#f92672">=</span> []
-        <span style="color:#66d9ef">for</span> d <span style="color:#f92672">in</span> m:
-            c<span style="color:#f92672">=</span>d()
-            block<span style="color:#f92672">.</span>append(c <span style="color:#f92672">!=</span> m[d])
-        s<span style="color:#f92672">.</span>add(Or(block))
-    <span style="color:#66d9ef">else</span>:
-        print(<span style="color:#e6db74">&#34;Total solutions: &#34;</span>, len(results))
-        <span style="color:#66d9ef">break</span>
-</code></pre></div><p>Running this code,</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ python sat_equation.py
-<span style="color:#f92672">[</span>d <span style="color:#f92672">=</span> 0, b <span style="color:#f92672">=</span> 0, a <span style="color:#f92672">=</span> 7, f <span style="color:#f92672">=</span> 0, c <span style="color:#f92672">=</span> 0, e <span style="color:#f92672">=</span> 0<span style="color:#f92672">]</span>
-<span style="color:#f92672">[</span>c <span style="color:#f92672">=</span> 0, d <span style="color:#f92672">=</span> 2, e <span style="color:#f92672">=</span> 0, f <span style="color:#f92672">=</span> 1, b <span style="color:#f92672">=</span> 0, a <span style="color:#f92672">=</span> 1<span style="color:#f92672">]</span>
-Total solutions:  <span style="color:#ae81ff">2</span>
-</code></pre></div><p>Turns out there are two ways for us to order our dishes! We can either:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Enumerate all possible solutions:</span>
+</span></span><span style="display:flex;"><span>results<span style="color:#f92672">=</span>[]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">while</span> <span style="color:#66d9ef">True</span>:
+</span></span><span style="display:flex;"><span>		<span style="color:#75715e"># If we found a solution, add it to the system </span>
+</span></span><span style="display:flex;"><span>		<span style="color:#75715e"># and check for another</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> s<span style="color:#f92672">.</span>check() <span style="color:#f92672">==</span> sat:
+</span></span><span style="display:flex;"><span>        m <span style="color:#f92672">=</span> s<span style="color:#f92672">.</span>model()
+</span></span><span style="display:flex;"><span>        print(m)
+</span></span><span style="display:flex;"><span>        results<span style="color:#f92672">.</span>append(m)
+</span></span><span style="display:flex;"><span>        block <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> d <span style="color:#f92672">in</span> m:
+</span></span><span style="display:flex;"><span>            c<span style="color:#f92672">=</span>d()
+</span></span><span style="display:flex;"><span>            block<span style="color:#f92672">.</span>append(c <span style="color:#f92672">!=</span> m[d])
+</span></span><span style="display:flex;"><span>        s<span style="color:#f92672">.</span>add(Or(block))
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#34;Total solutions: &#34;</span>, len(results))
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">break</span>
+</span></span></code></pre></div><p>Running this code,</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ python sat_equation.py
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>d <span style="color:#f92672">=</span> 0, b <span style="color:#f92672">=</span> 0, a <span style="color:#f92672">=</span> 7, f <span style="color:#f92672">=</span> 0, c <span style="color:#f92672">=</span> 0, e <span style="color:#f92672">=</span> 0<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>c <span style="color:#f92672">=</span> 0, d <span style="color:#f92672">=</span> 2, e <span style="color:#f92672">=</span> 0, f <span style="color:#f92672">=</span> 1, b <span style="color:#f92672">=</span> 0, a <span style="color:#f92672">=</span> 1<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>Total solutions:  <span style="color:#ae81ff">2</span>
+</span></span></code></pre></div><p>Turns out there are two ways for us to order our dishes! We can either:</p>
 <ul>
 <li>Order 7 of dishes $A$.</li>
 <li>OR order 1 dish of $A$, 2 of $D$ and 1 of $F$.</li>
@@ -295,14 +295,14 @@ Total solutions:  <span style="color:#ae81ff">2</span>
 <p>In computer applications, you&rsquo;ll often find anti-tamper or
 anti-cheating mechanisms. These mechanisms often place a lot of restrictions on what the user can and cannot do.</p>
 <p>A very toy-ish example finds its place in CTFs, where a very large number of constraints are given inside a binary, and we have to figure out a particular value for a variable that satisfies these constraints. For instance,</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c">(arg1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x14</span>) <span style="color:#f92672">^</span> <span style="color:#ae81ff">0x2b</span>) <span style="color:#f92672">==</span> <span style="color:#f92672">*</span>(arg1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">7</span>)) <span style="color:#f92672">&amp;&amp;</span>
-(<span style="color:#f92672">*</span>(arg1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x15</span>) <span style="color:#f92672">-</span> <span style="color:#f92672">*</span>(arg1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">3</span>) <span style="color:#f92672">==</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">0x14</span>)) <span style="color:#f92672">&amp;&amp;</span>
-(<span style="color:#f92672">*</span>(arg1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">2</span>) <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">6</span> <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;\0&#39;</span>)) <span style="color:#f92672">&amp;&amp;</span>
-((<span style="color:#f92672">*</span>(arg1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0xd</span>) <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;t&#39;</span> <span style="color:#f92672">&amp;&amp;</span> 
-((<span style="color:#f92672">*</span>(arg1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0xb</span>) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0x3fffffffU</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x5f</span>)))) <span style="color:#f92672">&amp;&amp;</span>
-
-<span style="color:#75715e">// .... HUNDREDS of such checks ....
-</span></code></pre></div><p>Notice how the <code>arg1</code> variable is constrained by all of these
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>(arg1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x14</span>) <span style="color:#f92672">^</span> <span style="color:#ae81ff">0x2b</span>) <span style="color:#f92672">==</span> <span style="color:#f92672">*</span>(arg1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">7</span>)) <span style="color:#f92672">&amp;&amp;</span>
+</span></span><span style="display:flex;"><span>(<span style="color:#f92672">*</span>(arg1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x15</span>) <span style="color:#f92672">-</span> <span style="color:#f92672">*</span>(arg1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">3</span>) <span style="color:#f92672">==</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">0x14</span>)) <span style="color:#f92672">&amp;&amp;</span>
+</span></span><span style="display:flex;"><span>(<span style="color:#f92672">*</span>(arg1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">2</span>) <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">6</span> <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;\0&#39;</span>)) <span style="color:#f92672">&amp;&amp;</span>
+</span></span><span style="display:flex;"><span>((<span style="color:#f92672">*</span>(arg1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0xd</span>) <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;t&#39;</span> <span style="color:#f92672">&amp;&amp;</span> 
+</span></span><span style="display:flex;"><span>((<span style="color:#f92672">*</span>(arg1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0xb</span>) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0x3fffffffU</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x5f</span>)))) <span style="color:#f92672">&amp;&amp;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// .... HUNDREDS of such checks ....
+</span></span></span></code></pre></div><p>Notice how the <code>arg1</code> variable is constrained by all of these
 equations consisting of byte-level operations. To solve such a system, we use Z3 again in the hopes of finding a solution. The solution is a value
 of <code>arg1</code> that satisfies all these checks. Imagine finding it by hand!</p>
 <p>Apart from this classic scenario, there have been challenges implementing custom cryptography. Such as <a href="https://www.hackthebox.com/blog/memory-acceleration-ca-ctf-2022-crypto-writeup">this one</a>, which require you to use Z3 to solve them.</p>
@@ -342,13 +342,6 @@ $$</p>
         <hr />
     </div>
     <div class="pagination__buttons">
-        
-        <span class="button previous">
-            <a href="https://crystalsage.github.io/posts/flare-1/">
-                <span class="button__icon">←</span>
-                <span class="button__text">Flare-on 9 Writeup (Part-1)</span>
-            </a>
-        </span>
         
         
         <span class="button next">

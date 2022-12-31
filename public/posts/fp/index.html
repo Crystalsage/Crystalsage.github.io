@@ -155,22 +155,21 @@
 </ol>
 <h1 id="dirent-structs">Dirent structs<a href="#dirent-structs" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
 <p>A <em>dirent</em> or <em>linux_dirent</em> struct is defined as follows.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">linux_dirent</span> {
-       <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span>  d_ino;     <span style="color:#75715e">/* File inode*/</span>
-       <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span>  d_off;     <span style="color:#75715e">/* Offset of the next linux_dirent */</span>
-       <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">short</span> d_reclen;  <span style="color:#75715e">/* Size of the current dirent struct*/</span>
-       <span style="color:#66d9ef">char</span>           d_name[];  <span style="color:#75715e">// The filename of the file
-</span><span style="color:#75715e"></span>
-       <span style="color:#66d9ef">char</span>           pad;       <span style="color:#75715e">// Zero padding byte
-</span><span style="color:#75715e"></span>       <span style="color:#66d9ef">char</span>           d_type;    <span style="color:#75715e">// File types such as block devices, named pipes, sockets etc.
-</span><span style="color:#75715e"></span>   }
-
-</code></pre></div><p>So anytime we call the <code>getdents</code> syscall, we are populating with <code>dirent</code> structures, the buffer that <code>dirp</code> points to. Notice how the struct also involves the filename of the file that the struct is for. We can use this for directory listing!</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">linux_dirent</span> {
+</span></span><span style="display:flex;"><span>       <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span>  d_ino;     <span style="color:#75715e">/* File inode*/</span>
+</span></span><span style="display:flex;"><span>       <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">long</span>  d_off;     <span style="color:#75715e">/* Offset of the next linux_dirent */</span>
+</span></span><span style="display:flex;"><span>       <span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">short</span> d_reclen;  <span style="color:#75715e">/* Size of the current dirent struct*/</span>
+</span></span><span style="display:flex;"><span>       <span style="color:#66d9ef">char</span>           d_name[];  <span style="color:#75715e">// The filename of the file
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>       <span style="color:#66d9ef">char</span>           pad;       <span style="color:#75715e">// Zero padding byte
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>       <span style="color:#66d9ef">char</span>           d_type;    <span style="color:#75715e">// File types such as block devices, named pipes, sockets etc.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>   }
+</span></span></code></pre></div><p>So anytime we call the <code>getdents</code> syscall, we are populating with <code>dirent</code> structures, the buffer that <code>dirp</code> points to. Notice how the struct also involves the filename of the file that the struct is for. We can use this for directory listing!</p>
 <h1 id="the-program">The program<a href="#the-program" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
 <p>The program that we are building lists the directory contents of the current directory. We allocate a 512 bytes buffer for storing the dirent structs. (Which is sufficient for a toy implementation)</p>
 <p>Based on the info above, we define the <code>.bss</code> and the <code>.data</code> sections as follows:</p>
 <pre tabindex="0"><code class="language-x86asm" data-lang="x86asm">[SECTION .data]
-dirname: db '.'
+dirname: db &#39;.&#39;
 
 [SECTION .bss]
 msgbuf:
@@ -247,15 +246,15 @@ main:
 <li>The filename sits at <code>struct_index + 8*2 + 2 = 0x12</code>bytes. 1 <code>unsigned short</code> is considered for. Note that we just add <code>0x2</code> to the struct size offset when outputting the filename.</li>
 </ul>
 <h1 id="results">Results<a href="#results" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">&gt;<span style="color:#f92672">=</span>&gt; ls
-file1.txt  file2.txt  main
-&gt;<span style="color:#f92672">=</span>&gt; ./main
-.
-file2.txt
-main
-..
-file1.txt
-</code></pre></div><p>Thus we get a barebones directory listing.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>&gt;<span style="color:#f92672">=</span>&gt; ls
+</span></span><span style="display:flex;"><span>file1.txt  file2.txt  main
+</span></span><span style="display:flex;"><span>&gt;<span style="color:#f92672">=</span>&gt; ./main
+</span></span><span style="display:flex;"><span>.
+</span></span><span style="display:flex;"><span>file2.txt
+</span></span><span style="display:flex;"><span>main
+</span></span><span style="display:flex;"><span>..
+</span></span><span style="display:flex;"><span>file1.txt
+</span></span></code></pre></div><p>Thus we get a barebones directory listing.</p>
 <p>The compile script and code is available : <a href="https://github.com/CrystalSage/Direntries">Here</a></p>
 <h1 id="ps">P.S<a href="#ps" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
 <p>I originally intended to write some malware in assembly with this, but got sidetracked and this was made ;)</p>

@@ -187,66 +187,66 @@ on set U which defines a partial order. This operator gives us a comparison betw
 <h2 id="ordering-in-rust">Ordering in Rust<a href="#ordering-in-rust" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
 <p>Ordering a data structure in Rust allows us to do abstract comparisons between objects of the same data structure. Let’s continue the umbrella saga.</p>
 <p>Suppose we create a struct for describing an umbrella. The size field is of the Size type, which is user-defined.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-rust" data-lang="rust"><span style="color:#66d9ef">enum</span> <span style="color:#a6e22e">Size</span>{
-  Small,
-  Medium,
-  Large,
-}
-
-<span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">Umbrella</span>{
-  size : <span style="color:#a6e22e">Size</span>,
-  cost : <span style="color:#66d9ef">u16</span>,
-}
-</code></pre></div><p>Now, we would like to say that an umbrella is ‘better’ (for us) if the size is maximum. As a side effect, we would also love that the cost gets minimized. In other words, we’d like to define a clear notion of comparison.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">enum</span> <span style="color:#a6e22e">Size</span>{
+</span></span><span style="display:flex;"><span>  Small,
+</span></span><span style="display:flex;"><span>  Medium,
+</span></span><span style="display:flex;"><span>  Large,
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">Umbrella</span>{
+</span></span><span style="display:flex;"><span>  size : <span style="color:#a6e22e">Size</span>,
+</span></span><span style="display:flex;"><span>  cost : <span style="color:#66d9ef">u16</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Now, we would like to say that an umbrella is ‘better’ (for us) if the size is maximum. As a side effect, we would also love that the cost gets minimized. In other words, we’d like to define a clear notion of comparison.</p>
 <p>In Rust, we can implement some traits, described below.</p>
 <ul>
 <li><code>PartialOrd</code> : This trait implements the partial_cmp method where we describe what fields will be compared.</li>
 <li><code>PartialEq</code> : This defines equality between objects.</li>
 </ul>
 <p>Let’s do this.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-rust" data-lang="rust"><span style="color:#66d9ef">impl</span> PartialOrd <span style="color:#66d9ef">for</span> Umbrella {
-    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">partial_cmp</span>(<span style="color:#f92672">&amp;</span>self, other: <span style="color:#66d9ef">&amp;</span><span style="color:#a6e22e">Self</span>) -&gt; Option<span style="color:#f92672">&lt;</span>Ordering<span style="color:#f92672">&gt;</span> {
-        self.size.partial_cmp(<span style="color:#f92672">&amp;</span>other.size)
-    }
-}
-
-<span style="color:#66d9ef">impl</span> PartialEq <span style="color:#66d9ef">for</span> Umbrella {
-    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">eq</span>(<span style="color:#f92672">&amp;</span>self, other: <span style="color:#66d9ef">&amp;</span><span style="color:#a6e22e">Self</span>) -&gt; <span style="color:#66d9ef">bool</span> {
-        self.size <span style="color:#f92672">==</span> other.size
-    }
-}
-</code></pre></div><p>but we run into a problem as soon as we run this.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">impl</span> PartialOrd <span style="color:#66d9ef">for</span> Umbrella {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">partial_cmp</span>(<span style="color:#f92672">&amp;</span>self, other: <span style="color:#66d9ef">&amp;</span><span style="color:#a6e22e">Self</span>) -&gt; Option<span style="color:#f92672">&lt;</span>Ordering<span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>        self.size.partial_cmp(<span style="color:#f92672">&amp;</span>other.size)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">impl</span> PartialEq <span style="color:#66d9ef">for</span> Umbrella {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">eq</span>(<span style="color:#f92672">&amp;</span>self, other: <span style="color:#66d9ef">&amp;</span><span style="color:#a6e22e">Self</span>) -&gt; <span style="color:#66d9ef">bool</span> {
+</span></span><span style="display:flex;"><span>        self.size <span style="color:#f92672">==</span> other.size
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>but we run into a problem as soon as we run this.</p>
 <pre tabindex="0"><code>error[E0599]: the method `partial_cmp` exists for enum `Size`, but its 
 trait bounds were not satisfied
 </code></pre><p>Oops! We forgot a really important thing here. We never defined a partial order on the <code>Size</code> enum in the first place, so the compiler doesn’t know how to compare its members. Let’s fix this.</p>
 <p>We can define the traits described above for the <code>enum</code> as well. But, we’ll take a shortcut this time. We can use the <code>#derive</code> attribute to tell the compiler to infer the traits onto the data type without manually defining them.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-rust" data-lang="rust"><span style="color:#75715e">// Small &lt; Medium &lt; Large is inferred due to discriminants.
-</span><span style="color:#75715e">// Implement `PartialOrd` and `PartialEq`
-</span><span style="color:#75715e"></span><span style="color:#75715e">#[derive(PartialOrd, PartialEq)]</span>
-<span style="color:#66d9ef">enum</span> <span style="color:#a6e22e">Size</span>{
-  Small,
-  Medium,
-  Large,
-}
-</code></pre></div><p>Note that variants ordered in this way are ordered by their discriminants, which are like indices. So an enum member at the top has a lower index than the one below it and is considered lesser. (See here)</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#75715e">// Small &lt; Medium &lt; Large is inferred due to discriminants.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// Implement `PartialOrd` and `PartialEq`
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#75715e">#[derive(PartialOrd, PartialEq)]</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">enum</span> <span style="color:#a6e22e">Size</span>{
+</span></span><span style="display:flex;"><span>  Small,
+</span></span><span style="display:flex;"><span>  Medium,
+</span></span><span style="display:flex;"><span>  Large,
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Note that variants ordered in this way are ordered by their discriminants, which are like indices. So an enum member at the top has a lower index than the one below it and is considered lesser. (See here)</p>
 <p>Neat! Let’s try running this now.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-rust" data-lang="rust"><span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">main</span>(){
-  <span style="color:#66d9ef">let</span> u1 <span style="color:#f92672">=</span> Umbrella{ size: <span style="color:#a6e22e">Size</span>::Small, cost: <span style="color:#ae81ff">20</span>};
-  <span style="color:#66d9ef">let</span> u2 <span style="color:#f92672">=</span> Umbrella{ size: <span style="color:#a6e22e">Size</span>::Medium, cost: <span style="color:#ae81ff">20</span>};
-  <span style="color:#66d9ef">let</span> u3 <span style="color:#f92672">=</span> Umbrella{ size: <span style="color:#a6e22e">Size</span>::Medium, cost: <span style="color:#ae81ff">30</span>};
-  <span style="color:#66d9ef">let</span> u4 <span style="color:#f92672">=</span> Umbrella{ size: <span style="color:#a6e22e">Size</span>::Large, cost: <span style="color:#ae81ff">40</span>};
-
-  assert!(u1 <span style="color:#f92672">&lt;</span> u2);
-  assert!(u1 <span style="color:#f92672">&lt;</span> u3);
-  assert!(u1 <span style="color:#f92672">&lt;</span> u2 <span style="color:#f92672">&amp;&amp;</span> u2 <span style="color:#f92672">&lt;</span> u3);
-  assert!(u4 <span style="color:#f92672">==</span> u3);
-
-  println!(<span style="color:#e6db74">&#34;Passed all checks!&#34;</span>);
-}
-</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ cargo run
-Finished dev <span style="color:#f92672">[</span>unoptimized + debuginfo<span style="color:#f92672">]</span> target<span style="color:#f92672">(</span>s<span style="color:#f92672">)</span> in 0.00s
-Running <span style="color:#e6db74">`</span>target/debug/partialeq<span style="color:#e6db74">`</span>
-</code></pre></div><p>Passed all checks!</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">main</span>(){
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> u1 <span style="color:#f92672">=</span> Umbrella{ size: <span style="color:#a6e22e">Size</span>::Small, cost: <span style="color:#ae81ff">20</span>};
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> u2 <span style="color:#f92672">=</span> Umbrella{ size: <span style="color:#a6e22e">Size</span>::Medium, cost: <span style="color:#ae81ff">20</span>};
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> u3 <span style="color:#f92672">=</span> Umbrella{ size: <span style="color:#a6e22e">Size</span>::Medium, cost: <span style="color:#ae81ff">30</span>};
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> u4 <span style="color:#f92672">=</span> Umbrella{ size: <span style="color:#a6e22e">Size</span>::Large, cost: <span style="color:#ae81ff">40</span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  assert!(u1 <span style="color:#f92672">&lt;</span> u2);
+</span></span><span style="display:flex;"><span>  assert!(u1 <span style="color:#f92672">&lt;</span> u3);
+</span></span><span style="display:flex;"><span>  assert!(u1 <span style="color:#f92672">&lt;</span> u2 <span style="color:#f92672">&amp;&amp;</span> u2 <span style="color:#f92672">&lt;</span> u3);
+</span></span><span style="display:flex;"><span>  assert!(u4 <span style="color:#f92672">==</span> u3);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  println!(<span style="color:#e6db74">&#34;Passed all checks!&#34;</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ cargo run
+</span></span><span style="display:flex;"><span>Finished dev <span style="color:#f92672">[</span>unoptimized + debuginfo<span style="color:#f92672">]</span> target<span style="color:#f92672">(</span>s<span style="color:#f92672">)</span> in 0.00s
+</span></span><span style="display:flex;"><span>Running <span style="color:#e6db74">`</span>target/debug/partialeq<span style="color:#e6db74">`</span>
+</span></span></code></pre></div><p>Passed all checks!</p>
 <p>Awesome! We just implemented a partial order on a custom data type. The entire code can be found here: Code</p>
 <h2 id="exercise-to-the-reader">Exercise to the reader<a href="#exercise-to-the-reader" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
 <p>The reader is invited to solve the following problems.</p>

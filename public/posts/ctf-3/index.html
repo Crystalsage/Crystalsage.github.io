@@ -193,8 +193,8 @@ which is clearly the letter <code>c</code>. This must be the &lsquo;c&rsquo; of 
 <p>Since we know the flag format, we can actually skip the first 8 lines and
 assume them to be <code>csi-ctf{</code>. To decode everything inside the brackets, we can
 extract the dits and dahs from the lines, with some simple Python.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">extract_symbols <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> line: <span style="color:#e6db74">&#34;&#34;</span><span style="color:#f92672">.</span>join([i <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> line <span style="color:#66d9ef">if</span> i <span style="color:#f92672">in</span> (<span style="color:#e6db74">&#34;-&#34;</span>, <span style="color:#e6db74">&#34;.&#34;</span>)])
-</code></pre></div><p>Once we extract all dits and dahs, we can put them in a morse &ndash;&gt; text converter.
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>extract_symbols <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> line: <span style="color:#e6db74">&#34;&#34;</span><span style="color:#f92672">.</span>join([i <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> line <span style="color:#66d9ef">if</span> i <span style="color:#f92672">in</span> (<span style="color:#e6db74">&#34;-&#34;</span>, <span style="color:#e6db74">&#34;.&#34;</span>)])
+</span></span></code></pre></div><p>Once we extract all dits and dahs, we can put them in a morse &ndash;&gt; text converter.
 I happened to have a script on my machine for this.</p>
 <p><img src="/ctf/di-morse-ans.png" alt="di-morse-ans"></p>
 <p>Which is the text inside the brackets, so the flag is
@@ -208,33 +208,33 @@ the combination is wrong.</p>
 <p><img src="/ctf/cts-wrong.png" alt="ctf-fail"></p>
 <p>Let&rsquo;s see what&rsquo;s going on under the hood. On the page&rsquo;s source,  we find the
 following Javascript code.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js">    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">store</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>;
-    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">count</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
-    <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">card</span>(<span style="color:#a6e22e">res</span>) {
-      <span style="color:#a6e22e">store</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">store</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">res</span>;
-      <span style="color:#a6e22e">count</span><span style="color:#f92672">++</span>;
-      <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">store</span>.<span style="color:#a6e22e">length</span>);
-
-      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">count</span> <span style="color:#f92672">===</span> <span style="color:#ae81ff">4</span>) {
-        <span style="color:#a6e22e">setTimeout</span>(() =&gt; {
-          <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>(<span style="color:#a6e22e">store</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#34;d8c2436e262448af3043fde3d652726a&#34;</span>)) {
-            <span style="color:#a6e22e">alert</span>(<span style="color:#e6db74">&#34;wrong&#34;</span>);
-            window.<span style="color:#a6e22e">location</span>.<span style="color:#a6e22e">reload</span>(<span style="color:#66d9ef">true</span>);
-          }
-          <span style="color:#66d9ef">else</span> {
-            <span style="color:#a6e22e">alert</span>(<span style="color:#e6db74">&#34;congratulations you found the flag : &#34;</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">`csi-ctf{</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">store</span><span style="color:#e6db74">}</span><span style="color:#e6db74">}`</span>);
-            window.<span style="color:#a6e22e">location</span>.<span style="color:#a6e22e">reload</span>(<span style="color:#66d9ef">true</span>);
-          }
-        }, <span style="color:#ae81ff">300</span>);
-      }
-    }
-    <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">flip</span>(<span style="color:#a6e22e">event</span>) {
-      <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">element</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">event</span>.<span style="color:#a6e22e">currentTarget</span>;
-      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">element</span>.<span style="color:#a6e22e">className</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#34;cards col-md-4 col-sm-6 col-12&#34;</span>) {
-        <span style="color:#a6e22e">element</span>.<span style="color:#a6e22e">style</span>.<span style="color:#a6e22e">transform</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;rotateY(180deg)&#34;</span>;
-      }
-    }
-</code></pre></div><p>The <code>card()</code> appends &lsquo;something&rsquo; to <code>store</code>. Once we flip 5 cards, we check if
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">store</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">count</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">card</span>(<span style="color:#a6e22e">res</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">store</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">store</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">res</span>;
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">count</span><span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">store</span>.<span style="color:#a6e22e">length</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">count</span> <span style="color:#f92672">===</span> <span style="color:#ae81ff">4</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">setTimeout</span>(() =&gt; {
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>(<span style="color:#a6e22e">store</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#34;d8c2436e262448af3043fde3d652726a&#34;</span>)) {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">alert</span>(<span style="color:#e6db74">&#34;wrong&#34;</span>);
+</span></span><span style="display:flex;"><span>            window.<span style="color:#a6e22e">location</span>.<span style="color:#a6e22e">reload</span>(<span style="color:#66d9ef">true</span>);
+</span></span><span style="display:flex;"><span>          }
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">alert</span>(<span style="color:#e6db74">&#34;congratulations you found the flag : &#34;</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">`csi-ctf{</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">store</span><span style="color:#e6db74">}</span><span style="color:#e6db74">}`</span>);
+</span></span><span style="display:flex;"><span>            window.<span style="color:#a6e22e">location</span>.<span style="color:#a6e22e">reload</span>(<span style="color:#66d9ef">true</span>);
+</span></span><span style="display:flex;"><span>          }
+</span></span><span style="display:flex;"><span>        }, <span style="color:#ae81ff">300</span>);
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">flip</span>(<span style="color:#a6e22e">event</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">element</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">event</span>.<span style="color:#a6e22e">currentTarget</span>;
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">element</span>.<span style="color:#a6e22e">className</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#34;cards col-md-4 col-sm-6 col-12&#34;</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">element</span>.<span style="color:#a6e22e">style</span>.<span style="color:#a6e22e">transform</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;rotateY(180deg)&#34;</span>;
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span></code></pre></div><p>The <code>card()</code> appends &lsquo;something&rsquo; to <code>store</code>. Once we flip 5 cards, we check if
 the &lsquo;something&rsquo; of the cards form the sequence
 <code>d8c2436e262448af3043fde3d652726a</code>. If so, we get the flag.</p>
 <p>But hey!!! The
@@ -255,15 +255,15 @@ seem like fragments of the entire sequence, these are the &lsquo;something&rsquo
 we notice for the first card that <code>card('d8c2436e')</code> is called. This matches
 with the first few characters of our resulting sequence.</p>
 <p>So we collect all the <code>onClick</code> snippets.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js">    <span style="color:#a6e22e">onclick</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;[flip(event),card(&#39;d8c2436e&#39;)] //1
-</span><span style="color:#e6db74">    onclick=&#34;</span>[<span style="color:#a6e22e">flip</span>(<span style="color:#a6e22e">event</span>),<span style="color:#a6e22e">card</span>(<span style="color:#e6db74">&#39;&#39;</span>)] <span style="color:#75715e">//2
-</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">onclick</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;[flip(event),card(&#39;&#39;)] //3
-</span><span style="color:#e6db74">    onclick=&#34;</span>[<span style="color:#a6e22e">flip</span>(<span style="color:#a6e22e">event</span>),<span style="color:#a6e22e">card</span>(<span style="color:#e6db74">&#39;&#39;</span>)] <span style="color:#75715e">//4
-</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">onclick</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;[flip(event),card(&#39;262448af&#39;)] //5
-</span><span style="color:#e6db74">    onclick=&#34;</span>[<span style="color:#a6e22e">flip</span>(<span style="color:#a6e22e">event</span>),<span style="color:#a6e22e">card</span>(<span style="color:#e6db74">&#39;652726a&#39;</span>)] <span style="color:#75715e">//6
-</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">onclick</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;[flip(event),card(&#39;&#39;)] //7 
-</span><span style="color:#e6db74">    onclick=&#34;</span>[<span style="color:#a6e22e">flip</span>(<span style="color:#a6e22e">event</span>),<span style="color:#a6e22e">card</span>(<span style="color:#e6db74">&#39;3043fde3d&#39;</span>)] <span style="color:#75715e">//8
-</span></code></pre></div><p>We notice that some of these are empty. So, if we were to flip the cards in
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span>    <span style="color:#a6e22e">onclick</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;[flip(event),card(&#39;d8c2436e&#39;)] //1
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    onclick=&#34;</span>[<span style="color:#a6e22e">flip</span>(<span style="color:#a6e22e">event</span>),<span style="color:#a6e22e">card</span>(<span style="color:#e6db74">&#39;&#39;</span>)] <span style="color:#75715e">//2
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#a6e22e">onclick</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;[flip(event),card(&#39;&#39;)] //3
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    onclick=&#34;</span>[<span style="color:#a6e22e">flip</span>(<span style="color:#a6e22e">event</span>),<span style="color:#a6e22e">card</span>(<span style="color:#e6db74">&#39;&#39;</span>)] <span style="color:#75715e">//4
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#a6e22e">onclick</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;[flip(event),card(&#39;262448af&#39;)] //5
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    onclick=&#34;</span>[<span style="color:#a6e22e">flip</span>(<span style="color:#a6e22e">event</span>),<span style="color:#a6e22e">card</span>(<span style="color:#e6db74">&#39;652726a&#39;</span>)] <span style="color:#75715e">//6
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#a6e22e">onclick</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;[flip(event),card(&#39;&#39;)] //7 
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    onclick=&#34;</span>[<span style="color:#a6e22e">flip</span>(<span style="color:#a6e22e">event</span>),<span style="color:#a6e22e">card</span>(<span style="color:#e6db74">&#39;3043fde3d&#39;</span>)] <span style="color:#75715e">//8
+</span></span></span></code></pre></div><p>We notice that some of these are empty. So, if we were to flip the cards in
 the order <code>1-5-8-6</code>, it&rsquo;ll form the sequence that we want and we&rsquo;ll get our hash, which is the same sequence.</p>
 <p><img src="/ctf/cts-flag-hashed.png" alt="cts-flag"></p>
 <p><strong>Challenge Idea/Solution</strong>: An alternate solution to this challenge, if the flag was something else, would be to set a breakpoint where we check if the <code>store</code> is equivalent to the sequence, and (by)pass the check entirely by modifying the <code>store</code> variable to be equal to the hash. Alternate challenge idea!</p>
