@@ -184,7 +184,7 @@ anything in life. You can take a look at the implementation in <a href="https://
 </span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Timestamp as a seed.
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">let</span> x0 <span style="color:#f92672">=</span> get_time_as_unix_timestamp().as_secs();
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> lcg: <span style="color:#a6e22e">LCG</span> <span style="color:#f92672">=</span> LCG::init(x0, A, C, M);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> lcg: <span style="color:#a6e22e">LCG</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">LCG</span>::init(x0, A, C, M);
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> _ <span style="color:#66d9ef">in</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">..</span>n {
 </span></span><span style="display:flex;"><span>        random_nums.push(lcg.next())
@@ -208,20 +208,20 @@ vary between <code>0x000000</code>-<code>0xFFFFFF</code>.</li>
 </ol>
 <p>Let&rsquo;s dive into the first approach.</p>
 <p>First we define the color palette. I picked up the <a href="https://github.com/morhetz/gruvbox">Gruvbox color palette</a> because why not.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> BRIGHT_RED :<span style="color:#a6e22e">Color32</span>       <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xFF3449FB</span>;
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> BRIGHT_GREEN :<span style="color:#a6e22e">Color32</span>     <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xFF26BBB8</span>;
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> BRIGHT_YELLOW:<span style="color:#a6e22e">Color32</span>     <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xFF2FBDFA</span>;
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> BRIGHT_BLUE :<span style="color:#a6e22e">Color32</span>      <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xFF98A583</span>;
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> BRIGHT_PURPLE:<span style="color:#a6e22e">Color32</span>     <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xFF9B86D3</span>;
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> BRIGHT_AQUA :<span style="color:#a6e22e">Color32</span>      <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xFF7CC08E</span>;
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> BRIGHT_ORANGE :<span style="color:#a6e22e">Color32</span>    <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xFF1980FE</span>;
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> COLOR_BACKGROUND: <span style="color:#a6e22e">Color32</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xFF181818</span>;
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#66d9ef">BRIGHT_RED</span> :<span style="color:#a6e22e">Color32</span>       <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xFF3449FB</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#66d9ef">BRIGHT_GREEN</span> :<span style="color:#a6e22e">Color32</span>     <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xFF26BBB8</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#66d9ef">BRIGHT_YELLOW</span>:<span style="color:#a6e22e">Color32</span>     <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xFF2FBDFA</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#66d9ef">BRIGHT_BLUE</span> :<span style="color:#a6e22e">Color32</span>      <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xFF98A583</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#66d9ef">BRIGHT_PURPLE</span>:<span style="color:#a6e22e">Color32</span>     <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xFF9B86D3</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#66d9ef">BRIGHT_AQUA</span> :<span style="color:#a6e22e">Color32</span>      <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xFF7CC08E</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#66d9ef">BRIGHT_ORANGE</span> :<span style="color:#a6e22e">Color32</span>    <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xFF1980FE</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#66d9ef">COLOR_BACKGROUND</span>: <span style="color:#a6e22e">Color32</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xFF181818</span>;
 </span></span></code></pre></div><p>Then, we generate the image as follows:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">let</span> random_nums <span style="color:#f92672">=</span> lcg::get_random_numbers(WIDTH <span style="color:#f92672">*</span> HEIGHT);
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">let</span> random_nums <span style="color:#f92672">=</span> lcg::get_random_numbers(<span style="color:#66d9ef">WIDTH</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">HEIGHT</span>);
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> y <span style="color:#66d9ef">in</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">..</span>HEIGHT <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">usize</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> x <span style="color:#66d9ef">in</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">..</span>WIDTH <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">usize</span> {
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> y <span style="color:#66d9ef">in</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">..</span><span style="color:#66d9ef">HEIGHT</span> <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">usize</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> x <span style="color:#66d9ef">in</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">..</span><span style="color:#66d9ef">WIDTH</span> <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">usize</span> {
 </span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">let</span> color <span style="color:#f92672">=</span> color_palette[(random_nums[j <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">usize</span>] <span style="color:#f92672">%</span> color_palette.len() <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">u64</span>) <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">usize</span>];
 </span></span><span style="display:flex;"><span>        image[y][x] <span style="color:#f92672">=</span> color;
 </span></span><span style="display:flex;"><span>        j <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>;
@@ -232,13 +232,13 @@ vary between <code>0x000000</code>-<code>0xFFFFFF</code>.</li>
 <p>Then, we simply assign that color to that pixel.</p>
 <p>Once all the pixels have a value, we can write those pixels to an image file.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">save_image_as_ppm</span>(image: <span style="color:#a6e22e">Image</span>) -&gt; <span style="color:#a6e22e">std</span>::io::Result<span style="color:#f92672">&lt;</span>()<span style="color:#f92672">&gt;</span> {
-</span></span><span style="display:flex;"><span>   <span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> file <span style="color:#f92672">=</span> File::create(FILE_PATH)<span style="color:#f92672">?</span>;
-</span></span><span style="display:flex;"><span>   file.write_all(format!(<span style="color:#e6db74">&#34;P6\n{} {} 255\n&#34;</span>, WIDTH, HEIGHT).as_bytes())<span style="color:#f92672">?</span>;
+</span></span><span style="display:flex;"><span>   <span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> file <span style="color:#f92672">=</span> File::create(<span style="color:#66d9ef">FILE_PATH</span>)<span style="color:#f92672">?</span>;
+</span></span><span style="display:flex;"><span>   file.write_all(format!(<span style="color:#e6db74">&#34;P6</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">{}</span><span style="color:#e6db74"> </span><span style="color:#e6db74">{}</span><span style="color:#e6db74"> 255</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, <span style="color:#66d9ef">WIDTH</span>, <span style="color:#66d9ef">HEIGHT</span>).as_bytes())<span style="color:#f92672">?</span>;
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>   <span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> all_bytes: Vec<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">u8</span><span style="color:#f92672">&gt;</span> <span style="color:#f92672">=</span> Vec::new();
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>   <span style="color:#66d9ef">for</span> y <span style="color:#66d9ef">in</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">..</span>HEIGHT <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">usize</span> {
-</span></span><span style="display:flex;"><span>       <span style="color:#66d9ef">for</span> x <span style="color:#66d9ef">in</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">..</span>WIDTH <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">usize</span> {
+</span></span><span style="display:flex;"><span>   <span style="color:#66d9ef">for</span> y <span style="color:#66d9ef">in</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">..</span><span style="color:#66d9ef">HEIGHT</span> <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">usize</span> {
+</span></span><span style="display:flex;"><span>       <span style="color:#66d9ef">for</span> x <span style="color:#66d9ef">in</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">..</span><span style="color:#66d9ef">WIDTH</span> <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">usize</span> {
 </span></span><span style="display:flex;"><span>           <span style="color:#66d9ef">let</span> pixel: <span style="color:#66d9ef">i64</span> <span style="color:#f92672">=</span> image[y][x];
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>           <span style="color:#75715e">// Extract red component
@@ -267,11 +267,11 @@ vary between <code>0x000000</code>-<code>0xFFFFFF</code>.</li>
 <h4 id="second-variant">Second variant<a href="#second-variant" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h4>
 <p>For the second variant of this experiment, we ditch the palette entirely. Let&rsquo;s change our pixel generation logic a bit.</p>
 <p>Instead of picking from a palette, we simply extract the lower 3 bytes of the randomly generated number. There&rsquo;s a variation of this where we simply use the number modulo 0xFFFFFF.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">let</span> random_nums <span style="color:#f92672">=</span> lcg::get_random_numbers(WIDTH <span style="color:#f92672">*</span> HEIGHT);
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">let</span> random_nums <span style="color:#f92672">=</span> lcg::get_random_numbers(<span style="color:#66d9ef">WIDTH</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">HEIGHT</span>);
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> y <span style="color:#66d9ef">in</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">..</span>HEIGHT <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">usize</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> x <span style="color:#66d9ef">in</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">..</span>WIDTH <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">usize</span> {
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> y <span style="color:#66d9ef">in</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">..</span><span style="color:#66d9ef">HEIGHT</span> <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">usize</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> x <span style="color:#66d9ef">in</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">..</span><span style="color:#66d9ef">WIDTH</span> <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">usize</span> {
 </span></span><span style="display:flex;"><span>        <span style="color:#75715e">// let color = (random_nums[j] % 0xFFFFFF) as i64;
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">let</span> color <span style="color:#f92672">=</span> (random_nums[j] <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xFFFFFF</span>) <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">i64</span>;
 </span></span><span style="display:flex;"><span>        image[y][x] <span style="color:#f92672">=</span> color;
@@ -302,7 +302,7 @@ vary between <code>0x000000</code>-<code>0xFFFFFF</code>.</li>
 4. Write all encrypted pixels to a file and save the image.
 </code></pre><p>Fortunately the image crate takes all the complexity of image formats away from us. We do each step as follows:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">read_image</span>() -&gt; <span style="color:#a6e22e">image</span>::DynamicImage {
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> image::open(IMAGE_PATH).unwrap();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> image::open(<span style="color:#66d9ef">IMAGE_PATH</span>).unwrap();
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>This reads, parses and returns a <code>Image</code> struct that we can use. The <code>Image</code> struct has several defined methods on it that we find useful.</p>
 <p>Once read, we generate the random numbers:</p>
@@ -399,6 +399,13 @@ $$</p>
         <hr />
     </div>
     <div class="pagination__buttons">
+        
+        <span class="button previous">
+            <a href="https://crystalsage.github.io/posts/dc_term/">
+                <span class="button__icon">←</span>
+                <span class="button__text">Windows Terminal with Double Commander</span>
+            </a>
+        </span>
         
         
         <span class="button next">

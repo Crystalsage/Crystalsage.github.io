@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+    <title>Windows Terminal with Double Commander :: /home/bourbon</title>
+  
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Let&#39;s use Windows Terminal &#43; WSL2 with Double Commander!" />
+<meta name="keywords" content="" />
+<meta name="robots" content="noodp" />
+<link rel="canonical" href="https://crystalsage.github.io/posts/dc_term/" />
+
+
+
+
+<link rel="stylesheet" href="https://crystalsage.github.io/assets/style.css">
+
+  <link rel="stylesheet" href="https://crystalsage.github.io/assets/green.css">
+
+
+
+
+
+
+<link rel="apple-touch-icon" href="https://crystalsage.github.io/img/apple-touch-icon-192x192.png">
+
+  <link rel="shortcut icon" href="https://crystalsage.github.io/favicon.png">
+
+
+
+<meta name="twitter:card" content="summary" />
+
+  
+    <meta name="twitter:site" content="" />
+  
+    <meta name="twitter:creator" content="" />
+
+
+
+<meta property="og:locale" content="en" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Windows Terminal with Double Commander">
+<meta property="og:description" content="Let&#39;s use Windows Terminal &#43; WSL2 with Double Commander!" />
+<meta property="og:url" content="https://crystalsage.github.io/posts/dc_term/" />
+<meta property="og:site_name" content="/home/bourbon" />
+
+  
+    <meta property="og:image" content="https://crystalsage.github.io/favicon.png">
+  
+
+<meta property="og:image:width" content="2048">
+<meta property="og:image:height" content="1024">
+
+
+  <meta property="article:published_time" content="2023-11-13 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+<body class="green">
+
+
+<div class="container center headings--one-size">
+
+  <header class="header">
+  <div class="header__inner">
+    <div class="header__logo">
+      <a href="/">
+  <div class="logo">
+    /home/bourbon
+  </div>
+</a>
+
+    </div>
+    
+      <div class="menu-trigger">menu</div>
+    
+  </div>
+  
+    <nav class="menu">
+  <ul class="menu__inner menu__inner--desktop">
+    
+      
+        
+          <li><a href="/about">About</a></li>
+        
+      
+        
+          <li><a href="/setup">Setup</a></li>
+        
+      
+      
+    
+
+    
+  </ul>
+
+  <ul class="menu__inner menu__inner--mobile">
+    
+      
+        <li><a href="/about">About</a></li>
+      
+    
+      
+        <li><a href="/setup">Setup</a></li>
+      
+    
+    
+  </ul>
+</nav>
+
+  
+</header>
+
+
+  <div class="content">
+    
+<div class="post">
+  <h1 class="post-title">
+    <a href="https://crystalsage.github.io/posts/dc_term/">Windows Terminal with Double Commander</a></h1>
+  <div class="post-meta">
+    
+      <span class="post-date">
+        2023-11-13
+        
+      </span>
+    
+    
+    
+  </div>
+
+  
+  
+
+
+  
+
+  <div class="post-content"><div>
+        <h1 id="double-commander">Double Commander<a href="#double-commander" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<p>Double Commander is an open source file explorer utility that&rsquo;s pretty similar in spirit with Total Commander. It allows for split views, and other handy functions that are otherwise very missed in explorer.exe.</p>
+<p><img src="/dc.png" alt=""></p>
+<p>Double Commander allows you to open terminal using F9. However, I had some trouble figuring out how to open my default WSL2 Ubuntu profile on the new Windows Terminal <strong>with the colorscheme and font preferences intact</strong>. This is a quick note on how to achieve that.</p>
+<h1 id="settings">Settings<a href="#settings" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<p>Go to Menu bar -&gt; Configuration -&gt; Options -&gt; Tools -&gt; Terminal. Edit &lsquo;Command for just runnning terminal&rsquo;.</p>
+<pre tabindex="0"><code>Command: wt
+Parameters: -p &#34;Ubuntu&#34; -d . wsl
+</code></pre><p>Hit OK.</p>
+<h2 id="run">Run!<a href="#run" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>Now, if you press F9, Windows Terminal should start your Ubuntu profile in the current Windows directory inside WSL2!</p>
+<p><img src="/dc_term.png" alt=""></p>
+<p>$$
+\blacksquare
+\blacksquare
+\blacksquare
+$$</p>
+
+      </div></div>
+
+  
+  
+<div class="pagination">
+    <div class="pagination__title">
+        <span class="pagination__title-h">Read other posts</span>
+        <hr />
+    </div>
+    <div class="pagination__buttons">
+        
+        
+        <span class="button next">
+            <a href="https://crystalsage.github.io/posts/lcg/">
+                <span class="button__text">Experiments with LCG</span>
+                <span class="button__icon">→</span>
+            </a>
+        </span>
+        
+    </div>
+</div>
+
+  
+
+  
+
+</div>
+
+  </div>
+
+  
+    <footer class="footer">
+  <div class="footer__inner">
+    
+      <div class="copyright copyright--user">
+        <span>Licensed to Bourbon</span>
+    
+        <span>:: Theme made by <a href="https://twitter.com/panr">panr</a></span>
+      </div>
+  </div>
+</footer>
+
+
+
+<script src="https://crystalsage.github.io/assets/main.js"></script>
+<script src="https://crystalsage.github.io/assets/prism.js"></script>
+<script type="text/javascript"
+  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\[','\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+           extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    }
+  });
+  </script>
+
+
+
+
+
+
+  
+</div>
+
+</body>
+</html>
