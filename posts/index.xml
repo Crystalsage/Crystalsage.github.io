@@ -291,6 +291,224 @@ $$&lt;/p&gt;
     </item>
     
     <item>
+      <title>Flare-on 9</title>
+      <link>https://crystalsage.github.io/posts/flare/</link>
+      <pubDate>Sun, 13 Nov 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://crystalsage.github.io/posts/flare/</guid>
+      <description>Introduction&amp;#8983; FLARE-On is a month-long annual CTF event by Mandiant. It focuses on Windows oriented reverse engineering and malware analysis.
+It is one of my most favorite CTF events throughout the year. And it&amp;rsquo;s really, really hard. This year, I managed to solve 4 out of 11 challenges.
+This blog post focuses on my writeups for the first two of these challenges and attempts to trace my train of thoughts.</description>
+      <content>&lt;h1 id=&#34;introduction&#34;&gt;Introduction&lt;a href=&#34;#introduction&#34; class=&#34;hanchor&#34; ariaLabel=&#34;Anchor&#34;&gt;&amp;#8983;&lt;/a&gt; &lt;/h1&gt;
+&lt;p&gt;FLARE-On is a month-long annual CTF event by Mandiant. It focuses on Windows
+oriented reverse engineering and malware analysis.&lt;/p&gt;
+&lt;p&gt;It is one of my most favorite CTF events throughout the year. And it&amp;rsquo;s really,
+really hard. This year, I managed to solve 4 out of 11 challenges.&lt;/p&gt;
+&lt;p&gt;This blog post focuses on my writeups for the first two of these challenges and
+attempts to trace my train of thoughts.&lt;/p&gt;
+&lt;h2 id=&#34;flaredle---challenge-1&#34;&gt;Flaredle - Challenge 1&lt;a href=&#34;#flaredle---challenge-1&#34; class=&#34;hanchor&#34; ariaLabel=&#34;Anchor&#34;&gt;&amp;#8983;&lt;/a&gt; &lt;/h2&gt;
+&lt;p&gt;This is pretty much the easiest warm-up challenge.&lt;/p&gt;
+&lt;p&gt;We&amp;rsquo;re given a 7z archive which contains the files necessary for this challenge.
+The 7z contains a typical collection of files used to run a website. It contains
+&lt;code&gt;index.html&lt;/code&gt;, &lt;code&gt;style.css&lt;/code&gt; and two javascript files - &lt;code&gt;script.js&lt;/code&gt; and &lt;code&gt;words.js&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;In a setup like this, I prefer setting up a local python server and playing
+around with the website first. We can setup a server in the same folder like this:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;$ python -m http.server
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This should start a server at the default port 8080. Cool!&lt;/p&gt;
+&lt;h3 id=&#34;wordle-and-code-review&#34;&gt;Wordle and code review&lt;a href=&#34;#wordle-and-code-review&#34; class=&#34;hanchor&#34; ariaLabel=&#34;Anchor&#34;&gt;&amp;#8983;&lt;/a&gt; &lt;/h3&gt;
+&lt;p&gt;The HTML page shows us a game setup.
+&lt;img src=&#34;https://crystalsage.github.io/flare/flare-1-wordle.png&#34; alt=&#34;Flaredle&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Many readers might recognize this setup to be the same of Wordle&amp;rsquo;s! Now the
+challenge&amp;rsquo;s name makes sense. But this version looks much harder. This being
+a CTF challenge, we&amp;rsquo;re not going to play the game. If we take a look at the
+source, you&amp;rsquo;ll find that the HTML sources the &lt;code&gt;script.js&lt;/code&gt; file. Let&amp;rsquo;s take a
+look inside.&lt;/p&gt;
+&lt;h3 id=&#34;scriptjs&#34;&gt;script.js&lt;a href=&#34;#scriptjs&#34; class=&#34;hanchor&#34; ariaLabel=&#34;Anchor&#34;&gt;&amp;#8983;&lt;/a&gt; &lt;/h3&gt;
+&lt;p&gt;The file contains multiple functions that are typical to a Wordle-like game
+implementation (Bonus question: Do you know how Wordle works?). The opening
+lines look like this:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;import&lt;/span&gt; { &lt;span style=&#34;color:#a6e22e&#34;&gt;WORDS&lt;/span&gt; } &lt;span style=&#34;color:#a6e22e&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;./words.js&amp;#34;&lt;/span&gt;;
+&lt;p&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;NUMBER_OF_GUESSES&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;6&lt;/span&gt;;
+&lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;WORD_LENGTH&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;21&lt;/span&gt;;&lt;/p&gt;
+&lt;p&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;CORRECT_GUESS&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;57&lt;/span&gt;;&lt;/p&gt;
+&lt;p&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;guessesRemaining&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;NUMBER_OF_GUESSES&lt;/span&gt;;
+&lt;span style=&#34;color:#66d9ef&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;currentGuess&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; [];
+&lt;span style=&#34;color:#66d9ef&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;nextLetter&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;;
+&lt;span style=&#34;color:#66d9ef&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;rightGuessString&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;WORDS&lt;/span&gt;[&lt;span style=&#34;color:#a6e22e&#34;&gt;CORRECT_GUESS&lt;/span&gt;];
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;We presumably import a set of words from the &lt;code&gt;words.js&lt;/code&gt; file and set some
+constants. It looks like we get 6 guesses at this. What’s interesting to us
+is that the ‘correct’ guess is hardcoded and is the 57th word in the wordlist.&lt;/p&gt;&lt;/p&gt;
+&lt;p&gt;Once we enter a word and hit enter, we invoke the &lt;code&gt;checkGuess&lt;/code&gt; function due
+to this code:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;document.&lt;span style=&#34;color:#a6e22e&#34;&gt;addEventListener&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;keyup&amp;#34;&lt;/span&gt;, (&lt;span style=&#34;color:#a6e22e&#34;&gt;e&lt;/span&gt;) =&amp;gt; {
+&lt;pre&gt;&lt;code&gt;&amp;lt;span style=&amp;quot;color:#66d9ef&amp;quot;&amp;gt;if&amp;lt;/span&amp;gt; (&amp;lt;span style=&amp;quot;color:#a6e22e&amp;quot;&amp;gt;guessesRemaining&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color:#f92672&amp;quot;&amp;gt;===&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color:#ae81ff&amp;quot;&amp;gt;0&amp;lt;/span&amp;gt;) {
+    &amp;lt;span style=&amp;quot;color:#66d9ef&amp;quot;&amp;gt;return&amp;lt;/span&amp;gt;
+}
+
+
+&amp;lt;span style=&amp;quot;color:#66d9ef&amp;quot;&amp;gt;let&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color:#a6e22e&amp;quot;&amp;gt;pressedKey&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color:#f92672&amp;quot;&amp;gt;=&amp;lt;/span&amp;gt; String(&amp;lt;span style=&amp;quot;color:#a6e22e&amp;quot;&amp;gt;e&amp;lt;/span&amp;gt;.&amp;lt;span style=&amp;quot;color:#a6e22e&amp;quot;&amp;gt;key&amp;lt;/span&amp;gt;)
+&amp;lt;span style=&amp;quot;color:#66d9ef&amp;quot;&amp;gt;if&amp;lt;/span&amp;gt; (&amp;lt;span style=&amp;quot;color:#a6e22e&amp;quot;&amp;gt;pressedKey&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color:#f92672&amp;quot;&amp;gt;===&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color:#e6db74&amp;quot;&amp;gt;&amp;amp;#34;Backspace&amp;amp;#34;&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color:#f92672&amp;quot;&amp;gt;&amp;amp;amp;&amp;amp;amp;&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color:#a6e22e&amp;quot;&amp;gt;nextLetter&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color:#f92672&amp;quot;&amp;gt;!==&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color:#ae81ff&amp;quot;&amp;gt;0&amp;lt;/span&amp;gt;) {
+
+    &amp;lt;span style=&amp;quot;color:#a6e22e&amp;quot;&amp;gt;deleteLetter&amp;lt;/span&amp;gt;()
+    &amp;lt;span style=&amp;quot;color:#66d9ef&amp;quot;&amp;gt;return&amp;lt;/span&amp;gt;
+}
+
+&amp;lt;span style=&amp;quot;color:#66d9ef&amp;quot;&amp;gt;if&amp;lt;/span&amp;gt; (&amp;lt;span style=&amp;quot;color:#a6e22e&amp;quot;&amp;gt;pressedKey&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color:#f92672&amp;quot;&amp;gt;===&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color:#e6db74&amp;quot;&amp;gt;&amp;amp;#34;Enter&amp;amp;#34;&amp;lt;/span&amp;gt;) {
+    &amp;lt;span style=&amp;quot;color:#a6e22e&amp;quot;&amp;gt;checkGuess&amp;lt;/span&amp;gt;()
+    &amp;lt;span style=&amp;quot;color:#66d9ef&amp;quot;&amp;gt;return&amp;lt;/span&amp;gt;
+}
+
+
+&amp;lt;span style=&amp;quot;color:#66d9ef&amp;quot;&amp;gt;let&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color:#a6e22e&amp;quot;&amp;gt;found&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color:#f92672&amp;quot;&amp;gt;=&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color:#a6e22e&amp;quot;&amp;gt;pressedKey&amp;lt;/span&amp;gt;.&amp;lt;span style=&amp;quot;color:#a6e22e&amp;quot;&amp;gt;match&amp;lt;/span&amp;gt;(&amp;lt;span style=&amp;quot;color:#e6db74&amp;quot;&amp;gt;/[a-z]/gi&amp;lt;/span&amp;gt;)
+&amp;lt;span style=&amp;quot;color:#66d9ef&amp;quot;&amp;gt;if&amp;lt;/span&amp;gt; (&amp;lt;span style=&amp;quot;color:#f92672&amp;quot;&amp;gt;!&amp;lt;/span&amp;gt;&amp;lt;span style=&amp;quot;color:#a6e22e&amp;quot;&amp;gt;found&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color:#f92672&amp;quot;&amp;gt;||&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color:#a6e22e&amp;quot;&amp;gt;found&amp;lt;/span&amp;gt;.&amp;lt;span style=&amp;quot;color:#a6e22e&amp;quot;&amp;gt;length&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color:#f92672&amp;quot;&amp;gt;&amp;amp;gt;&amp;lt;/span&amp;gt; &amp;lt;span style=&amp;quot;color:#ae81ff&amp;quot;&amp;gt;1&amp;lt;/span&amp;gt;) {
+    &amp;lt;span style=&amp;quot;color:#66d9ef&amp;quot;&amp;gt;return&amp;lt;/span&amp;gt;
+} &amp;lt;span style=&amp;quot;color:#66d9ef&amp;quot;&amp;gt;else&amp;lt;/span&amp;gt; {
+    &amp;lt;span style=&amp;quot;color:#a6e22e&amp;quot;&amp;gt;insertLetter&amp;lt;/span&amp;gt;(&amp;lt;span style=&amp;quot;color:#a6e22e&amp;quot;&amp;gt;pressedKey&amp;lt;/span&amp;gt;)
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;})
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The &lt;code&gt;checkGuess&lt;/code&gt; function&lt;/p&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#a6e22e&#34;&gt;guessString&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;===&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;rightGuessString&lt;/span&gt;) {
+		&lt;span style=&#34;color:#66d9ef&#34;&gt;let&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;flag&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;rightGuessString&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;@flare-on.com&amp;#39;&lt;/span&gt;;
+		&lt;span style=&#34;color:#a6e22e&#34;&gt;toastr&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;options&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;timeOut&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;;
+		&lt;span style=&#34;color:#a6e22e&#34;&gt;toastr&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;options&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;onclick&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt;() {&lt;span style=&#34;color:#a6e22e&#34;&gt;alert&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;flag&lt;/span&gt;);}
+        &lt;span style=&#34;color:#a6e22e&#34;&gt;toastr&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;success&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;You guessed right! The flag is &amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;flag&lt;/span&gt;);
+		&lt;span style=&#34;color:#a6e22e&#34;&gt;guessesRemaining&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;
+		&lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt;
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;So we obtain the flag for this challenge if we guess the word correctly. The
+&lt;code&gt;words.js&lt;/code&gt; file contains a long list of words.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;WORDS&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;acetylphenylhydrazine&amp;#39;&lt;/span&gt;,
+	&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;aerobacteriologically&amp;#39;&lt;/span&gt;,
+	&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;alkylbenzenesulfonate&amp;#39;&lt;/span&gt;,
+	&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;aminoacetophenetidine&amp;#39;&lt;/span&gt;,
+	&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;anatomicopathological&amp;#39;&lt;/span&gt;,
+	&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;anemometrographically&amp;#39;&lt;/span&gt;,
+	...
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;We check this file to locate the 58th word. It turns out to be
+&lt;code&gt;flareonisallaboutcats&lt;/code&gt;. Let&amp;rsquo;s try entering this word into Flaredle.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/flare/flare-1-flag.png&#34; alt=&#34;Flaredle flag&#34;&gt;&lt;/p&gt;
+&lt;p&gt;We get the flag!&lt;/p&gt;
+&lt;p&gt;$$
+\boxed{\text{Flag: flareonisallaboutcats@flare-on.com}}
+$$&lt;/p&gt;
+&lt;p&gt;Again, this was a really easy challenge that involves taking a look into
+source code.&lt;/p&gt;
+&lt;h2 id=&#34;pixelpoker---challenge-2&#34;&gt;PixelPoker - Challenge 2&lt;a href=&#34;#pixelpoker---challenge-2&#34; class=&#34;hanchor&#34; ariaLabel=&#34;Anchor&#34;&gt;&amp;#8983;&lt;/a&gt; &lt;/h2&gt;
+&lt;p&gt;The difficulty of challenges grows rapidly from this challenge. Here, we
+encounter a proper 32-bit PE that we have to reverse. Let&amp;rsquo;s see.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Challenge: I said you wouldn&amp;rsquo;t win that last one. I lied. The last challenge was basically a captcha. Now the real work begins. Shall we play another game?&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;The challenge offers us a 7z again. Once we extract it, we&amp;rsquo;re left with 32-bit
+executable named &lt;code&gt;PixelPoker.exe&lt;/code&gt; and a readme file. The readme file tells us
+that our goal is to click a correct pixel. Running this executable, we are
+greeted with this screen.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/flare/flare-2-pixelpoker.png&#34; alt=&#34;PixelPoker&#34;&gt;&lt;/p&gt;
+&lt;p&gt;The main canvas seems to be filled an array of random pixels, reminiscent of a
+TV&amp;rsquo;s static noise. The title bar holds two interesting things.&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Position of the cursor in x and y co-ordinates.&lt;/li&gt;
+&lt;li&gt;Some sort of counter that keeps a count of how many clicks have been made
+on the canvas.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;e.g. In the screenshot visible above, the cursor was positioned at $x=743$ and
+$y=198$.&lt;/p&gt;
+&lt;p&gt;Exhausting the attempts leaves us with a dialog.
+&lt;img src=&#34;https://crystalsage.github.io/flare/flare-2-pixelpoker-fail.png&#34; alt=&#34;PixelPoker Attempt&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Now to make some guesses based on the observations and my intuition:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;It&amp;rsquo;s certain that we have to click the correct the pixel out of all of the possible
+combination of pixels on the canvas. The maximum size of canvas seems to be &lt;code&gt;(741, 641)&lt;/code&gt;.
+This means that there are 474981 unique pixels to click. No way we&amp;rsquo;re going to find
+that manually.&lt;/li&gt;
+&lt;li&gt;It&amp;rsquo;s possible that the array of pixels is either completely random, created
+at runtime. Or, it&amp;rsquo;s loaded from a Bitmap that&amp;rsquo;s present inside the binary. Such
+bitmaps are typically loaded using Win32 API&amp;rsquo;s&lt;sup&gt;1&lt;/sup&gt; &lt;code&gt;BitBlt&lt;/code&gt; and friend functions.&lt;/li&gt;
+&lt;li&gt;To find out the correct pixel, there&amp;rsquo;s probably some sort of calculation that
+happens at runtime. We&amp;rsquo;ll need to reverse engineer the application to find it out.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Let&amp;rsquo;s get our hands dirty. I love Ghidra, so I&amp;rsquo;ll use that. I very much miss
+the expensive licensing costs of IDA these days.&lt;/p&gt;
+&lt;h3 id=&#34;diving-into-the-pixel-soup&#34;&gt;Diving into the pixel soup&lt;a href=&#34;#diving-into-the-pixel-soup&#34; class=&#34;hanchor&#34; ariaLabel=&#34;Anchor&#34;&gt;&amp;#8983;&lt;/a&gt; &lt;/h3&gt;
+&lt;p&gt;Whenever I analyze a binary, I like to check the strings first, as they give me
+a good initial impression of what I&amp;rsquo;m analyzing (or not). Looking into the
+strings, we get some indicators right off the bat.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/flare/flare-2-strings.png&#34; alt=&#34;PixelPoker Strings&#34;&gt;&lt;/p&gt;
+&lt;p&gt;We see some typical functions such as &lt;code&gt;BitBlt&lt;/code&gt; (aha!) and &lt;code&gt;MessageBoxA&lt;/code&gt;. These
+functions definitely tell me that I&amp;rsquo;m dealing with Bitmaps and Win32 GUI functions.
+Tracing these functions into the imports of the application and examining their
+cross references lands us in the main function.&lt;/p&gt;
+&lt;p&gt;In the main function, we see a bunch of match statements matching different
+values. I was hoping to find something similar to this, since I had a hunch
+that the application would listen for mouse button down event somewhere. Our
+search is simplified by Ghidra&amp;rsquo;s decompilation and some very helpful strings.
+After all of the boilerplate code that manages menus and Bitmap loading, we have
+the stuff we really care about.
+&lt;img src=&#34;https://crystalsage.github.io/flare/flare-2-main.png&#34; alt=&#34;PixelPoker Main&#34;&gt;&lt;/p&gt;
+&lt;p&gt;The first thing that immediately stands out is the &lt;em&gt;Please play again&lt;/em&gt; message.
+Before that string, we even see a variable being compared to decimal value 10.
+This is probably our click counter!&lt;/p&gt;
+&lt;p&gt;The next thing that stands out is the comparisons of &lt;code&gt;param_2&lt;/code&gt; against different
+hardcoded constants. These are probably some kind of macro constants. If we
+look up those constants in the context of WIN32 API and events, it doesn&amp;rsquo;t take us very
+long to find out that &lt;code&gt;0x200&lt;/code&gt; is a &lt;code&gt;WM_MOUSEMOVE&lt;/code&gt; constant and &lt;code&gt;0x201&lt;/code&gt; is
+a &lt;code&gt;WM_LBUTTONDOWN&lt;/code&gt; (Mouse left button down) event. Just like we predicted! [&lt;a href=&#34;https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-mousemove&#34;&gt;Reference]&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Further down &lt;code&gt;else&lt;/code&gt; branch we see our click counter getting incremented. Then,
+we do some kind of check against some values. Let&amp;rsquo;s understand what these values are.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;uVar8&lt;/code&gt; and &lt;code&gt;uVar6&lt;/code&gt; are the input X and Y co-ordinates that we clicked.
+(Exercise to the reader: How did I arrive at that conclusion?).&lt;/p&gt;
+&lt;p&gt;The first argument to the modulo (&lt;code&gt;%&lt;/code&gt;) operator is seems to be a constant. You&amp;rsquo;ll
+see a Ghidra exclusive notation where, for example, the variable name ends with &lt;code&gt;._0_4_&lt;/code&gt;.
+This just means that only the first four bytes of that data source are considered.
+This roughly translates to $\text{MOV EAX, [s_FLARE-On_00412004]}$ in assembly (Add offset for the next 4 bytes).
+The entire modulo operation looks something like this in assembly.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-nasm&#34; data-lang=&#34;nasm&#34;&gt;        &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;00401472&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;a3&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;98&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;32&lt;/span&gt;        MOV        [DAT_00413298],EAX                               &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;=&lt;/span&gt; ??
+                 &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;41&lt;/span&gt; &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;00&lt;/span&gt;
+        &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;00401477&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;a1&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;04&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;20&lt;/span&gt;        MOV        EAX,[s_FLARE&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;On_00412004]                        &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;FLARE-On&amp;#34;&lt;/span&gt;
+                 &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;41&lt;/span&gt; &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;00&lt;/span&gt;
+        &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;0040147&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;c&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;8&lt;/span&gt;b &lt;span style=&#34;color:#ae81ff&#34;&gt;35&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;80&lt;/span&gt;        MOV        ESI,&lt;span style=&#34;color:#66d9ef&#34;&gt;dword&lt;/span&gt; ptr [DAT_00413280]                     &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;=&lt;/span&gt; ??
+                 &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;32&lt;/span&gt; &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;41&lt;/span&gt; &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;00&lt;/span&gt;
+        &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;00401482&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;f7&lt;/span&gt; f6           DIV        ESI
+&lt;p&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;It turns out &lt;code&gt;s_FLARE-On_00412004&lt;/code&gt; is just a 8 byte string &lt;code&gt;&amp;quot;FLARE-On&amp;quot;&lt;/code&gt;. But since
+these are the first 4 bytes LE, it translates to the constant &lt;code&gt;0x52414c46&lt;/code&gt;.
+Further down, we see &lt;code&gt;s_E-On_00412004+4&lt;/code&gt; getting referenced. These are probably
+the next 4 bytes LE which are &lt;code&gt;0x6e4f2d45&lt;/code&gt; (LE: Little Endian).&lt;/p&gt;&lt;/p&gt;
+&lt;p&gt;Next, we care about what &lt;code&gt;DAT_00413280&lt;/code&gt; and &lt;code&gt;DAT_00413284&lt;/code&gt; is. I went into the
+cross references of these data pointers to find out these are also used for
+creating window and are provided as dimensions to &lt;code&gt;CreateWindowExW&lt;/code&gt; which has
+a signature as &lt;a href=&#34;https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-createwindowexa&#34;&gt;described here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/flare/flare-2-create_window.png&#34; alt=&#34;PixelPoker CreateWindow&#34;&gt;&lt;/p&gt;
+&lt;p&gt;So these are the window height and width, which we know to be 741 and 641!
+This is also probably the check to find out the correct pixel.&lt;/p&gt;
+&lt;p&gt;It&amp;rsquo;s a common practice in reverse engineering to rename everything in the decompilation as we go along.
+The entire code, after renaming constants and variables looks something like this:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/flare/flare-2-code-untangled.png&#34; alt=&#34;PixelPoker CreateWindow&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Much better!&lt;/p&gt;
+&lt;h3 id=&#34;wrapping-up&#34;&gt;Wrapping up&lt;a href=&#34;#wrapping-up&#34; class=&#34;hanchor&#34; ariaLabel=&#34;Anchor&#34;&gt;&amp;#8983;&lt;/a&gt; &lt;/h3&gt;
+&lt;p&gt;So we know that the actual check to see if clicked the correct pixel happens
+where the modulo operation happens. The two checks actually look like this.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (INPUT_X_PIXEL &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x52414c46&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;%&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;741&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;and&lt;/span&gt; (INPUT_Y_PIXEL &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x6e4f2d45&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;%&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;641&lt;/span&gt;):
+    &lt;span style=&#34;color:#75715e&#34;&gt;# Success&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;We can actually calculate these values in a calculator.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&amp;gt;&amp;gt;&amp;gt; 0x52414C46 % &lt;span style=&#34;color:#ae81ff&#34;&gt;741&lt;/span&gt;
+&lt;span style=&#34;color:#ae81ff&#34;&gt;95&lt;/span&gt;
+&amp;gt;&amp;gt;&amp;gt; 0x6E4F2D45 % &lt;span style=&#34;color:#ae81ff&#34;&gt;641&lt;/span&gt;
+&lt;span style=&#34;color:#ae81ff&#34;&gt;313&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Once we click the pixel located at (95, 313), we succesfully get the flag.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/flare/flare-2-flag.png&#34; alt=&#34;PixelPoker flag&#34;&gt;&lt;/p&gt;
+&lt;p&gt;$$
+\boxed{\text{Flag: w!nN3r_W!NneR_cHick3n_d1nNer@flare-on.com}}
+$$&lt;/p&gt;
+&lt;p&gt;$$
+\blacksquare
+\blacksquare
+\blacksquare
+$$&lt;/p&gt;
+</content>
+    </item>
+    
+    <item>
       <title>SMT solvers for fun and CTFs</title>
       <link>https://crystalsage.github.io/posts/smt/</link>
       <pubDate>Fri, 04 Nov 2022 00:00:00 +0000</pubDate>
