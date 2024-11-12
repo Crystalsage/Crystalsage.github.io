@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+    <title>Flare-on 9 Writeup (Part-1) :: /home/bourbon</title>
+  
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="My writeup of Flare-on 9 CTF. This part includes challenge 1 and challenge 2." />
+<meta name="keywords" content="" />
+<meta name="robots" content="noodp" />
+<link rel="canonical" href="https://crystalsage.github.io/posts/flare-1/" />
+
+
+
+
+<link rel="stylesheet" href="https://crystalsage.github.io/assets/style.css">
+
+  <link rel="stylesheet" href="https://crystalsage.github.io/assets/green.css">
+
+
+
+
+
+
+<link rel="apple-touch-icon" href="https://crystalsage.github.io/img/apple-touch-icon-192x192.png">
+
+  <link rel="shortcut icon" href="https://crystalsage.github.io/favicon.png">
+
+
+
+<meta name="twitter:card" content="summary" />
+
+  
+    <meta name="twitter:site" content="" />
+  
+    <meta name="twitter:creator" content="" />
+
+
+
+<meta property="og:locale" content="en" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Flare-on 9 Writeup (Part-1)">
+<meta property="og:description" content="My writeup of Flare-on 9 CTF. This part includes challenge 1 and challenge 2." />
+<meta property="og:url" content="https://crystalsage.github.io/posts/flare-1/" />
+<meta property="og:site_name" content="/home/bourbon" />
+
+  
+    <meta property="og:image" content="https://crystalsage.github.io/favicon.png">
+  
+
+<meta property="og:image:width" content="2048">
+<meta property="og:image:height" content="1024">
+
+
+  <meta property="article:published_time" content="2022-11-19 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+<body class="green">
+
+
+<div class="container center headings--one-size">
+
+  <header class="header">
+  <div class="header__inner">
+    <div class="header__logo">
+      <a href="/">
+  <div class="logo">
+    /home/bourbon
+  </div>
+</a>
+
+    </div>
+    
+      <div class="menu-trigger">menu</div>
+    
+  </div>
+  
+    <nav class="menu">
+  <ul class="menu__inner menu__inner--desktop">
+    
+      
+        
+          <li><a href="/about">About</a></li>
+        
+      
+        
+          <li><a href="/setup">Setup</a></li>
+        
+      
+      
+    
+
+    
+  </ul>
+
+  <ul class="menu__inner menu__inner--mobile">
+    
+      
+        <li><a href="/about">About</a></li>
+      
+    
+      
+        <li><a href="/setup">Setup</a></li>
+      
+    
+    
+  </ul>
+</nav>
+
+  
+</header>
+
+
+  <div class="content">
+    
+<div class="post">
+  <h1 class="post-title">
+    <a href="https://crystalsage.github.io/posts/flare-1/">Flare-on 9 Writeup (Part-1)</a></h1>
+  <div class="post-meta">
+    
+      <span class="post-date">
+        2022-11-19
+        
+      </span>
+    
+    
+    
+  </div>
+
+  
+  
+
+
+  
+
+  <div class="post-content"><div>
+        <h1 id="introduction">Introduction<a href="#introduction" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<p>FLARE-On is a month-long annual CTF event by Mandiant. It focuses on Windows
+oriented reverse engineering and malware analysis.</p>
+<p>It is one of my most favorite CTF events throughout the year. And it&rsquo;s really,
+really hard. This year, I managed to solve 4 out of 11 challenges.</p>
+<p>This series of blog posts focuses on my writeups for these challenges and
+attempts to trace my train of thoughts.</p>
+<h2 id="flaredle---challenge-1">Flaredle - Challenge 1<a href="#flaredle---challenge-1" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>This is pretty much the easiest warm-up challenge.</p>
+<p>We&rsquo;re given a 7z archive which contains the files necessary for this challenge.
+The 7z contains a typical collection of files used to run a website. It contains
+<code>index.html</code>, <code>style.css</code> and two javascript files - <code>script.js</code> and <code>words.js</code>.</p>
+<p>In a setup like this, I prefer setting up a local python server and playing
+around with the website first. We can setup a server in the same folder like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ python -m http.server
+</code></pre></div><p>This should start a server at the default port 8080. Cool!</p>
+<h3 id="wordle-and-code-review">Wordle and code review<a href="#wordle-and-code-review" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h3>
+<p>The HTML page shows us a game setup.
+<img src="/flare/flare-1-wordle.png" alt="Flaredle"></p>
+<p>Many readers might recognize this setup to be the same of Wordle&rsquo;s! Now the
+challenge&rsquo;s name makes sense. But this version looks much harder. This being
+a CTF challenge, we&rsquo;re not going to play the game. If we take a look at the
+source, you&rsquo;ll find that the HTML sources the <code>script.js</code> file. Let&rsquo;s take a
+look inside.</p>
+<h3 id="scriptjs">script.js<a href="#scriptjs" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h3>
+<p>The file contains multiple functions that are typical to a Wordle-like game
+implementation (Bonus question: Do you know how Wordle works?). The opening
+lines look like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#66d9ef">import</span> { <span style="color:#a6e22e">WORDS</span> } <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#34;./words.js&#34;</span>;
+
+
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">NUMBER_OF_GUESSES</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">6</span>;
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">WORD_LENGTH</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">21</span>;
+
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">CORRECT_GUESS</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">57</span>;
+
+<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">guessesRemaining</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">NUMBER_OF_GUESSES</span>;
+<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">currentGuess</span> <span style="color:#f92672">=</span> [];
+<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">nextLetter</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">rightGuessString</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">WORDS</span>[<span style="color:#a6e22e">CORRECT_GUESS</span>];
+</code></pre></div><p>We presumably import a set of words from the <code>words.js</code> file and set some
+constants. It looks like we get 6 guesses at this. What&rsquo;s interesting to us
+is that the &lsquo;correct&rsquo; guess is hardcoded and is the 57th word in the wordlist.</p>
+<p>Once we enter a word and hit enter, we invoke the <code>checkGuess</code> function due
+to this code:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript">document.<span style="color:#a6e22e">addEventListener</span>(<span style="color:#e6db74">&#34;keyup&#34;</span>, (<span style="color:#a6e22e">e</span>) =&gt; {
+
+    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">guessesRemaining</span> <span style="color:#f92672">===</span> <span style="color:#ae81ff">0</span>) {
+        <span style="color:#66d9ef">return</span>
+    }
+
+
+    <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">pressedKey</span> <span style="color:#f92672">=</span> String(<span style="color:#a6e22e">e</span>.<span style="color:#a6e22e">key</span>)
+    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">pressedKey</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#34;Backspace&#34;</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">nextLetter</span> <span style="color:#f92672">!==</span> <span style="color:#ae81ff">0</span>) {
+
+        <span style="color:#a6e22e">deleteLetter</span>()
+        <span style="color:#66d9ef">return</span>
+    }
+
+    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">pressedKey</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#34;Enter&#34;</span>) {
+        <span style="color:#a6e22e">checkGuess</span>()
+        <span style="color:#66d9ef">return</span>
+    }
+
+
+    <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">found</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">pressedKey</span>.<span style="color:#a6e22e">match</span>(<span style="color:#e6db74">/[a-z]/gi</span>)
+    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">found</span> <span style="color:#f92672">||</span> <span style="color:#a6e22e">found</span>.<span style="color:#a6e22e">length</span> <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">1</span>) {
+        <span style="color:#66d9ef">return</span>
+    } <span style="color:#66d9ef">else</span> {
+        <span style="color:#a6e22e">insertLetter</span>(<span style="color:#a6e22e">pressedKey</span>)
+    }
+})
+</code></pre></div><p>The <code>checkGuess</code> function</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">guessString</span> <span style="color:#f92672">===</span> <span style="color:#a6e22e">rightGuessString</span>) {
+		<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">flag</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">rightGuessString</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;@flare-on.com&#39;</span>;
+		<span style="color:#a6e22e">toastr</span>.<span style="color:#a6e22e">options</span>.<span style="color:#a6e22e">timeOut</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+		<span style="color:#a6e22e">toastr</span>.<span style="color:#a6e22e">options</span>.<span style="color:#a6e22e">onclick</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">function</span>() {<span style="color:#a6e22e">alert</span>(<span style="color:#a6e22e">flag</span>);}
+        <span style="color:#a6e22e">toastr</span>.<span style="color:#a6e22e">success</span>(<span style="color:#e6db74">&#39;You guessed right! The flag is &#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">flag</span>);
+
+		<span style="color:#a6e22e">guessesRemaining</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+		<span style="color:#66d9ef">return</span>
+}
+</code></pre></div><p>So we obtain the flag for this challenge if we guess the word correctly. The
+<code>words.js</code> file contains a long list of words.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#66d9ef">export</span> <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">WORDS</span> <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;acetylphenylhydrazine&#39;</span>,
+	<span style="color:#e6db74">&#39;aerobacteriologically&#39;</span>,
+	<span style="color:#e6db74">&#39;alkylbenzenesulfonate&#39;</span>,
+	<span style="color:#e6db74">&#39;aminoacetophenetidine&#39;</span>,
+	<span style="color:#e6db74">&#39;anatomicopathological&#39;</span>,
+	<span style="color:#e6db74">&#39;anemometrographically&#39;</span>,
+	...
+</code></pre></div><p>We check this file to locate the 58th word. It turns out to be
+<code>flareonisallaboutcats</code>. Let&rsquo;s try entering this word into Flaredle.</p>
+<p><img src="/flare/flare-1-flag.png" alt="Flaredle flag"></p>
+<p>We get the flag!</p>
+<p>$$
+\boxed{\text{Flag: flareonisallaboutcats@flare-on.com}}
+$$</p>
+<p>Again, this was a really easy challenge that involves taking a look into
+source code.</p>
+<h2 id="pixelpoker---challenge-2">PixelPoker - Challenge 2<a href="#pixelpoker---challenge-2" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>The difficulty of challenges grows rapidly from this challenge. Here, we
+encounter a proper 32-bit PE that we have to reverse. Let&rsquo;s see.</p>
+<blockquote>
+<p>Challenge: I said you wouldn&rsquo;t win that last one. I lied. The last challenge was basically a captcha. Now the real work begins. Shall we play another game?</p>
+</blockquote>
+<p>The challenge offers us a 7z again. Once we extract it, we&rsquo;re left with 32-bit
+executable named <code>PixelPoker.exe</code> and a readme file. The readme file tells us
+that our goal is to click a correct pixel. Running this executable, we are
+greeted with this screen.</p>
+<p><img src="/flare/flare-2-pixelpoker.png" alt="PixelPoker"></p>
+<p>The main canvas seems to be filled an array of random pixels, reminiscent of a
+TV&rsquo;s static noise. The title bar holds two interesting things.</p>
+<ol>
+<li>Position of the cursor in x and y co-ordinates.</li>
+<li>Some sort of counter that keeps a count of how many clicks have been made
+on the canvas.</li>
+</ol>
+<p>e.g. In the screenshot visible above, the cursor was positioned at $x=743$ and
+$y=198$.</p>
+<p>Exhausting the attempts leaves us with a dialog.
+<img src="/flare/flare-2-pixelpoker-fail.png" alt="PixelPoker Attempt"></p>
+<p>Now to make some guesses based on the observations and my intuition:</p>
+<ol>
+<li>It&rsquo;s certain that we have to click the correct the pixel out of all of the possible
+combination of pixels on the canvas. The maximum size of canvas seems to be <code>(741, 641)</code>.
+This means that there are 474981 unique pixels to click. No way we&rsquo;re going to find
+that manually.</li>
+<li>It&rsquo;s possible that the array of pixels is either completely random, created
+at runtime. Or, it&rsquo;s loaded from a Bitmap that&rsquo;s present inside the binary. Such
+bitmaps are typically loaded using Win32 API&rsquo;s<sup>1</sup> <code>BitBlt</code> and friend functions.</li>
+<li>To find out the correct pixel, there&rsquo;s probably some sort of calculation that
+happens at runtime. We&rsquo;ll need to reverse engineer the application to find it out.</li>
+</ol>
+<p>Let&rsquo;s get our hands dirty. I love Ghidra, so I&rsquo;ll use that. I very much miss
+the expensive licensing costs of IDA these days.</p>
+<h3 id="diving-into-the-pixel-soup">Diving into the pixel soup<a href="#diving-into-the-pixel-soup" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h3>
+<p>Whenever I analyze a binary, I like to check the strings first, as they give me
+a good initial impression of what I&rsquo;m analyzing (or not). Looking into the
+strings, we get some indicators right off the bat.</p>
+<p><img src="/flare/flare-2-strings.png" alt="PixelPoker Strings"></p>
+<p>We see some typical functions such as <code>BitBlt</code> (aha!) and <code>MessageBoxA</code>. These
+functions definitely tell me that I&rsquo;m dealing with Bitmaps and Win32 GUI functions.
+Tracing these functions into the imports of the application and examining their
+cross references lands us in the main function.</p>
+<p>In the main function, we see a bunch of match statements matching different
+values. I was hoping to find something similar to this, since I had a hunch
+that the application would listen for mouse button down event somewhere. Our
+search is simplified by Ghidra&rsquo;s decompilation and some very helpful strings.
+After all of the boilerplate code that manages menus and Bitmap loading, we have
+the stuff we really care about.
+<img src="/flare/flare-2-main.png" alt="PixelPoker Main"></p>
+<p>The first thing that immediately stands out is the <em>Please play again</em> message.
+Before that string, we even see a variable being compared to decimal value 10.
+This is probably our click counter!</p>
+<p>The next thing that stands out is the comparisons of <code>param_2</code> against different
+hardcoded constants. These are probably some kind of macro constants. If we
+look up those constants in the context of WIN32 API and events, it doesn&rsquo;t take us very
+long to find out that <code>0x200</code> is a <code>WM_MOUSEMOVE</code> constant and <code>0x201</code> is
+a <code>WM_LBUTTONDOWN</code> (Mouse left button down) event. Just like we predicted! [<a href="https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-mousemove">Reference]</a></p>
+<p>Further down <code>else</code> branch we see our click counter getting incremented. Then,
+we do some kind of check against some values. Let&rsquo;s understand what these values are.</p>
+<p><code>uVar8</code> and <code>uVar6</code> are the input X and Y co-ordinates that we clicked.
+(Exercise to the reader: How did I arrive at that conclusion?).</p>
+<p>The first argument to the modulo (<code>%</code>) operator is seems to be a constant. You&rsquo;ll
+see a Ghidra exclusive notation where, for example, the variable name ends with <code>._0_4_</code>.
+This just means that only the first four bytes of that data source are considered.
+This roughly translates to $\text{MOV EAX, [s_FLARE-On_00412004]}$ in assembly (Add offset for the next 4 bytes).
+The entire modulo operation looks something like this in assembly.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-nasm" data-lang="nasm">        <span style="color:#960050;background-color:#1e0010">00401472</span> <span style="color:#a6e22e">a3</span> <span style="color:#ae81ff">98</span> <span style="color:#ae81ff">32</span>        MOV        [DAT_00413298],EAX                               <span style="color:#960050;background-color:#1e0010">=</span> ??
+                 <span style="color:#960050;background-color:#1e0010">41</span> <span style="color:#960050;background-color:#1e0010">00</span>
+        <span style="color:#960050;background-color:#1e0010">00401477</span> <span style="color:#a6e22e">a1</span> <span style="color:#ae81ff">04</span> <span style="color:#ae81ff">20</span>        MOV        EAX,[s_FLARE<span style="color:#f92672">-</span>On_00412004]                        <span style="color:#960050;background-color:#1e0010">=</span> <span style="color:#e6db74">&#34;FLARE-On&#34;</span>
+                 <span style="color:#960050;background-color:#1e0010">41</span> <span style="color:#960050;background-color:#1e0010">00</span>
+        <span style="color:#960050;background-color:#1e0010">0040147</span><span style="color:#a6e22e">c</span> <span style="color:#ae81ff">8</span>b <span style="color:#ae81ff">35</span> <span style="color:#ae81ff">80</span>        MOV        ESI,<span style="color:#66d9ef">dword</span> ptr [DAT_00413280]                     <span style="color:#960050;background-color:#1e0010">=</span> ??
+                 <span style="color:#960050;background-color:#1e0010">32</span> <span style="color:#960050;background-color:#1e0010">41</span> <span style="color:#960050;background-color:#1e0010">00</span>
+        <span style="color:#960050;background-color:#1e0010">00401482</span> <span style="color:#a6e22e">f7</span> f6           DIV        ESI
+
+</code></pre></div><p>It turns out <code>s_FLARE-On_00412004</code> is just a 8 byte string <code>&quot;FLARE-On&quot;</code>. But since
+these are the first 4 bytes LE, it translates to the constant <code>0x52414c46</code>.
+Further down, we see <code>s_E-On_00412004+4</code> getting referenced. These are probably
+the next 4 bytes LE which are <code>0x6e4f2d45</code> (LE: Little Endian).</p>
+<p>Next, we care about what <code>DAT_00413280</code> and <code>DAT_00413284</code> is. I went into the
+cross references of these data pointers to find out these are also used for
+creating window and are provided as dimensions to <code>CreateWindowExW</code> which has
+a signature as <a href="https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-createwindowexa">described here</a>.</p>
+<p><img src="/flare/flare-2-create_window.png" alt="PixelPoker CreateWindow"></p>
+<p>So these are the window height and width, which we know to be 741 and 641!
+This is also probably the check to find out the correct pixel.</p>
+<p>It&rsquo;s a common practice in reverse engineering to rename everything in the decompilation as we go along.
+The entire code, after renaming constants and variables looks something like this:</p>
+<p><img src="/flare/flare-2-code-untangled.png" alt="PixelPoker CreateWindow"></p>
+<p>Much better!</p>
+<h3 id="wrapping-up">Wrapping up<a href="#wrapping-up" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h3>
+<p>So we know that the actual check to see if clicked the correct pixel happens
+where the modulo operation happens. The two checks actually look like this.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">if</span> (INPUT_X_PIXEL <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x52414c46</span> <span style="color:#f92672">%</span> <span style="color:#ae81ff">741</span>) <span style="color:#f92672">and</span> (INPUT_Y_PIXEL <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x6e4f2d45</span> <span style="color:#f92672">%</span> <span style="color:#ae81ff">641</span>):
+    <span style="color:#75715e"># Success</span>
+</code></pre></div><p>We can actually calculate these values in a calculator.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">&gt;&gt;&gt; 0x52414C46 % <span style="color:#ae81ff">741</span>
+<span style="color:#ae81ff">95</span>
+&gt;&gt;&gt; 0x6E4F2D45 % <span style="color:#ae81ff">641</span>
+<span style="color:#ae81ff">313</span>
+</code></pre></div><p>Once we click the pixel located at (95, 313), we succesfully get the flag.</p>
+<p><img src="/flare/flare-2-flag.png" alt="PixelPoker flag"></p>
+<p>$$
+\boxed{\text{Flag: w!nN3r_W!NneR_cHick3n_d1nNer@flare-on.com}}
+$$</p>
+<p>If you wish to retrace the steps to learn some reverse engineering, you can download these challenges <a href="https://github.com/fareedfauzi/Flare-On-Challenges/tree/master/Challenges/2022">from here</a>.</p>
+<p>With that, we conclude the first part of this series. In the
+next blog post, we&rsquo;ll take a look at the third challenge.</p>
+<p>$$
+\blacksquare
+\blacksquare
+\blacksquare
+$$</p>
+
+      </div></div>
+
+  
+  
+<div class="pagination">
+    <div class="pagination__title">
+        <span class="pagination__title-h">Read other posts</span>
+        <hr />
+    </div>
+    <div class="pagination__buttons">
+        
+        
+        <span class="button next">
+            <a href="https://crystalsage.github.io/posts/smt/">
+                <span class="button__text">SMT solvers for fun and CTFs</span>
+                <span class="button__icon">→</span>
+            </a>
+        </span>
+        
+    </div>
+</div>
+
+  
+
+  
+
+</div>
+
+  </div>
+
+  
+    <footer class="footer">
+  <div class="footer__inner">
+    
+      <div class="copyright copyright--user">
+        <span>Licensed to Bourbon</span>
+    
+        <span>:: Theme made by <a href="https://twitter.com/panr">panr</a></span>
+      </div>
+  </div>
+</footer>
+
+
+
+<script src="https://crystalsage.github.io/assets/main.js"></script>
+<script src="https://crystalsage.github.io/assets/prism.js"></script>
+<script type="text/javascript"
+  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\[','\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+           extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    }
+  });
+  </script>
+
+
+
+
+
+
+  
+</div>
+
+</body>
+</html>

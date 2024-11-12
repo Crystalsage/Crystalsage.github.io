@@ -259,9 +259,9 @@ vary between <code>0x000000</code>-<code>0xFFFFFF</code>.</li>
 </span></span></code></pre></div><p>Notice that Netbpm uses reversed notation for the pixel components. The component order is <code>BGR</code> instead of RGB.</p>
 <p><strong>The result:</strong></p>
 <p>The output is a <code>.ppm</code> image which looks like this:
-<img src="/lcg/lcg-image-gruvbox-zoomed-out.png" alt="lcg-image-out"></p>
+<img alt="lcg-image-out" src="/lcg/lcg-image-gruvbox-zoomed-out.png"></p>
 <p>Interesting! Let&rsquo;s zoom in.</p>
-<p><img src="/lcg/lcg-image-gruvbox-zoomed-in.png" alt="lcg-image-in"></p>
+<p><img alt="lcg-image-in" src="/lcg/lcg-image-gruvbox-zoomed-in.png"></p>
 <p>Not as random as thought it&rsquo;d be, eh? We see that the colors repeat after a while. This probably means that the underlying number modulo color palette length is the same for some definite, short period.</p>
 <p>Makes sense! Since we are doing modulo calculations again on the generated number, the period gets even shortened, and the pattern emerges.</p>
 <h4 id="second-variant">Second variant<a href="#second-variant" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h4>
@@ -280,7 +280,7 @@ vary between <code>0x000000</code>-<code>0xFFFFFF</code>.</li>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p><strong>The result:</strong></p>
 <p>The output is a <code>.ppm</code> image which looks like this:
-<img src="/lcg/lcg-image-random-out.png" alt="lcg-image-random-out"></p>
+<img alt="lcg-image-random-out" src="/lcg/lcg-image-random-out.png"></p>
 <p>Just what we ordered! Noisy images are just what we needed and expected. Since the image is noisy, we may claim that LCG indeed generates random numbers successfully.</p>
 <p>It is however, questionable if a pattern exists in the resulting image. Since we no longer do a modulo calculation in the logical AND variation, the pattern simply vanishes (as zooming would explain). But the regularly irregular columns in the image seem interesting.</p>
 <h1 id="image-encryption">Image encryption<a href="#image-encryption" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
@@ -290,9 +290,9 @@ vary between <code>0x000000</code>-<code>0xFFFFFF</code>.</li>
 <p>The code is at <a href="https://github.com/Crystalsage/lcg-enc/">lcg-enc</a> repository.</p>
 <p>The LCG implementation for this experiment is the same as the last one. No changes.</p>
 <p>The test image I used is the famous AES-ECB Tux.</p>
-<p><img src="/lcg/lcg-enc-normal-tux.png" alt="test-tux"></p>
+<p><img alt="test-tux" src="/lcg/lcg-enc-normal-tux.png"></p>
 <p>This image is often used as a proof of concept for testing encryption algorithms. For illustration, here&rsquo;s how the image looks after encryption with AES-ECB.</p>
-<p><img src="/lcg/lcg-enc-tux-aes.png" alt="test-tux"></p>
+<p><img alt="test-tux" src="/lcg/lcg-enc-tux-aes.png"></p>
 <p>A minor technical difference arises in this experiment, in the form of image formats. Since we now need to read images instead of just generating them, we would like to have a proper decoder. Fortunately, Rust&rsquo;s handy <a href="https://crates.io/crates/image">image crate</a> takes care of everything for us.</p>
 <h3 id="experiment-1">Experiment<a href="#experiment-1" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h3>
 <p>We&rsquo;ll need to do the following things to encrypt the image.</p>
@@ -336,7 +336,7 @@ vary between <code>0x000000</code>-<code>0xFFFFFF</code>.</li>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p><strong>The result:</strong></p>
 <p>We get an encrypted PNG file.
-<img src="/lcg/lcg-enc-image-pixel.png" alt="lcg-enc-image-pixel"></p>
+<img alt="lcg-enc-image-pixel" src="/lcg/lcg-enc-image-pixel.png"></p>
 <p>Now that&rsquo;s not bad, is it? You can still make out the penguin but the image itself is sufficiently encrypted.</p>
 <h4 id="a-variation">A variation<a href="#a-variation" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h4>
 <p>Now let&rsquo;s alter our image encryption a bit and do a variant.</p>
@@ -376,10 +376,10 @@ vary between <code>0x000000</code>-<code>0xFFFFFF</code>.</li>
 </span></span></code></pre></div><p>The code is pretty self-explanatory. <code>encrypt_alpha</code> is a switch that you can use to decide whether if you want to encrypt the alpha channel as well. Note that we use the entire slice.</p>
 <p><strong>The result:</strong></p>
 <p>We get an encrypted PNG file.
-<img src="/lcg/lcg-enc-image-rgb.png" alt="lcg-enc-image-rgb"></p>
+<img alt="lcg-enc-image-rgb" src="/lcg/lcg-enc-image-rgb.png"></p>
 <p>A good question to ask is if this variation offers us more encryption than the first one, where we just used the same number for the entire pixel. Personally, I didn&rsquo;t notice much of a difference. Why? I do not know. Maybe information theory has an answer. Both approaches seem exactly similar if you look at it from a randomness perspective.</p>
 <p>Here&rsquo;s the same encryption method with the alpha channel encrypted.
-<img src="/lcg/lcg-enc-image-rgba.png" alt="lcg-enc-image-rgba"></p>
+<img alt="lcg-enc-image-rgba" src="/lcg/lcg-enc-image-rgba.png"></p>
 <p>Makes the penguin pop out even more. An interesting thing to note is that we lost the color palette of the original, unencrypted image here. This is actually better.</p>
 <h1 id="conclusion">Conclusion<a href="#conclusion" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
 <p>There&rsquo;s no conclusion. This was purely for recreational purposes.</p>
@@ -409,8 +409,8 @@ $$</p>
         
         
         <span class="button next">
-            <a href="https://crystalsage.github.io/posts/flare/">
-                <span class="button__text">Flare-on 9</span>
+            <a href="https://crystalsage.github.io/posts/smt/">
+                <span class="button__text">SMT solvers for fun and CTFs</span>
                 <span class="button__icon">→</span>
             </a>
         </span>
