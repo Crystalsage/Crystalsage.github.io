@@ -9,6 +9,552 @@
     <copyright>Licensed to Bourbon</copyright>
     <lastBuildDate>Sat, 09 Nov 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://crystalsage.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
+      <title>Flare-On 11: Challenge 5</title>
+      <link>https://crystalsage.github.io/posts/flare-11-ch5/</link>
+      <pubDate>Sat, 09 Nov 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://crystalsage.github.io/posts/flare-11-ch5/</guid>
+      <description>&lt;h1 id=&#34;flare-on-11&#34;&gt;Flare on 11&lt;/h1&gt;
+&lt;p&gt;&lt;a href=&#34;https://flare-on.com/&#34;&gt;Flare-On 11&lt;/a&gt; is the 11th revision of the annual Flare-On
+challenge. Flare-on is famous for its difficult Windows oriented reverse engineering
+challenges. The CTF is one of my favourites. This year was fun, and introduced
+challenges including a variety of platforms including Verilog and Smart Contracts.&lt;/p&gt;
+&lt;p&gt;I solved a total of 8 challenges out of 10. I got pretty far and I&amp;rsquo;m proud! :)
+&lt;img alt=&#34;flare-on-11-scoreboard&#34; src=&#34;https://crystalsage.github.io/flare11/sshd/final-place.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Challenges 5, 7 and 9 were interesting. Rest of them were pretty simple and I
+had a really manual way of going about them. In this blogpost, we&amp;rsquo;ll take a look
+at challenge 5 specifically.&lt;/p&gt;</description>
+      <content>&lt;h1 id=&#34;flare-on-11&#34;&gt;Flare on 11&lt;/h1&gt;
+&lt;p&gt;&lt;a href=&#34;https://flare-on.com/&#34;&gt;Flare-On 11&lt;/a&gt; is the 11th revision of the annual Flare-On
+challenge. Flare-on is famous for its difficult Windows oriented reverse engineering
+challenges. The CTF is one of my favourites. This year was fun, and introduced
+challenges including a variety of platforms including Verilog and Smart Contracts.&lt;/p&gt;
+&lt;p&gt;I solved a total of 8 challenges out of 10. I got pretty far and I&amp;rsquo;m proud! :)
+&lt;img alt=&#34;flare-on-11-scoreboard&#34; src=&#34;https://crystalsage.github.io/flare11/sshd/final-place.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Challenges 5, 7 and 9 were interesting. Rest of them were pretty simple and I
+had a really manual way of going about them. In this blogpost, we&amp;rsquo;ll take a look
+at challenge 5 specifically.&lt;/p&gt;
+&lt;h1 id=&#34;challenge-5-sshd&#34;&gt;Challenge 5: sshd&lt;/h1&gt;
+&lt;p&gt;The challenge begins by giving us a pretty huge tar file, &lt;code&gt;ssh_container.tar&lt;/code&gt;.
+The name of the tar suggests it is some kind of file system. We can take a look
+at what&amp;rsquo;s inside with &lt;code&gt;tar xvf ssh_container.tar&lt;/code&gt;, and it indeed is a full blown
+file system.&lt;/p&gt;
+&lt;p&gt;Taking a look at &lt;code&gt;/root/flag.txt&lt;/code&gt;, it turns out to be a false flag :p
+&lt;img alt=&#34;flare-on-11-false-flag&#34; src=&#34;https://crystalsage.github.io/flare11/sshd/sshd-false-flag.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;If only&amp;hellip;&lt;/p&gt;
+&lt;h2 id=&#34;coredump&#34;&gt;Coredump&lt;/h2&gt;
+&lt;p&gt;I had to sift through the entire filesystem, but I couldn&amp;rsquo;t find anything interesting.
+After looking for a while, I found a coredump in one of the directories.
+&lt;img alt=&#34;flare-on-11-false-flag&#34; src=&#34;https://crystalsage.github.io/flare11/sshd/sshd-coredump.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Running &lt;code&gt;file&lt;/code&gt; on this tells us that this is a coredump generated for the &lt;code&gt;/sbin/sshd&lt;/code&gt;,
+a SSH daemon that&amp;rsquo;s also present on the filesystem.&lt;/p&gt;
+&lt;p&gt;We can go ahead and load this coredump along with the binary in &lt;code&gt;gdb&lt;/code&gt;.
+Doing so tells us that the binary encountered a &lt;code&gt;SIGSEGV&lt;/code&gt;. We can try printing
+a backtrace in gdb to find out exactly where the crash happened.
+&lt;img alt=&#34;flare-on-11-false-flag&#34; src=&#34;https://crystalsage.github.io/flare11/sshd/sshd-gdb-bt.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Interesting! &lt;code&gt;liblzma.so.5.4.1&lt;/code&gt; immediately &lt;a href=&#34;https://en.wikipedia.org/wiki/XZ_Utils_backdoor&#34;&gt;brings back some memories!&lt;/a&gt; :p&lt;/p&gt;
+&lt;h2 id=&#34;liblzmaso541&#34;&gt;liblzma.so.5.4.1&lt;/h2&gt;
+&lt;p&gt;This is a shared library that&amp;rsquo;s also present on the filesystem. We can grab a copy
+and load it in Ghidra. Looking around in Ghidra, I eventually stumbled across &lt;code&gt;INIT_0&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;_INIT_1&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;void&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;int&lt;/span&gt; iVar1;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;long&lt;/span&gt; in_FS_OFFSET;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;local_18;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;long&lt;/span&gt; local_10;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  local_10 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;(in_FS_OFFSET &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x28&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  local_18 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x0&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  iVar1 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;FUN_00108b10&lt;/span&gt;(&lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&lt;/span&gt;local_18,_strlen,_strlen &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x10&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (iVar1 &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x0&lt;/span&gt;) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;FUN_001091b0&lt;/span&gt;(local_18,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;RSA_public_decrypt&amp;#34;&lt;/span&gt;, FUN_00109820,&lt;span style=&#34;color:#ae81ff&#34;&gt;0x0&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (local_18 &lt;span style=&#34;color:#f92672&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x0&lt;/span&gt;) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#a6e22e&#34;&gt;free&lt;/span&gt;(local_18);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (local_10 &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;(in_FS_OFFSET &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x28&lt;/span&gt;)) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#75715e&#34;&gt;// WARNING: Subroutine does not return
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;  &lt;span style=&#34;color:#a6e22e&#34;&gt;__stack_chk_fail&lt;/span&gt;();
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;RSA_public_decrypt&lt;/code&gt; string looks interesting to us, especially in the context of
+the XZ backdoor article I linked to.&lt;/p&gt;
+&lt;p&gt;We can look inside &lt;code&gt;FUN_00109820&lt;/code&gt; and google for the strings inside. Doing so leads
+us to &lt;a href=&#34;https://github.com/kubo/plthook&#34;&gt;kubo/plthook&lt;/a&gt;. TL;DR - &lt;code&gt;FUN_00109820&lt;/code&gt;
+installs a hook into &lt;code&gt;RSA_public_decrypt&lt;/code&gt;, and replaces the function with &lt;code&gt;FUN_00109820&lt;/code&gt;.
+What this does is that it replaces the address to the actual function in the
+PLT of the binary with our hook&amp;rsquo;s address. Thus, we can analyze the hook at &lt;code&gt;FUN_00109820&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Since we know that &lt;code&gt;FUN_00109820&lt;/code&gt; hooks &lt;code&gt;RSA_public_decrypt&lt;/code&gt;, its function signature
+is exactly the same as &lt;code&gt;RSA_public_decrypt&lt;/code&gt;. Knowing this, we can edit the function
+signature and relabel the variables to make the decompilation a bit more digestible.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;int&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;hook_RSA_public_decrypt&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;int&lt;/span&gt; flen,&lt;span style=&#34;color:#66d9ef&#34;&gt;char&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;from,&lt;span style=&#34;color:#66d9ef&#34;&gt;char&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;to,RSA &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;rsa,&lt;span style=&#34;color:#66d9ef&#34;&gt;int&lt;/span&gt; padding) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  __uid_t _Var1;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;int&lt;/span&gt; iVar2;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  code &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;pcVar3;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;__dest;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;char&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;pcVar4;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;long&lt;/span&gt; in_FS_OFFSET;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  undefined local_108 [&lt;span style=&#34;color:#ae81ff&#34;&gt;0xc8&lt;/span&gt;];
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;long&lt;/span&gt; local_40;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  local_40 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;(in_FS_OFFSET &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x28&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  _Var1 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;getuid&lt;/span&gt;();
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  pcVar4 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;RSA_public_decrypt&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (_Var1 &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x0&lt;/span&gt;) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;from &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;0x3abf85b8&lt;/span&gt;) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#a6e22e&#34;&gt;FUN_001093f0&lt;/span&gt;(local_108,from &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x4&lt;/span&gt;,from &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x24&lt;/span&gt;,&lt;span style=&#34;color:#ae81ff&#34;&gt;0x0&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      __dest &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;mmap&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x0&lt;/span&gt;,DAT_00132360,&lt;span style=&#34;color:#ae81ff&#34;&gt;0x7&lt;/span&gt;,&lt;span style=&#34;color:#ae81ff&#34;&gt;0x22&lt;/span&gt;,&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;0x1&lt;/span&gt;,&lt;span style=&#34;color:#ae81ff&#34;&gt;0x0&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      pcVar3 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;memcpy&lt;/span&gt;(__dest,&lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&lt;/span&gt;DAT_00123960,DAT_00132360);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#a6e22e&#34;&gt;FUN_00109520&lt;/span&gt;(local_108,pcVar3,DAT_00132360);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      (&lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;pcVar3)();
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#a6e22e&#34;&gt;FUN_001093f0&lt;/span&gt;(local_108,from &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x4&lt;/span&gt;,from &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x24&lt;/span&gt;,&lt;span style=&#34;color:#ae81ff&#34;&gt;0x0&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#a6e22e&#34;&gt;FUN_00109520&lt;/span&gt;(local_108,pcVar3,DAT_00132360);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    pcVar4 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;RSA_public_decrypt &amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  pcVar3 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;dlsym&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;0x0&lt;/span&gt;,pcVar4);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  iVar2 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; (&lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;pcVar3)(flen,from,to,rsa,padding);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (local_40 &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;(in_FS_OFFSET &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x28&lt;/span&gt;)) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; iVar2;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#75715e&#34;&gt;// WARNING: Subroutine does not return
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;  &lt;span style=&#34;color:#a6e22e&#34;&gt;__stack_chk_fail&lt;/span&gt;();
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Looking at this decompilation, we can get a pretty good sense of what&amp;rsquo;s going on.
+The hook only works if &lt;code&gt;getuid&lt;/code&gt; returns zero, i.e. if the root user is executing this.
+This would make sense as the hook gets triggered by &lt;code&gt;sshd&lt;/code&gt;, which is most likely to be
+run by the root user. The hook also checks if the &lt;code&gt;from&lt;/code&gt; parameter is a very
+specific value &lt;code&gt;-0x3abf85b8&lt;/code&gt;(equivalent to &lt;code&gt;0xc5407a48&lt;/code&gt;). If so,
+It calls &lt;code&gt;FUN_001093f0&lt;/code&gt; and passes it &lt;code&gt;local_108&lt;/code&gt; along with what seems
+like offsets into the struct pointed to by &lt;code&gt;from&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;We then map &lt;code&gt;DAT_00132360 = 0xf96&lt;/code&gt; size of memory, and &lt;code&gt;memcpy&lt;/code&gt; those many bytes
+into the mapped memory region.&lt;/p&gt;
+&lt;p&gt;The code following it is interesting. &lt;code&gt;FUN_00109520&lt;/code&gt; receives &lt;code&gt;local_108&lt;/code&gt;, our
+memory region &lt;code&gt;pcVar3&lt;/code&gt; and the size &lt;code&gt;0xf96&lt;/code&gt;. Then the memory region is called.
+This is probably shellcode then! The two following invocations of &lt;code&gt;FUN_001093f0&lt;/code&gt;
+and &lt;code&gt;FUN_00109520&lt;/code&gt; are exactly the same as the previous invocations. This is smelling of
+some kind of a decrypt-execute-encrypt code, where a shellcode in memory is decrypted,
+executed and then encrypted again to prevent reverse engineering.&lt;/p&gt;
+&lt;p&gt;But what is the cipher being used? Looking inside &lt;code&gt;FUN_001093f0&lt;/code&gt;, we see the following
+instruction in the disassembly:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-nasm&#34; data-lang=&#34;nasm&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;   &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;0010942&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;b&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;48&lt;/span&gt; bf      MOV      RDI,&lt;span style=&#34;color:#ae81ff&#34;&gt;0x3320646e61707865&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;65&lt;/span&gt; &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;78&lt;/span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;70&lt;/span&gt; &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;61&lt;/span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;   &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;0010945&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;d&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;48&lt;/span&gt; bf      MOV      RDI,&lt;span style=&#34;color:#ae81ff&#34;&gt;0x6b20657479622d32&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;32&lt;/span&gt; &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;2&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;d&lt;/span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;62&lt;/span&gt; &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;79&lt;/span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Converting these constants from hex to an ASCII string results in &lt;code&gt;3 dnapxe&lt;/code&gt; and
+&lt;code&gt;k etyb-2&lt;/code&gt;. If we consider that this is little endian, we can concatenate this
+and we get &lt;code&gt;expand 32-byte k&lt;/code&gt;. This is &lt;a href=&#34;https://en.wikipedia.org/wiki/Salsa20&#34;&gt;Salsa20 or ChaCha20&lt;/a&gt;!
+This would mean that the offsets &lt;code&gt;from + 0x4&lt;/code&gt; and &lt;code&gt;from + 0x24&lt;/code&gt; and probably key and nonce!&lt;/p&gt;
+&lt;p&gt;The code then calls the actual &lt;code&gt;RSA_public_decrypt &lt;/code&gt; (notice the subtle trailing space)
+by locating it with &lt;code&gt;dlsym&lt;/code&gt; and executing it.&lt;/p&gt;
+&lt;h3 id=&#34;summary-so-far&#34;&gt;Summary so far&lt;/h3&gt;
+&lt;p&gt;We essentially have two pieces of the puzzle: Our &lt;code&gt;RSA_public_decrypt&lt;/code&gt; hook and the
+coredump. From the coredump, we can infer that we crashed sometime when checking
+the stack cookie:
+&lt;img alt=&#34;sshd-crash-location&#34; src=&#34;https://crystalsage.github.io/flare11/sshd/sshd-crash-location.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;From this location in the coredump, we can get enough information about the key
+and nonce to decrypt the shellcode.&lt;/p&gt;
+&lt;p&gt;But we&amp;rsquo;re still missing a part of the puzzle. Is this Salsa20 or ChaCha20? We
+can get to know this by looking at the suspected state initialization function.
+You&amp;rsquo;ll remember from the earlier disassembly where we found the &lt;code&gt;expand 32-byte k&lt;/code&gt;
+constant that the instruction look like this in the decompilation:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// &amp;#34;3 dnapxe&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;uVar1[&lt;span style=&#34;color:#ae81ff&#34;&gt;0x10&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x3320646e61707865&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// &amp;#34;k etyb-2&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;uVar1[&lt;span style=&#34;color:#ae81ff&#34;&gt;0x11&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x6b20657479622d32&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Converting these constants from hex to an ASCII string results in &lt;code&gt;3 dnapxe&lt;/code&gt; and
+&lt;code&gt;k etyb-2&lt;/code&gt;. If we consider that this is little endian, we can concatenate this&lt;/p&gt;
+&lt;p&gt;Since the two halves are adjacent in the cipher state, this must be ChaCha20!
+This is because the states of ChaCha20 and Salsa20 are initialized in different ways.
+Salsa:
+&lt;img alt=&#34;sshd-salsa-state&#34; src=&#34;https://crystalsage.github.io/flare11/sshd/sshd-salsa-state.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;ChaCha
+&lt;img alt=&#34;sshd-salsa-state&#34; src=&#34;https://crystalsage.github.io/flare11/sshd/sshd-chacha-state.png&#34;&gt;&lt;/p&gt;
+&lt;h3 id=&#34;key-and-nonce-recovery&#34;&gt;Key and nonce recovery&lt;/h3&gt;
+&lt;p&gt;Now that we know that the algorithm is definitely ChaCha20, we know that the key
+is 32 byte and the nonce is 12 bytes.&lt;/p&gt;
+&lt;p&gt;Looking at the disassembly of the function calls in the hook, particulary where
+&lt;code&gt;from + 0x4&lt;/code&gt; and &lt;code&gt;from + 0x24&lt;/code&gt; are passed on,&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-nasm&#34; data-lang=&#34;nasm&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;   &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;001098&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;c0&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;4&lt;/span&gt;c &lt;span style=&#34;color:#ae81ff&#34;&gt;8&lt;/span&gt;d &lt;span style=&#34;color:#ae81ff&#34;&gt;5&lt;/span&gt;d &lt;span style=&#34;color:#ae81ff&#34;&gt;24&lt;/span&gt;      LEA      R11,[RBP &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x24&lt;/span&gt;]
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;   &lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;001098&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;c4&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;4&lt;/span&gt;c &lt;span style=&#34;color:#ae81ff&#34;&gt;8&lt;/span&gt;d &lt;span style=&#34;color:#ae81ff&#34;&gt;55&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;04&lt;/span&gt;      LEA      R10,[RBP &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x4&lt;/span&gt;]
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;we see that &lt;code&gt;RBP&lt;/code&gt; is being used to index into the struct. We can use this same fact
+and locate our key and nonce in the coredump. Remember that the ChaCha/Salsa key
+is 32 bytes and the nonce is 12 bytes. Hence,
+&lt;img alt=&#34;sshd-key-nonce-1&#34; src=&#34;https://crystalsage.github.io/flare11/sshd/sshd-key-nonce-1.png&#34;&gt;
+This gives us the key = &lt;code&gt;943df638a81813e2de6318a507f9a0ba2dbb8a7ba63666d08d11a65ec914d66f&lt;/code&gt;
+and the nonce = &lt;code&gt;f236839f4dcd711a52862955&lt;/code&gt;. Combined with the &lt;code&gt;0xf96&lt;/code&gt; bytes of encrypted
+shellcode, this decrypts beautifully into x86 shellcode.&lt;/p&gt;
+&lt;h2 id=&#34;shellcode-analysis&#34;&gt;Shellcode analysis&lt;/h2&gt;
+&lt;p&gt;We can load this shellcode into Ghidra.&lt;/p&gt;
+&lt;p&gt;The shellcode calls a function &lt;code&gt;FUN_00000dc2&lt;/code&gt;. This function involves some
+syscalls, and Ghidra doesn&amp;rsquo;t resolve them properly in the decompiler, so it is
+much better to look at the listing instead.&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code class=&#34;language-x86asm&#34; data-lang=&#34;x86asm&#34;&gt;   00000dcb  LEA      RSP=&amp;gt;local_16b0,[RSP + -0x1688]
+   00000dd3  MOV      EAX,0xa00020f
+   00000dd8  MOV      DX,0x539
+   00000ddc  CALL     FUN_0000001a
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;After the function prologue, this pushes some interesting values on the stack.
+0x539 is 1337! The function &lt;code&gt;FUN_0000001a&lt;/code&gt; wraps two syscalls that connect
+to a socket. Based on the values passed to the function, I could infer that the
+connection is being made to host &lt;code&gt;10.0.2.15&lt;/code&gt; (&lt;code&gt;0xa00020f&lt;/code&gt;) and port &lt;code&gt;1337&lt;/code&gt;. This must be the
+attacker&amp;rsquo;s machine.&lt;/p&gt;
+&lt;p&gt;Further in the original function, we encounter 4 &lt;code&gt;recvfrom&lt;/code&gt; syscalls that load
+data into various offsets on the stack. See an example:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code class=&#34;language-x86asm&#34; data-lang=&#34;x86asm&#34;&gt;   00000de3 LEA      RSI=&amp;gt;local_12a0,[RBP + -0x1278] ; buf points to RBP - 0x1278
+   00000dea PUSH     0x2d ; recvfrom
+   00000dec POP      RAX
+   00000ded MOV      EDI,EBX
+   00000def PUSH     0x20 ; load 32 bytes
+   00000df1 POP      RDX
+   00000df2 XOR      R10D,R10D
+   00000df5 XOR      R8D,R8D
+   00000df8 XOR      R9D,R9D
+   00000dfb SYSCALL
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Based on the four syscalls, we can infer the size of data loaded at different
+offsets:&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Address/Offset&lt;/th&gt;
+          &lt;th&gt;Size in bytes&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;RBP - 0x1278&lt;/td&gt;
+          &lt;td&gt;32&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;RBP - 0x1258&lt;/td&gt;
+          &lt;td&gt;12&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;RBP - 0x1248&lt;/td&gt;
+          &lt;td&gt;&lt;code&gt;dword ptr RBP - 0xf0&lt;/code&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;RBP - 0xc8&lt;/td&gt;
+          &lt;td&gt;4&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Looking further in the code,&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code class=&#34;language-x86asm&#34; data-lang=&#34;x86asm&#34;&gt;   00000e99 LEA      RAX=&amp;gt;local_e8,[RBP + -0xc0]
+   00000ea0 LEA      RDX=&amp;gt;local_12a0,[RBP + -0x1278]
+   00000ea7 LEA      RCX=&amp;gt;local_1280,[RBP + -0x1258]
+   00000eae XOR      R8D,R8D
+   00000eb1 CALL     FUN_00000cd2
+   00000eb6 LEA      RAX=&amp;gt;local_e8,[RBP + -0xc0]
+   00000ebd LEA      RDX=&amp;gt;local_1170,[RBP + -0x1148]
+   00000ec4 MOV      ECX,dword ptr [RBP + local_ec]
+   00000eca CALL     FUN_00000d49
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;We can see that two function calls are being made, and the arguments to the
+function calls are the data that we receive from the network.&lt;/p&gt;
+&lt;p&gt;Taking a look at the first function&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;FUN_00000cd2&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;void&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;int&lt;/span&gt; iVar1;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  undefined &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;in_RAX;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;long&lt;/span&gt; i;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  undefined &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;puVar2;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;int&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;piVar3;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  undefined8 in_R8;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  puVar2 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; in_RAX;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;for&lt;/span&gt; (i &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0xc0&lt;/span&gt;; i &lt;span style=&#34;color:#f92672&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x0&lt;/span&gt;; i &lt;span style=&#34;color:#f92672&#34;&gt;+=&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;0x1&lt;/span&gt;) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;puVar2 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x0&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    puVar2 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; puVar2 &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x1&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#a6e22e&#34;&gt;FUN_00000a93&lt;/span&gt;();
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;(in_RAX &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0xb0&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; in_R8;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  piVar3 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; in_RAX &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0xb4&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  iVar1 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;FUN_00000f20&lt;/span&gt;();
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;piVar3 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; iVar1 &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; (in_R8 &lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x20&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;(in_RAX &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x78&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; in_R8;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;(in_RAX &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x40&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x40&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The decompilation looks a bit off. Specifically, the &lt;code&gt;in_RAX&lt;/code&gt; business Ghidra
+seems to do. We can take care of this however, by modifying the function signature.
+What the &lt;code&gt;in_RAX&lt;/code&gt; means is that the register being operated on, as it was passed
+in the function. We can take care of this by choosing custom storage for
+function parameters in Ghidra.
+&lt;img alt=&#34;sshd-ghidra-fc&#34; src=&#34;https://crystalsage.github.io/flare11/sshd/sshd-ghidra-fc.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;After specifying all of the function parameters, the decompilation looks a lot
+cleaner:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;FUN_00000cd2&lt;/span&gt;(undefined &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;param_1,undefined &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;param_2,undefined &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;param_3,undefined8 param_4)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;int&lt;/span&gt; iVar1;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;long&lt;/span&gt; i;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  undefined &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;puVar2;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;int&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;piVar3;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  puVar2 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; param_1;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;for&lt;/span&gt; (i &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0xc0&lt;/span&gt;; i &lt;span style=&#34;color:#f92672&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x0&lt;/span&gt;; i &lt;span style=&#34;color:#f92672&#34;&gt;+=&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;0x1&lt;/span&gt;) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;puVar2 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x0&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    puVar2 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; puVar2 &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x1&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#a6e22e&#34;&gt;FUN_00000a93&lt;/span&gt;(puVar2,param_4,param_3,param_2,param_1);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;(param_1 &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0xb0&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; param_4;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  piVar3 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; param_1 &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0xb4&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  iVar1 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;FUN_00000f20&lt;/span&gt;(param_1 &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x68&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;piVar3 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; iVar1 &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; (param_4 &lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x20&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;(param_1 &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x78&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; param_4;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;(param_1 &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x40&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x40&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Seeing the &lt;code&gt;*(param_1 + 0x40) = 0x40;&lt;/code&gt; rang a lot of bells for me. This is the
+ChaCha20 state initialization function (again!). This means that the other function
+must be ChaCha20 encrypt function.&lt;/p&gt;
+&lt;p&gt;We can clean up the decompilation again and the result is pretty satisfying.
+&lt;img alt=&#34;sshd-ghidra-listing-2&#34; src=&#34;https://crystalsage.github.io/flare11/sshd/sshd-sc-listing-2.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;One other incredible gotcha in here that the ChaCha20 is standard &lt;em&gt;except&lt;/em&gt; for
+the nothing-up-my-sleeve constant being used. Standard ChaCha20 uses &lt;code&gt;expand 32-byte k&lt;/code&gt;
+while the binary uses &lt;code&gt;expand-32-byte K&lt;/code&gt; (notice the uppercase K). This was really sneaky!&lt;/p&gt;
+&lt;h2 id=&#34;extracting-all-the-data&#34;&gt;Extracting all the data&lt;/h2&gt;
+&lt;p&gt;Since we know that we receive 32 bytes and then 12 bytes over the TCP socket,
+this must be the key and the nonce for ChaCha20. The encrypted data must be the
+data at &lt;code&gt;RBP - 0xec&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;One interesting thing to note is that the &lt;code&gt;RBP&lt;/code&gt; inside our shellcode is actually
+the &lt;code&gt;RSP&lt;/code&gt; in the GDB backtrace. This is because of the function prologue that happens
+when the shellcode gets called:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code class=&#34;language-x86asm&#34; data-lang=&#34;x86asm&#34;&gt;00000000 PUSH     RBP
+00000001 MOV      RBP,RSP
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;The original function also opens and reads some content inside a file. This filename
+should be present at &lt;code&gt;RSP - 0x1248&lt;/code&gt; in the coredump. If we look in the GDB coredump,
+we can see that the filename doesn&amp;rsquo;t exist at &lt;code&gt;RSP - 0x1248&lt;/code&gt; but at &lt;code&gt;RSP-0x1288&lt;/code&gt;.
+&lt;img alt=&#34;sshd-gdb-filename&#34; src=&#34;https://crystalsage.github.io/flare11/sshd/sshd-gdb-filename.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;We know that the data inside this file is encrypted and sent over the network.&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code class=&#34;language-x86asm&#34; data-lang=&#34;x86asm&#34;&gt;   00000ee9 LEA      RSI=&amp;gt;len,[RBP + -0x1148]
+   00000ef0 PUSH     0x2c
+   00000ef2 POP      RAX
+   00000ef3 MOV      EDI,EBX
+   00000ef5 MOV      EDX,dword ptr [RBP + buff]
+   00000efb XOR      R10D,R10D
+   00000efe XOR      R8D,R8D
+   00000f01 XOR      R9D,R9D
+   00000f04 SYSCALL
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;We can take a look at &lt;code&gt;RBP - 0x1148&lt;/code&gt; for the encrypted data then.&lt;/p&gt;
+&lt;p&gt;This is a pretty good indicator that the data is all offset by &lt;code&gt;-0x40&lt;/code&gt;. Thus we
+now know the locations of the key and nonce and the encrypted data as well. Let&amp;rsquo;s
+get all of the data. The length of the encrypted buffer must also be somewhere on the
+stack. Let&amp;rsquo;s just get the first 64 bytes for now.&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;sshd-gdb-final&#34; src=&#34;https://crystalsage.github.io/flare11/sshd/sshd-gdb-final.png&#34;&gt;
+Key, nonce and encrypted data.&lt;/p&gt;
+&lt;p&gt;Since we know that the ChaCha20 implementation is a bit non-standard, we can write
+our own implementation (or just let a LLM generate one for us :p)&lt;/p&gt;
+&lt;p&gt;Plugging all of the values into this implementation and running the script gives
+us our flag.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; struct
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;from&lt;/span&gt; typing &lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; List
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;ChaCha20Context&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; __init__(self):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        self&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;state: List[int] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;16&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        self&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;keystream32: List[int] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;16&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        self&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;key: bytes &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; bytes(&lt;span style=&#34;color:#ae81ff&#34;&gt;32&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        self&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;nonce: bytes &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; bytes(&lt;span style=&#34;color:#ae81ff&#34;&gt;12&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        self&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;counter: int &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        self&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;position: int &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;rotl32&lt;/span&gt;(x: int, n: int) &lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt; int:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; ((x &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&amp;lt;&lt;/span&gt; n) &lt;span style=&#34;color:#f92672&#34;&gt;|&lt;/span&gt; (x &lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&amp;gt;&lt;/span&gt; (&lt;span style=&#34;color:#ae81ff&#34;&gt;32&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; n))) &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0xFFFFFFFF&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;pack4&lt;/span&gt;(a: bytes) &lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt; int:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; struct&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;unpack(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;&amp;lt;I&amp;#39;&lt;/span&gt;, a)[&lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;]
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;unpack4&lt;/span&gt;(src: int) &lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt; bytes:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; struct&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;pack(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;&amp;lt;I&amp;#39;&lt;/span&gt;, src)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;chacha20_init_block&lt;/span&gt;(ctx: ChaCha20Context, key: bytes, nonce: bytes):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;key &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; key
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;nonce &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; nonce
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    magic_constant &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;b&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;expand 32-byte K&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;state[&lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; pack4(magic_constant[&lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;:&lt;span style=&#34;color:#ae81ff&#34;&gt;4&lt;/span&gt;])
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;state[&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; pack4(magic_constant[&lt;span style=&#34;color:#ae81ff&#34;&gt;4&lt;/span&gt;:&lt;span style=&#34;color:#ae81ff&#34;&gt;8&lt;/span&gt;])
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;state[&lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; pack4(magic_constant[&lt;span style=&#34;color:#ae81ff&#34;&gt;8&lt;/span&gt;:&lt;span style=&#34;color:#ae81ff&#34;&gt;12&lt;/span&gt;])
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;state[&lt;span style=&#34;color:#ae81ff&#34;&gt;3&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; pack4(magic_constant[&lt;span style=&#34;color:#ae81ff&#34;&gt;12&lt;/span&gt;:&lt;span style=&#34;color:#ae81ff&#34;&gt;16&lt;/span&gt;])
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;for&lt;/span&gt; i &lt;span style=&#34;color:#f92672&#34;&gt;in&lt;/span&gt; range(&lt;span style=&#34;color:#ae81ff&#34;&gt;8&lt;/span&gt;):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;state[&lt;span style=&#34;color:#ae81ff&#34;&gt;4&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; i] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; pack4(key[i&lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;4&lt;/span&gt;:i&lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;4&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;4&lt;/span&gt;])
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;state[&lt;span style=&#34;color:#ae81ff&#34;&gt;12&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;state[&lt;span style=&#34;color:#ae81ff&#34;&gt;13&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; pack4(nonce[&lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;:&lt;span style=&#34;color:#ae81ff&#34;&gt;4&lt;/span&gt;])
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;state[&lt;span style=&#34;color:#ae81ff&#34;&gt;14&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; pack4(nonce[&lt;span style=&#34;color:#ae81ff&#34;&gt;4&lt;/span&gt;:&lt;span style=&#34;color:#ae81ff&#34;&gt;8&lt;/span&gt;])
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;state[&lt;span style=&#34;color:#ae81ff&#34;&gt;15&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; pack4(nonce[&lt;span style=&#34;color:#ae81ff&#34;&gt;8&lt;/span&gt;:&lt;span style=&#34;color:#ae81ff&#34;&gt;12&lt;/span&gt;])
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;chacha20_block_set_counter&lt;/span&gt;(ctx: ChaCha20Context, counter: int):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;state[&lt;span style=&#34;color:#ae81ff&#34;&gt;12&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; counter &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0xFFFFFFFF&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;state[&lt;span style=&#34;color:#ae81ff&#34;&gt;13&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; pack4(ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;nonce[&lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;:&lt;span style=&#34;color:#ae81ff&#34;&gt;4&lt;/span&gt;]) &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; (counter &lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;32&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;chacha20_block_next&lt;/span&gt;(ctx: ChaCha20Context):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;keystream32 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;state&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;copy()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;quarter_round&lt;/span&gt;(x, a, b, c, d):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        x[a] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; (x[a] &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; x[b]) &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0xFFFFFFFF&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        x[d] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; rotl32(x[d] &lt;span style=&#34;color:#f92672&#34;&gt;^&lt;/span&gt; x[a], &lt;span style=&#34;color:#ae81ff&#34;&gt;16&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        x[c] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; (x[c] &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; x[d]) &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0xFFFFFFFF&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        x[b] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; rotl32(x[b] &lt;span style=&#34;color:#f92672&#34;&gt;^&lt;/span&gt; x[c], &lt;span style=&#34;color:#ae81ff&#34;&gt;12&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        x[a] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; (x[a] &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; x[b]) &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0xFFFFFFFF&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        x[d] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; rotl32(x[d] &lt;span style=&#34;color:#f92672&#34;&gt;^&lt;/span&gt; x[a], &lt;span style=&#34;color:#ae81ff&#34;&gt;8&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        x[c] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; (x[c] &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; x[d]) &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0xFFFFFFFF&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        x[b] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; rotl32(x[b] &lt;span style=&#34;color:#f92672&#34;&gt;^&lt;/span&gt; x[c], &lt;span style=&#34;color:#ae81ff&#34;&gt;7&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;for&lt;/span&gt; _ &lt;span style=&#34;color:#f92672&#34;&gt;in&lt;/span&gt; range(&lt;span style=&#34;color:#ae81ff&#34;&gt;10&lt;/span&gt;):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        quarter_round(ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;keystream32, &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;4&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;8&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;12&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        quarter_round(ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;keystream32, &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;5&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;9&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;13&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        quarter_round(ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;keystream32, &lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;6&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;10&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;14&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        quarter_round(ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;keystream32, &lt;span style=&#34;color:#ae81ff&#34;&gt;3&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;7&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;11&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;15&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        quarter_round(ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;keystream32, &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;5&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;10&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;15&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        quarter_round(ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;keystream32, &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;6&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;11&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;12&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        quarter_round(ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;keystream32, &lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;7&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;8&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;13&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        quarter_round(ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;keystream32, &lt;span style=&#34;color:#ae81ff&#34;&gt;3&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;4&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;9&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;14&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;for&lt;/span&gt; i &lt;span style=&#34;color:#f92672&#34;&gt;in&lt;/span&gt; range(&lt;span style=&#34;color:#ae81ff&#34;&gt;16&lt;/span&gt;):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;keystream32[i] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; (ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;keystream32[i] &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;state[i]) &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0xFFFFFFFF&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;state[&lt;span style=&#34;color:#ae81ff&#34;&gt;12&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; (ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;state[&lt;span style=&#34;color:#ae81ff&#34;&gt;12&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0xFFFFFFFF&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;state[&lt;span style=&#34;color:#ae81ff&#34;&gt;12&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;state[&lt;span style=&#34;color:#ae81ff&#34;&gt;13&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; (ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;state[&lt;span style=&#34;color:#ae81ff&#34;&gt;13&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0xFFFFFFFF&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#66d9ef&#34;&gt;assert&lt;/span&gt; ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;state[&lt;span style=&#34;color:#ae81ff&#34;&gt;13&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Counter overflow&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;chacha20_init_context&lt;/span&gt;(ctx: ChaCha20Context, key: bytes, nonce: bytes, counter: int):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    chacha20_init_block(ctx, key, nonce)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    chacha20_block_set_counter(ctx, counter)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;counter &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; counter
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;position &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;64&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;chacha20_xor&lt;/span&gt;(ctx: ChaCha20Context, data: bytearray):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;for&lt;/span&gt; i &lt;span style=&#34;color:#f92672&#34;&gt;in&lt;/span&gt; range(len(data)):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;position &lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;64&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            chacha20_block_next(ctx)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;position &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        data[i] &lt;span style=&#34;color:#f92672&#34;&gt;^=&lt;/span&gt; (ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;keystream32[ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;position &lt;span style=&#34;color:#f92672&#34;&gt;//&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;4&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&amp;gt;&lt;/span&gt; (&lt;span style=&#34;color:#ae81ff&#34;&gt;8&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt; (ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;position &lt;span style=&#34;color:#f92672&#34;&gt;%&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;4&lt;/span&gt;))) &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0xFF&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        ctx&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;position &lt;span style=&#34;color:#f92672&#34;&gt;+=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# Example usage&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; __name__ &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;__main__&amp;#34;&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    nonce &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; bytes&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;fromhex(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;111111111111111111111111&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    key&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; bytes&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;fromhex(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;8dec9112eb760eda7c7d87a443271c35d9e0cb878993b4d904aef934fa2166d7&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    plaintext &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; bytes&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;fromhex(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;a9f63408422a9e1c0c03a8089470bb8daadc6d7b24ff7f247cda839e92f7071d&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    ctx &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; ChaCha20Context()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    chacha20_init_context(ctx, key, nonce, &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    data &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; bytearray(plaintext)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    chacha20_xor(ctx, data)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    print(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Dec:&amp;#34;&lt;/span&gt;, data)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img alt=&#34;sshd-flag&#34; src=&#34;https://crystalsage.github.io/flare11/sshd/sshd-flag.png&#34;&gt;&lt;/p&gt;
+&lt;div style=&#34;padding: 0.5rem;border-top:2px solid white;border-bottom:2px solid white;border-left:2px solid white;border-right:2px solid white;&#34; &gt;
+&lt;b style=&#34;color: #78e2a0&#34; &gt;Flag&lt;/b&gt;&lt;br&gt;&lt;br&gt;
+&lt;b&gt;supp1y_cha1n_sund4y@flare-on.com&lt;/b&gt;
+&lt;/div&gt;
+&lt;h1 id=&#34;an-alternate-approach&#34;&gt;An alternate approach&lt;/h1&gt;
+&lt;p&gt;An alternate approach to this challenge in the stage 2 shellcode
+is to just patch the shellcode to connect to localhost, and then let the binary decrypt the data for you. This saves us
+some trouble of writing and figuring out of the ChaCha20 works.&lt;/p&gt;
+&lt;p&gt;It goes roughly like this:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Patch the constant IP in the shellcode.&lt;/li&gt;
+&lt;li&gt;Encrypt this data using the stage 1 ChaCha20 key and nonce.&lt;/li&gt;
+&lt;li&gt;Patch liblzma with this shellcode&lt;/li&gt;
+&lt;li&gt;Write a socket client that sends the key, nonce and the encrypted data we located.&lt;/li&gt;
+&lt;li&gt;The data received should contain the flag.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;p&gt;This was a pretty fun challenge that is closely related to the XZ backdoor incident.
+I found &lt;a href=&#34;https://securelist.com/xz-backdoor-part-3-hooking-ssh/113007/&#34;&gt;this page&lt;/a&gt; really
+useful while analyzing the hook. It talks in details about how the hook is triggered and
+how the backdoor works and it&amp;rsquo;s really interesting! :)&lt;/p&gt;
+&lt;h1 id=&#34;appendix&#34;&gt;Appendix&lt;/h1&gt;
+&lt;p&gt;A fun exercise I did post the challenge it to clean up the decompilation as much as possible.
+The result is pretty beautiful!&lt;/p&gt;
+&lt;p&gt;I found a C implementation of ChaCha20 online and downloaded &lt;a href=&#34;https://github.com/Ginurx/chacha20-c/blob/master/chacha20.h&#34;&gt;its header file&lt;/a&gt;
+We an parse this header file and import the data types in Ghidra to get a nice decompilation, especially of the key init function.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;void&lt;/span&gt; chacha20&lt;span style=&#34;color:#f92672&#34;&gt;::&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;init&lt;/span&gt;(chacha20_context &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;ctx,&lt;span style=&#34;color:#66d9ef&#34;&gt;uint32_t&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;key,&lt;span style=&#34;color:#66d9ef&#34;&gt;uint32_t&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;nonce,&lt;span style=&#34;color:#66d9ef&#34;&gt;uint64_t&lt;/span&gt; counter)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;uint32_t&lt;/span&gt; uVar1;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;int&lt;/span&gt; iVar2;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  undefined8 uVar3;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  ulong i;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  undefined8 &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;puVar4;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;ctx&lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt;keystream32 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x0&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;(ctx&lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt;state &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0xe&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x0&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  puVar4 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; ctx&lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt;keystream32 &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x2&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0xfffffffffffffff8&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  i &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; (ctx &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; puVar4) &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0xc0U&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x3&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;for&lt;/span&gt; (; i &lt;span style=&#34;color:#f92672&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x0&lt;/span&gt;; i &lt;span style=&#34;color:#f92672&#34;&gt;-=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x1&lt;/span&gt;) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;puVar4 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x0&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    puVar4 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; puVar4 &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x1&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  uVar3 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;(key &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x2&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;ctx&lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt;key &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;key;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;(ctx&lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt;key &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x8&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; uVar3;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  uVar3 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;(key &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x6&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;(ctx&lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt;key &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x10&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;(key &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x4&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;(ctx&lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt;key &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x18&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; uVar3;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;ctx&lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt;nonce &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;nonce;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  uVar1 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; nonce[&lt;span style=&#34;color:#ae81ff&#34;&gt;0x2&lt;/span&gt;];
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;ctx&lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt;state &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x3320646e61707865&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;(ctx&lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt;nonce &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x8&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; uVar1;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;(ctx&lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt;state &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x2&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x6b20657479622d32&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  ctx&lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt;state[&lt;span style=&#34;color:#ae81ff&#34;&gt;0x4&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;key;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  ctx&lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt;state[&lt;span style=&#34;color:#ae81ff&#34;&gt;0x5&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; key[&lt;span style=&#34;color:#ae81ff&#34;&gt;0x1&lt;/span&gt;];
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  ctx&lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt;state[&lt;span style=&#34;color:#ae81ff&#34;&gt;0x6&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; key[&lt;span style=&#34;color:#ae81ff&#34;&gt;0x2&lt;/span&gt;];
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  ctx&lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt;state[&lt;span style=&#34;color:#ae81ff&#34;&gt;0x7&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; key[&lt;span style=&#34;color:#ae81ff&#34;&gt;0x3&lt;/span&gt;];
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  ctx&lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt;state[&lt;span style=&#34;color:#ae81ff&#34;&gt;0x8&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; key[&lt;span style=&#34;color:#ae81ff&#34;&gt;0x4&lt;/span&gt;];
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  ctx&lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt;state[&lt;span style=&#34;color:#ae81ff&#34;&gt;0x9&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; key[&lt;span style=&#34;color:#ae81ff&#34;&gt;0x5&lt;/span&gt;];
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  ctx&lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt;state[&lt;span style=&#34;color:#ae81ff&#34;&gt;0xa&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; key[&lt;span style=&#34;color:#ae81ff&#34;&gt;0x6&lt;/span&gt;];
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  uVar1 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; key[&lt;span style=&#34;color:#ae81ff&#34;&gt;0x7&lt;/span&gt;];
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  ctx&lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt;state[&lt;span style=&#34;color:#ae81ff&#34;&gt;0xc&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x0&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  ctx&lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt;state[&lt;span style=&#34;color:#ae81ff&#34;&gt;0xb&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; uVar1;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  ctx&lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt;state[&lt;span style=&#34;color:#ae81ff&#34;&gt;0xd&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;nonce;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  ctx&lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt;state[&lt;span style=&#34;color:#ae81ff&#34;&gt;0xe&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; nonce[&lt;span style=&#34;color:#ae81ff&#34;&gt;0x1&lt;/span&gt;];
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  ctx&lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt;state[&lt;span style=&#34;color:#ae81ff&#34;&gt;0xf&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; nonce[&lt;span style=&#34;color:#ae81ff&#34;&gt;0x2&lt;/span&gt;];
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;ctx&lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt;nonce &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;nonce;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  uVar1 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; nonce[&lt;span style=&#34;color:#ae81ff&#34;&gt;0x2&lt;/span&gt;];
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  iVar2 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;ctx&lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt;nonce;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  ctx&lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt;state[&lt;span style=&#34;color:#ae81ff&#34;&gt;0xc&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; counter;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;(ctx&lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt;nonce &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x8&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; uVar1;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  ctx&lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt;state[&lt;span style=&#34;color:#ae81ff&#34;&gt;0xd&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; (counter &lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x20&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; iVar2;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  ctx&lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt;counter &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; counter;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  ctx&lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt;position &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x40&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;$$
+\blacksquare
+\blacksquare
+\blacksquare
+$$&lt;/p&gt;
+</content>
+    </item>
+    
+    <item>
       <title>Windows Terminal with Double Commander</title>
       <link>https://crystalsage.github.io/posts/dc_term/</link>
       <pubDate>Mon, 13 Nov 2023 00:00:00 +0000</pubDate>
