@@ -4,11 +4,23 @@
   
     <title>Experiments with LCG :: /home/bourbon</title>
   
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script>
+  MathJax = {
+    tex: {
+      displayMath: [['\\[', '\\]'], ['$$', '$$']],  
+      inlineMath: [['\$', '\$']]                  
+    }
+  };
+</script>
+
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="A braindump of my experiments with Linear Congruential Generators." />
 <meta name="keywords" content="" />
-<meta name="robots" content="noodp" />
+
+  <meta name="robots" content="noodp" />
+
 <link rel="canonical" href="https://crystalsage.github.io/posts/lcg/" />
 
 
@@ -17,19 +29,57 @@
 
 
 
-<link rel="stylesheet" href="https://crystalsage.github.io/assets/style.css">
 
-  <link rel="stylesheet" href="https://crystalsage.github.io/assets/green.css">
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/buttons.min.2bc533403a27dfe0e93105a92502b42ce4587e2e4a87d9f7d349e51e16e09478.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/code.min.908b624027f3ff8f68f0c699b6aae9b136ff787526eef803f31e0be07f215e86.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/fonts.min.4881f0c525f3ce2a1864fb6e96676396cebe1e6fcef1933e8e1dde7041004fb5.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/footer.min.2e3eb191baee58dd05a9f0104ac1fab0827bca7c64dafe0b2579f934c33a1d69.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/gist.min.a751e8b0abe1ba8bc53ced52a38b19d8950fe78ca29454ea8c2595cf26aad5c0.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/header.min.b6fb4423cf82a9f9d7abc9cd010223fa3d70a6526a3f28f8e17d814c06e18f9e.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/main.min.fe8dc560fccb53a458b0db19ccb7b265764ac46b68596b7e099c6793054dd457.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/menu.min.83637a90d903026bc280d3f82f96ceb06c5fc72b7c1a8d686afb5bbf818a29f7.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/pagination.min.82f6400eae7c7c6dc3c866733c2ec0579e4089608fea69400ff85b3880aa0d3c.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/post.min.fc74ca360273c1d828da3c02b8174eba435607b369d98418ccc6f2243cd4e75d.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/prism.min.9023bbc24533d09e97a51a0a42a5a7bfe4c591ae167c5551fb1d2191d11977c0.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/syntax.min.cc789ed9377260d7949ea4c18781fc58959a89287210fe4edbff44ebfc1511b6.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/terminal.min.8074e2cdbe96bc9f109b195cce06db0fcb4d7fc695ccde7ae48eb09485db3682.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/terms.min.b81791663c3790e738e571cdbf802312390d30e4b1d8dc9d814a5b5454d0ac11.css">
 
 
 
 
 
 
-<link rel="apple-touch-icon" href="https://crystalsage.github.io/img/apple-touch-icon-192x192.png">
 
-  <link rel="shortcut icon" href="https://crystalsage.github.io/favicon.png">
-
+<link rel="shortcut icon" href="https://crystalsage.github.io/favicon.png">
+<link rel="apple-touch-icon" href="https://crystalsage.github.io/apple-touch-icon.png">
 
 
 <meta name="twitter:card" content="summary" />
@@ -48,12 +98,10 @@
 <meta property="og:url" content="https://crystalsage.github.io/posts/lcg/" />
 <meta property="og:site_name" content="/home/bourbon" />
 
-  
-    <meta property="og:image" content="https://crystalsage.github.io/favicon.png">
-  
+  <meta property="og:image" content="https://crystalsage.github.io/og-image.png">
 
-<meta property="og:image:width" content="2048">
-<meta property="og:image:height" content="1024">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="627">
 
 
   <meta property="article:published_time" content="2022-12-31 00:00:00 &#43;0000 UTC" />
@@ -70,10 +118,10 @@
 
 
 </head>
-<body class="green">
+<body>
 
 
-<div class="container center headings--one-size">
+<div class="container center">
 
   <header class="header">
   <div class="header__inner">
@@ -86,13 +134,10 @@
 
     </div>
     
-      <div class="menu-trigger">menu</div>
-    
-  </div>
-  
-    <nav class="menu">
-  <ul class="menu__inner menu__inner--desktop">
-    
+      <ul class="menu menu--mobile">
+  <li class="menu__trigger">Menu&nbsp;▾</li>
+  <li>
+    <ul class="menu__dropdown">
       
         
           <li><a href="/about">About</a></li>
@@ -103,21 +148,27 @@
         
       
       
-    
+    </ul>
+  </li>
+</ul>
 
     
-  </ul>
-
-  <ul class="menu__inner menu__inner--mobile">
+    
+  </div>
+  
+    <nav class="navigation-menu">
+  <ul class="navigation-menu__inner menu--desktop">
     
       
-        <li><a href="/about">About</a></li>
+        
+          <li><a href="/about" >About</a></li>
+        
       
-    
+        
+          <li><a href="/setup" >Setup</a></li>
+        
       
-        <li><a href="/setup">Setup</a></li>
       
-    
     
   </ul>
 </nav>
@@ -128,19 +179,11 @@
 
   <div class="content">
     
-<div class="post">
+<article class="post">
   <h1 class="post-title">
-    <a href="https://crystalsage.github.io/posts/lcg/">Experiments with LCG</a></h1>
-  <div class="post-meta">
-    
-      <span class="post-date">
-        2022-12-31
-        
-      </span>
-    
-    
-    
-  </div>
+    <a href="https://crystalsage.github.io/posts/lcg/">Experiments with LCG</a>
+  </h1>
+  <div class="post-meta"><time class="post-date">2022-12-31&nbsp;[Updated:  2022-12-31]</time></div>
 
   
   
@@ -149,16 +192,15 @@
   
 
   <div class="post-content"><div>
-        <h1 id="introduction">Introduction<a href="#introduction" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+        <h1 id="introduction">Introduction<a href="#introduction" class="hanchor" ariaLabel="Anchor">#</a> </h1>
 <p>Pseudo-random number generators have always been my favorite thing to study as a pastime. A beautiful amalgam of information theory, cryptography and computing simply makes this a desirable candidate for study.</p>
 <p>A while ago, I stumbled upon <a href="https://en.wikipedia.org/wiki/Linear_congruential_generator">Linear Congruential generators</a>. Such pragmatical utililty despite the functional simplicity is rare to find, especially in cryptography.</p>
 <p>Seeing how LCGs aren&rsquo;t a common topic discussed anywhere, I decided to do some experiments of my own. We&rsquo;ll begin the article with a short overview. More enlightening references can be found in the Wikipedia article.</p>
-<h1 id="overview">Overview<a href="#overview" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<h1 id="overview">Overview<a href="#overview" class="hanchor" ariaLabel="Anchor">#</a> </h1>
 <p>Linear Congruential generators are pseudo-random number generators that use a recurrent piecewise linear equation defined as follows:</p>
-<p>$$
+$$
 X_{n+1} = (aX_n + c) \pmod{m}
-$$</p>
-<p>Where:</p>
+$$<p>Where:</p>
 <ul>
 <li>$X$ is a sequence of pseudo-random values,</li>
 <li>$m$ is the modulus,</li>
@@ -171,11 +213,11 @@ values.</p>
 <p><strong>Note</strong>: Since the whole calculation is modulo $m$, the whole generator has
 a <em>period</em>. Meaning that a sequence of specific numbers will simply keep
 repeating after the generator has exhausted.</p>
-<h1 id="experiments">Experiments<a href="#experiments" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<h1 id="experiments">Experiments<a href="#experiments" class="hanchor" ariaLabel="Anchor">#</a> </h1>
 <p>Since image manipulation is a favorite topic of mine to explore through both literature and code, I decided to explore LCGs through images. I experimented with two different scenarios. The reader is invited to read through them, and suggest more experimental ideas.</p>
-<h2 id="randomized-images">Randomized images<a href="#randomized-images" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<h2 id="randomized-images">Randomized images<a href="#randomized-images" class="hanchor" ariaLabel="Anchor">#</a> </h2>
 <p>Since LCGs generate pseudo-random numbers, I thought it would be interesting to explore how random images are generated. The images would be random in the sense that each pixel would have a randomized RGB components. Let&rsquo;s take a brisk walk through the experiment.</p>
-<h3 id="setup">Setup<a href="#setup" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h3>
+<h3 id="setup">Setup<a href="#setup" class="hanchor" ariaLabel="Anchor">#</a> </h3>
 <p>The code is available here: <a href="https://github.com/Crystalsage/lcg-images">Link</a>.</p>
 <p>As a foundational activity, I set my sights on writing a simple but sufficient LCG implementation. I&rsquo;d use no other language than Rust for
 anything in life. You can take a look at the implementation in <a href="https://github.com/Crystalsage/lcg-images/blob/main/src/lcg.rs">lcg.rs</a>.</p>
@@ -202,7 +244,7 @@ anything in life. You can take a look at the implementation in <a href="https://
 ......
 ......
 </code></pre><p>where the dots are the pixel values each having RGB components.</p>
-<h3 id="experiment">Experiment<a href="#experiment" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h3>
+<h3 id="experiment">Experiment<a href="#experiment" class="hanchor" ariaLabel="Anchor">#</a> </h3>
 <p>I decided to carry out the experiment in two different ways.</p>
 <ol>
 <li>Color of each pixel is randomly picked from a palette of colors.</li>
@@ -267,7 +309,7 @@ vary between <code>0x000000</code>-<code>0xFFFFFF</code>.</li>
 <p><img alt="lcg-image-in" src="/lcg/lcg-image-gruvbox-zoomed-in.png"></p>
 <p>Not as random as thought it&rsquo;d be, eh? We see that the colors repeat after a while. This probably means that the underlying number modulo color palette length is the same for some definite, short period.</p>
 <p>Makes sense! Since we are doing modulo calculations again on the generated number, the period gets even shortened, and the pattern emerges.</p>
-<h4 id="second-variant">Second variant<a href="#second-variant" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h4>
+<h4 id="second-variant">Second variant<a href="#second-variant" class="hanchor" ariaLabel="Anchor">#</a> </h4>
 <p>For the second variant of this experiment, we ditch the palette entirely. Let&rsquo;s change our pixel generation logic a bit.</p>
 <p>Instead of picking from a palette, we simply extract the lower 3 bytes of the randomly generated number. There&rsquo;s a variation of this where we simply use the number modulo 0xFFFFFF.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">let</span> random_nums <span style="color:#f92672">=</span> lcg::get_random_numbers(<span style="color:#66d9ef">WIDTH</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">HEIGHT</span>);
@@ -286,10 +328,10 @@ vary between <code>0x000000</code>-<code>0xFFFFFF</code>.</li>
 <img alt="lcg-image-random-out" src="/lcg/lcg-image-random-out.png"></p>
 <p>Just what we ordered! Noisy images are just what we needed and expected. Since the image is noisy, we may claim that LCG indeed generates random numbers successfully.</p>
 <p>It is however, questionable if a pattern exists in the resulting image. Since we no longer do a modulo calculation in the logical AND variation, the pattern simply vanishes (as zooming would explain). But the regularly irregular columns in the image seem interesting.</p>
-<h1 id="image-encryption">Image encryption<a href="#image-encryption" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<h1 id="image-encryption">Image encryption<a href="#image-encryption" class="hanchor" ariaLabel="Anchor">#</a> </h1>
 <p>For my second experiment, I wanted to explore image encryption with LCGs. Since LCGs are pseudo-random number generators (PRNG), it is a good question to ask how they can be used for encryption.</p>
 <p>Personally, I went the XOR route. Meaning that each pixel of the image is XORd with a random number. There are different strategies for this as well, as we will explore.</p>
-<h3 id="setup-1">Setup<a href="#setup-1" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h3>
+<h3 id="setup-1">Setup<a href="#setup-1" class="hanchor" ariaLabel="Anchor">#</a> </h3>
 <p>The code is at <a href="https://github.com/Crystalsage/lcg-enc/">lcg-enc</a> repository.</p>
 <p>The LCG implementation for this experiment is the same as the last one. No changes.</p>
 <p>The test image I used is the famous AES-ECB Tux.</p>
@@ -297,7 +339,7 @@ vary between <code>0x000000</code>-<code>0xFFFFFF</code>.</li>
 <p>This image is often used as a proof of concept for testing encryption algorithms. For illustration, here&rsquo;s how the image looks after encryption with AES-ECB.</p>
 <p><img alt="test-tux" src="/lcg/lcg-enc-tux-aes.png"></p>
 <p>A minor technical difference arises in this experiment, in the form of image formats. Since we now need to read images instead of just generating them, we would like to have a proper decoder. Fortunately, Rust&rsquo;s handy <a href="https://crates.io/crates/image">image crate</a> takes care of everything for us.</p>
-<h3 id="experiment-1">Experiment<a href="#experiment-1" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h3>
+<h3 id="experiment-1">Experiment<a href="#experiment-1" class="hanchor" ariaLabel="Anchor">#</a> </h3>
 <p>We&rsquo;ll need to do the following things to encrypt the image.</p>
 <pre tabindex="0"><code>1. Read all the pixels of the image to be encrypted.
 2. Generate the WIDTH * HEIGHT amount of random numbers from the LCG.
@@ -341,7 +383,7 @@ vary between <code>0x000000</code>-<code>0xFFFFFF</code>.</li>
 <p>We get an encrypted PNG file.
 <img alt="lcg-enc-image-pixel" src="/lcg/lcg-enc-image-pixel.png"></p>
 <p>Now that&rsquo;s not bad, is it? You can still make out the penguin but the image itself is sufficiently encrypted.</p>
-<h4 id="a-variation">A variation<a href="#a-variation" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h4>
+<h4 id="a-variation">A variation<a href="#a-variation" class="hanchor" ariaLabel="Anchor">#</a> </h4>
 <p>Now let&rsquo;s alter our image encryption a bit and do a variant.</p>
 <p>Here, instead of encrypting the whole pixel with the same value, we use different random numbers for each of the RGBA components.</p>
 <p>Thus, we&rsquo;ll first need 4 times the random numbers:</p>
@@ -384,48 +426,47 @@ vary between <code>0x000000</code>-<code>0xFFFFFF</code>.</li>
 <p>Here&rsquo;s the same encryption method with the alpha channel encrypted.
 <img alt="lcg-enc-image-rgba" src="/lcg/lcg-enc-image-rgba.png"></p>
 <p>Makes the penguin pop out even more. An interesting thing to note is that we lost the color palette of the original, unencrypted image here. This is actually better.</p>
-<h1 id="conclusion">Conclusion<a href="#conclusion" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<h1 id="conclusion">Conclusion<a href="#conclusion" class="hanchor" ariaLabel="Anchor">#</a> </h1>
 <p>There&rsquo;s no conclusion. This was purely for recreational purposes.</p>
-<p>$$
+$$
 \blacksquare
 \blacksquare
 \blacksquare
-$$</p>
-
+$$
       </div></div>
 
   
-  
+    
 <div class="pagination">
-    <div class="pagination__title">
-        <span class="pagination__title-h">Read other posts</span>
-        <hr />
-    </div>
-    <div class="pagination__buttons">
-        
-        <span class="button previous">
-            <a href="https://crystalsage.github.io/posts/dc_term/">
-                <span class="button__icon">←</span>
-                <span class="button__text">Windows Terminal with Double Commander</span>
-            </a>
-        </span>
-        
-        
-        <span class="button next">
-            <a href="https://crystalsage.github.io/posts/smt/">
-                <span class="button__text">SMT solvers for fun and CTFs</span>
-                <span class="button__icon">→</span>
-            </a>
-        </span>
-        
-    </div>
+  <div class="pagination__title">
+    <span class="pagination__title-h">Read other posts</span>
+    <hr />
+  </div>
+  <div class="pagination__buttons">
+    
+      <a href="https://crystalsage.github.io/posts/dc_term/" class="button inline prev">
+        Windows Terminal with Double Commander
+      </a>
+    
+    
+      ::
+    
+    
+      <a href="https://crystalsage.github.io/posts/smt/" class="button inline next">
+        SMT solvers for fun and CTFs
+      </a>
+    
+  </div>
 </div>
+
 
   
 
   
+    
 
-</div>
+  
+</article>
 
   </div>
 
@@ -436,32 +477,17 @@ $$</p>
       <div class="copyright copyright--user">
         <span>Licensed to Bourbon</span>
     
-        <span>:: Theme made by <a href="https://twitter.com/panr">panr</a></span>
+      <span>:: <a href="https://github.com/panr/hugo-theme-terminal" target="_blank">Theme</a> made by <a href="https://github.com/panr" target="_blank">panr</a></span>
       </div>
   </div>
 </footer>
 
 
 
-<script src="https://crystalsage.github.io/assets/main.js"></script>
-<script src="https://crystalsage.github.io/assets/prism.js"></script>
-<script type="text/javascript"
-  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-</script>
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-    tex2jax: {
-      inlineMath: [['$','$'], ['\\(','\\)']],
-      displayMath: [['$$','$$'], ['\[','\]']],
-      processEscapes: true,
-      processEnvironments: true,
-      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
-      TeX: { equationNumbers: { autoNumber: "AMS" },
-           extensions: ["AMSmath.js", "AMSsymbols.js"] }
-    }
-  });
-  </script>
 
+
+
+<script type="text/javascript" src="/bundle.min.js"></script>
 
 
 

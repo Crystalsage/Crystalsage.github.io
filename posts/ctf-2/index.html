@@ -4,11 +4,23 @@
   
     <title>CSI-CTF Writeup (Part-2) :: /home/bourbon</title>
   
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script>
+  MathJax = {
+    tex: {
+      displayMath: [['\\[', '\\]'], ['$$', '$$']],  
+      inlineMath: [['\$', '\$']]                  
+    }
+  };
+</script>
+
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="The 2nd part of the 3-part writeup for CSI-CTF 2022" />
 <meta name="keywords" content="" />
-<meta name="robots" content="noodp" />
+
+  <meta name="robots" content="noodp" />
+
 <link rel="canonical" href="https://crystalsage.github.io/posts/ctf-2/" />
 
 
@@ -17,19 +29,57 @@
 
 
 
-<link rel="stylesheet" href="https://crystalsage.github.io/assets/style.css">
 
-  <link rel="stylesheet" href="https://crystalsage.github.io/assets/green.css">
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/buttons.min.2bc533403a27dfe0e93105a92502b42ce4587e2e4a87d9f7d349e51e16e09478.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/code.min.908b624027f3ff8f68f0c699b6aae9b136ff787526eef803f31e0be07f215e86.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/fonts.min.4881f0c525f3ce2a1864fb6e96676396cebe1e6fcef1933e8e1dde7041004fb5.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/footer.min.2e3eb191baee58dd05a9f0104ac1fab0827bca7c64dafe0b2579f934c33a1d69.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/gist.min.a751e8b0abe1ba8bc53ced52a38b19d8950fe78ca29454ea8c2595cf26aad5c0.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/header.min.b6fb4423cf82a9f9d7abc9cd010223fa3d70a6526a3f28f8e17d814c06e18f9e.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/main.min.fe8dc560fccb53a458b0db19ccb7b265764ac46b68596b7e099c6793054dd457.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/menu.min.83637a90d903026bc280d3f82f96ceb06c5fc72b7c1a8d686afb5bbf818a29f7.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/pagination.min.82f6400eae7c7c6dc3c866733c2ec0579e4089608fea69400ff85b3880aa0d3c.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/post.min.fc74ca360273c1d828da3c02b8174eba435607b369d98418ccc6f2243cd4e75d.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/prism.min.9023bbc24533d09e97a51a0a42a5a7bfe4c591ae167c5551fb1d2191d11977c0.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/syntax.min.cc789ed9377260d7949ea4c18781fc58959a89287210fe4edbff44ebfc1511b6.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/terminal.min.8074e2cdbe96bc9f109b195cce06db0fcb4d7fc695ccde7ae48eb09485db3682.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/terms.min.b81791663c3790e738e571cdbf802312390d30e4b1d8dc9d814a5b5454d0ac11.css">
 
 
 
 
 
 
-<link rel="apple-touch-icon" href="https://crystalsage.github.io/img/apple-touch-icon-192x192.png">
 
-  <link rel="shortcut icon" href="https://crystalsage.github.io/favicon.png">
-
+<link rel="shortcut icon" href="https://crystalsage.github.io/favicon.png">
+<link rel="apple-touch-icon" href="https://crystalsage.github.io/apple-touch-icon.png">
 
 
 <meta name="twitter:card" content="summary" />
@@ -48,12 +98,10 @@
 <meta property="og:url" content="https://crystalsage.github.io/posts/ctf-2/" />
 <meta property="og:site_name" content="/home/bourbon" />
 
-  
-    <meta property="og:image" content="https://crystalsage.github.io/favicon.png">
-  
+  <meta property="og:image" content="https://crystalsage.github.io/og-image.png">
 
-<meta property="og:image:width" content="2048">
-<meta property="og:image:height" content="1024">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="627">
 
 
   <meta property="article:published_time" content="2022-02-20 00:00:00 &#43;0000 UTC" />
@@ -70,10 +118,10 @@
 
 
 </head>
-<body class="green">
+<body>
 
 
-<div class="container center headings--one-size">
+<div class="container center">
 
   <header class="header">
   <div class="header__inner">
@@ -86,13 +134,10 @@
 
     </div>
     
-      <div class="menu-trigger">menu</div>
-    
-  </div>
-  
-    <nav class="menu">
-  <ul class="menu__inner menu__inner--desktop">
-    
+      <ul class="menu menu--mobile">
+  <li class="menu__trigger">Menu&nbsp;▾</li>
+  <li>
+    <ul class="menu__dropdown">
       
         
           <li><a href="/about">About</a></li>
@@ -103,21 +148,27 @@
         
       
       
-    
+    </ul>
+  </li>
+</ul>
 
     
-  </ul>
-
-  <ul class="menu__inner menu__inner--mobile">
+    
+  </div>
+  
+    <nav class="navigation-menu">
+  <ul class="navigation-menu__inner menu--desktop">
     
       
-        <li><a href="/about">About</a></li>
+        
+          <li><a href="/about" >About</a></li>
+        
       
-    
+        
+          <li><a href="/setup" >Setup</a></li>
+        
       
-        <li><a href="/setup">Setup</a></li>
       
-    
     
   </ul>
 </nav>
@@ -128,19 +179,11 @@
 
   <div class="content">
     
-<div class="post">
+<article class="post">
   <h1 class="post-title">
-    <a href="https://crystalsage.github.io/posts/ctf-2/">CSI-CTF Writeup (Part-2)</a></h1>
-  <div class="post-meta">
-    
-      <span class="post-date">
-        2022-02-20
-        
-      </span>
-    
-    
-    
-  </div>
+    <a href="https://crystalsage.github.io/posts/ctf-2/">CSI-CTF Writeup (Part-2)</a>
+  </h1>
+  <div class="post-meta"><time class="post-date">2022-02-20&nbsp;[Updated:  2022-02-20]</time></div>
 
   
   
@@ -155,7 +198,7 @@
 <a href="https://tinyurl.com/ms95pajv">play</a> this CTF. It&rsquo;s open to everyone.</p>
 <p>In this 3-part series, we will see my method of approaching these challenges
 and how I solved them. The 9 challenges are divided into 3 posts.</p>
-<h1 id="attack-on-bank">Attack on Bank<a href="#attack-on-bank" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<h1 id="attack-on-bank">Attack on Bank<a href="#attack-on-bank" class="hanchor" ariaLabel="Anchor">#</a> </h1>
 <p><img alt="here" src="/ctf/AOB.png"></p>
 <p>The challenge description gives us info about the encrypted text (Also notice
 how ECB abbreviation gives us a hint about 128-bit AES-ECB being the cryptosystem).
@@ -167,7 +210,7 @@ for this.</p>
 <p><img alt="aob-flag" src="/ctf/aob-flag.png"></p>
 <p>We first decoded the base64 encoded plaintext, and decrypted the text using the
 key, and a blank IV. This gets us our flag! <code>csi-ctf{pR0videncE_$4ys_He110}</code> $\blacksquare$</p>
-<h1 id="js-nerds">JS Nerds<a href="#js-nerds" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<h1 id="js-nerds">JS Nerds<a href="#js-nerds" class="hanchor" ariaLabel="Anchor">#</a> </h1>
 <p><img alt="jsn" src="/ctf/jsn.png"></p>
 <p>We get login page right off the bat. I was initially thrown off by the obvious
 hints towards a Blind SQL injection. <em>You can&rsquo;t see me</em> is really
@@ -199,7 +242,7 @@ crackstation had this hash in their database, which reveals the password to be
 <p>We can log in to the site with our credentials now to get the flag.</p>
 <p><img alt="jsn-flag" src="/ctf/jsn-flag.png"></p>
 <p>Bread! <code>csi-ctf{eXploIted_wEb}</code> $\blacksquare$</p>
-<h1 id="computer-engineering">Computer Engineering<a href="#computer-engineering" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<h1 id="computer-engineering">Computer Engineering<a href="#computer-engineering" class="hanchor" ariaLabel="Anchor">#</a> </h1>
 <p><img alt="ce-1" src="/ctf/ce1.png"></p>
 <p>We get another Github page. Except this time, there is nothing in
 the 6 commits. We do notice the 6 branches though.</p>
@@ -216,44 +259,42 @@ solving aspect to them.</p>
 handsomely because he found an internal API key or SSH key in a Github
 commit history, which was accidentally pushed to the repo. So, it&rsquo;s not
 unrealistic at all. There&rsquo;s a lesson to be learned here.</p>
-<hr style="border:2px solid gray"> </hr>
-This series is to be continued in part 3 where we'll solve more
-challenges...
+<!-- raw HTML omitted -->
 
       </div></div>
 
   
-  
+    
 <div class="pagination">
-    <div class="pagination__title">
-        <span class="pagination__title-h">Read other posts</span>
-        <hr />
-    </div>
-    <div class="pagination__buttons">
-        
-        <span class="button previous">
-            <a href="https://crystalsage.github.io/posts/ctf-3/">
-                <span class="button__icon">←</span>
-                <span class="button__text">CSI-CTF Writeup (Part-3)</span>
-            </a>
-        </span>
-        
-        
-        <span class="button next">
-            <a href="https://crystalsage.github.io/posts/ctf-1/">
-                <span class="button__text">CSI-CTF Writeup (Part-1)</span>
-                <span class="button__icon">→</span>
-            </a>
-        </span>
-        
-    </div>
+  <div class="pagination__title">
+    <span class="pagination__title-h">Read other posts</span>
+    <hr />
+  </div>
+  <div class="pagination__buttons">
+    
+      <a href="https://crystalsage.github.io/posts/ctf-3/" class="button inline prev">
+        CSI-CTF Writeup (Part-3)
+      </a>
+    
+    
+      ::
+    
+    
+      <a href="https://crystalsage.github.io/posts/ctf-1/" class="button inline next">
+        CSI-CTF Writeup (Part-1)
+      </a>
+    
+  </div>
 </div>
+
 
   
 
   
+    
 
-</div>
+  
+</article>
 
   </div>
 
@@ -264,32 +305,17 @@ challenges...
       <div class="copyright copyright--user">
         <span>Licensed to Bourbon</span>
     
-        <span>:: Theme made by <a href="https://twitter.com/panr">panr</a></span>
+      <span>:: <a href="https://github.com/panr/hugo-theme-terminal" target="_blank">Theme</a> made by <a href="https://github.com/panr" target="_blank">panr</a></span>
       </div>
   </div>
 </footer>
 
 
 
-<script src="https://crystalsage.github.io/assets/main.js"></script>
-<script src="https://crystalsage.github.io/assets/prism.js"></script>
-<script type="text/javascript"
-  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-</script>
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-    tex2jax: {
-      inlineMath: [['$','$'], ['\\(','\\)']],
-      displayMath: [['$$','$$'], ['\[','\]']],
-      processEscapes: true,
-      processEnvironments: true,
-      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
-      TeX: { equationNumbers: { autoNumber: "AMS" },
-           extensions: ["AMSmath.js", "AMSsymbols.js"] }
-    }
-  });
-  </script>
 
+
+
+<script type="text/javascript" src="/bundle.min.js"></script>
 
 
 

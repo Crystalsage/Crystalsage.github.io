@@ -278,7 +278,7 @@ What the &lt;code&gt;in_RAX&lt;/code&gt; means is that the register being operat
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Seeing the &lt;code&gt;*(param_1 + 0x40) = 0x40;&lt;/code&gt; rang a lot of bells for me. This is the ChaCha20 state initialization function (again!). This means that the other function must be ChaCha20 encrypt function.&lt;/p&gt;
 &lt;p&gt;We can clean up the decompilation again and the result is pretty satisfying.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/flare11/sshd-fc-listing-2.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/flare11/sshd-sc-listing-2.png&#34;&gt;&lt;/p&gt;
 &lt;p&gt;One other incredible gotcha in here that the ChaCha20 is standard except for the nothing-up-my-sleeve constant being used. Standard ChaCha20 uses &lt;code&gt;expand 32-byte k&lt;/code&gt; while the binary uses &lt;code&gt;expand-32-byte K&lt;/code&gt; (notice the uppercase K). This was really sneaky!&lt;/p&gt;
 &lt;h2 id=&#34;extracting-all-the-data&#34;&gt;Extracting all the data&lt;/h2&gt;
 &lt;p&gt;Since we know that we receive 32 bytes and then 12 bytes over the TCP socket, this must be the key and the nonce for ChaCha20. The encrypted data must be the data at &lt;code&gt;RBP - 0xec&lt;/code&gt;.&lt;/p&gt;
@@ -408,10 +408,7 @@ What the &lt;code&gt;in_RAX&lt;/code&gt; means is that the register being operat
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    chacha20_xor(ctx, data)
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    print(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Dec:&amp;#34;&lt;/span&gt;, data)
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/flare11/sshd-flag.png&#34;&gt;&lt;/p&gt;
-&lt;div style=&#34;padding: 0.5rem;border-top:2px solid white;border-bottom:2px solid white;border-left:2px solid white;border-right:2px solid white;&#34; &gt;
-&lt;b style=&#34;color: #78e2a0&#34; &gt;Flag&lt;/b&gt;&lt;br&gt;&lt;b&gt;---&lt;/b&gt;&lt;br&gt;
-&lt;b&gt;supp1y_cha1n_sund4y@flare-on.com&lt;/b&gt;
-&lt;/div&gt;
+&lt;!-- raw HTML omitted --&gt;
 &lt;h1 id=&#34;an-alternate-approach&#34;&gt;An alternate approach&lt;/h1&gt;
 &lt;p&gt;An alternate approach to this challenge in the stage 2 shellcode is to just patch the shellcode to connect to localhost, and then let the binary decrypt the data for you. This saves us some trouble of writing and figuring out of the ChaCha20 works.&lt;/p&gt;
 &lt;p&gt;It goes roughly like this:&lt;/p&gt;
@@ -481,12 +478,11 @@ What the &lt;code&gt;in_RAX&lt;/code&gt; means is that the register being operat
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  ctx&lt;span style=&#34;color:#f92672&#34;&gt;-&amp;gt;&lt;/span&gt;position &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x40&lt;/span&gt;;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt;;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;$$
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;$$
 \blacksquare
 \blacksquare
 \blacksquare
-$$&lt;/p&gt;
-</content>
+$$</content>
     </item>
     
     <item>
@@ -509,12 +505,11 @@ Parameters: -p &amp;#34;Ubuntu&amp;#34; -d . wsl
 &lt;h2 id=&#34;run&#34;&gt;Run!&lt;/h2&gt;
 &lt;p&gt;Now, if you press F9, Windows Terminal should start your Ubuntu profile in the current Windows directory inside WSL2!&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/dc_term.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;$$
+$$
 \blacksquare
 \blacksquare
 \blacksquare
-$$&lt;/p&gt;
-</content>
+$$</content>
     </item>
     
     <item>
@@ -532,10 +527,9 @@ Seeing how LCGs aren&amp;rsquo;t a common topic discussed anywhere, I decided to
 &lt;p&gt;Seeing how LCGs aren&amp;rsquo;t a common topic discussed anywhere, I decided to do some experiments of my own. We&amp;rsquo;ll begin the article with a short overview. More enlightening references can be found in the Wikipedia article.&lt;/p&gt;
 &lt;h1 id=&#34;overview&#34;&gt;Overview&lt;/h1&gt;
 &lt;p&gt;Linear Congruential generators are pseudo-random number generators that use a recurrent piecewise linear equation defined as follows:&lt;/p&gt;
-&lt;p&gt;$$
+$$
 X_{n+1} = (aX_n + c) \pmod{m}
-$$&lt;/p&gt;
-&lt;p&gt;Where:&lt;/p&gt;
+$$&lt;p&gt;Where:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;$X$ is a sequence of pseudo-random values,&lt;/li&gt;
 &lt;li&gt;$m$ is the modulus,&lt;/li&gt;
@@ -763,12 +757,11 @@ vary between &lt;code&gt;0x000000&lt;/code&gt;-&lt;code&gt;0xFFFFFF&lt;/code&gt;
 &lt;p&gt;Makes the penguin pop out even more. An interesting thing to note is that we lost the color palette of the original, unencrypted image here. This is actually better.&lt;/p&gt;
 &lt;h1 id=&#34;conclusion&#34;&gt;Conclusion&lt;/h1&gt;
 &lt;p&gt;There&amp;rsquo;s no conclusion. This was purely for recreational purposes.&lt;/p&gt;
-&lt;p&gt;$$
+$$
 \blacksquare
 \blacksquare
 \blacksquare
-$$&lt;/p&gt;
-</content>
+$$</content>
     </item>
     
     <item>
@@ -798,22 +791,20 @@ and a set of $n$ constraints $a_nx + b_ny \leq c_n$.&lt;/p&gt;
 &lt;p&gt;What they don&amp;rsquo;t teach you in school, is that those $n$ constraints can be
 modeled as first-order logic equations as well. For example, consider a
 system of three linear equations:&lt;/p&gt;
-&lt;p&gt;$$
+$$
 \begin{align*}
--3x + 2y - 5z &amp;amp;= -14  \\
-2x - 3y + 4z  &amp;amp;= 10  \\
-x + y + z &amp;amp;= 4&lt;br&gt;
+-3x + 2y - 5z &amp;= -14  \\\
+2x - 3y + 4z  &amp;= 10  \\\
+x + y + z &amp;= 4  
 \end{align*}
-$$&lt;/p&gt;
-&lt;p&gt;Since it is absolutely necessary that we satisfy all three of these
+$$&lt;p&gt;Since it is absolutely necessary that we satisfy all three of these
 constraints to find values of $x$, $y$ and $z$. A &amp;lsquo;winning&amp;rsquo; condition for
 us would be when a solution to such a system exists, and can be
 calculated. If the winning condition is denoted with $W$, then we can
 express $W$ as:&lt;/p&gt;
-&lt;p&gt;$$
-(-3x + 2y - 5z = -14) \wedge (2x - 3y + 4z  = 10) \wedge (x + y + z = 4)&lt;br&gt;
-$$&lt;/p&gt;
-&lt;p&gt;The $\wedge$ symbol is the usual conjunction (AND condition).&lt;/p&gt;
+$$
+(-3x + 2y - 5z = -14) \wedge (2x - 3y + 4z  = 10) \wedge (x + y + z = 4)  
+$$&lt;p&gt;The $\wedge$ symbol is the usual conjunction (AND condition).&lt;/p&gt;
 &lt;p&gt;Now that we&amp;rsquo;ve modeled this as a logic problem, we can finally talk about Satisfiability Modulo Theories.&lt;/p&gt;
 &lt;h2 id=&#34;satisfiability-modulo-theories&#34;&gt;Satisfiability Modulo Theories&lt;/h2&gt;
 &lt;p&gt;Abbreviated as SMT, the instance of such a system is a formula in
@@ -868,8 +859,7 @@ by the corresponding lower case letter.
 Thus, we can express the given problem as a series of linear equations. As the quantity of dishes is non-negative, it makes sense that $a \geq 0,\ b \geq 0,\ c \geq 0,\ d \geq 0,\ e \geq 0 \text{and} \ f \geq 0 $.&lt;/p&gt;
 &lt;p&gt;Finally, we express our financial constraint as following. Notice that
 quantity of each dish is multiplied by its price.&lt;/p&gt;
-&lt;p&gt;$$a*215 + b*275 + c*335 + d*355 + e*420 + f*580 = 1505$$&lt;/p&gt;
-&lt;p&gt;You can further model these equations in CNF, like we did in the example we saw earlier. Cool! Let&amp;rsquo;s turn to Z3 and Python.&lt;/p&gt;
+$$a\*215 + b\*275 + c\*335 + d\*355 + e\*420 + f\*580 = 1505$$&lt;p&gt;You can further model these equations in CNF, like we did in the example we saw earlier. Cool! Let&amp;rsquo;s turn to Z3 and Python.&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# Import the Z3 library&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;from&lt;/span&gt; z3 &lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt;
@@ -959,12 +949,11 @@ Complete it.
 Does it return &lt;code&gt;sat&lt;/code&gt;?
 What&amp;rsquo;s the solution?&lt;/p&gt;
 &lt;p&gt;&lt;a href=&#34;https://gist.github.com/Crystalsage/1536740eb0608458627569f2092f52f6&#34;&gt;Solve me!&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;$$
+$$
 \blacksquare
 \blacksquare
 \blacksquare
-$$&lt;/p&gt;
-</content>
+$$</content>
     </item>
     
     <item>
@@ -993,115 +982,8 @@ and $p$ are decided upon at the start of the exchange. $g$ is the generator of t
 &lt;p&gt;The shared secret $S$ is computed by Alice as $S \equiv B^a \pmod{p}$ and by Bob as $S \equiv A^b \pmod{p}$. Both values are found to be equal.&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ol&gt;
-&lt;div style=&#34;padding: 0.5rem;border-top:2px solid white;border-bottom:2px solid white;border-left:2px solid white;border-right:2px solid white;&#34; &gt;
-&lt;b style=&#34;color: #78e2a0&#34; &gt;Remember&lt;/b&gt;&lt;br&gt;&lt;br&gt;
-$X \equiv g^x \pmod{p}$ is hard to reverse because of discrete logarithm problem.
-&lt;p&gt;$A$, $B$, $g$ and $p$ are public. $a$ and $b$ are kept private by the respective parties.&lt;/p&gt;
-&lt;/div&gt;
-&lt;h1 id=&#34;the-challenge&#34;&gt;The challenge&lt;a href=&#34;#the-challenge&#34; class=&#34;hanchor&#34; ariaLabel=&#34;Anchor&#34;&gt;&amp;#8983;&lt;/a&gt; &lt;/h1&gt;
-&lt;p&gt;The challenge is served to us through a Python script. I&amp;rsquo;ve snipped
-away some part of it to maintain focus and left some comments. Take a read.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# The flag is a dummy one. The real flag is set on the server.&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;FLAG &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;CTF{--REDACTED--}&amp;#34;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;DEBUG_MSG &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;DEBUG MSG - &amp;#34;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# The prime and base&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;p &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0x509efab16c5e2772fa00fc180766b6e62c09bdbd65637793c70b6094f6a7bb8189172685d2bddf87564fe2a6bc596ce28867fd7bbc300fd241b8e3348df6a0b076a0b438824517e0a87c38946fa69511f4201505fca11bc08f257e7a4bb009b4f16b34b3c15ec63c55a9dac306f4daa6f4e8b31ae700eba47766d0d907e2b9633a957f19398151111a879563cbe719ddb4a4078dd4ba42ebbf15203d75a4ed3dcd126cb86937222d2ee8bddc973df44435f3f9335f062b7b68c3da300e88bf1013847af1203402a3147b6f7ddab422d29d56fc7dcb8ad7297b04ccc52f7bc5fdd90bf9e36d01902e0e16aa4c387294c1605c6859b40dad12ae28fdfd3250a2e9&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;g &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# Decrypt with AES. &lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;decrypt&lt;/span&gt;(encrypted, shared_secret):
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    key &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; hashlib&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;md5(long_to_bytes(shared_secret))&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;digest()
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    cipher &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; AES&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;new(key, AES&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;MODE_ECB)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    message &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; cipher&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;decrypt(encrypted)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; message
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;main&lt;/span&gt;(s):
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#75715e&#34;&gt;# Server calculates its keys&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    c &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; random&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;randrange(&lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;, p &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    C &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; pow(g, c, p)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#75715e&#34;&gt;# Enter our public key here&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    M &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; receiveMessage(s, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Enter The Public Key of The Memory: &amp;#34;&lt;/span&gt;)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    shared_secret &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; pow(M, c, p)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    encrypted_sequence &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; receiveMessage(s, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Enter The Encrypted Initialization Sequence: &amp;#34;&lt;/span&gt;)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#75715e&#34;&gt;# The cipher text should be a hex digest&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;try&lt;/span&gt;:
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        encrypted_sequence &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; bytes&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;fromhex(encrypted_sequence)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#66d9ef&#34;&gt;assert&lt;/span&gt; len(encrypted_sequence) &lt;span style=&#34;color:#f92672&#34;&gt;%&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;16&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    sequence &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; decrypt(encrypted_sequence, shared_secret)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; sequence &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;b&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Initialization Sequence - Code 0&amp;#34;&lt;/span&gt;:
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        sendMessage(s, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;\n&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; DEBUG_MSG &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Reseting The Protocol With The New Shared Key&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;\n&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        sendMessage(s, DEBUG_MSG &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;f&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;{&lt;/span&gt;FLAG&lt;span style=&#34;color:#e6db74&#34;&gt;}&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt;:
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        exit()
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;So we know the plaintext! We need to encrypt the string &lt;code&gt;Initialization Sequence - Code 0&lt;/code&gt; such that it decrypts correctly. But, to our dismay, we find that we &lt;strong&gt;don&amp;rsquo;t know the shared secret&lt;/strong&gt; and there&amp;rsquo;s no way to derive it since we never received server&amp;rsquo;s public key $C$. How can we hope to find the
-shared secret then?&lt;/p&gt;
-&lt;div style=&#34;padding: 0.5rem;border-top:2px solid white;border-bottom:2px solid white;border-left:2px solid white;border-right:2px solid white;&#34; &gt;
-&lt;b style=&#34;color: #78e2a0&#34;&gt;&lt;u&gt;Halt&lt;/u&gt;&lt;/b&gt;&lt;br&gt;&lt;br&gt;
-Ponder over the problem and try to figure out the flaw in the script before heading further. (Hint: It&#39;s somewhere in `main()`)
-&lt;/div&gt;
-&lt;h1 id=&#34;the-solution&#34;&gt;The solution&lt;a href=&#34;#the-solution&#34; class=&#34;hanchor&#34; ariaLabel=&#34;Anchor&#34;&gt;&amp;#8983;&lt;/a&gt; &lt;/h1&gt;
-&lt;p&gt;We don&amp;rsquo;t need to &lt;em&gt;derive&lt;/em&gt; the shared secret if we can just make it
-predictable! The way to do this would be to send a &amp;lsquo;bad&amp;rsquo; public key.&lt;/p&gt;
-&lt;p&gt;If you see how the shared secret is being derived,&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;shared_secret &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; pow(M,c,p)
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;you&amp;rsquo;ll notice that our public key is used as the &lt;em&gt;base&lt;/em&gt; here, which means
-we have complete control over &lt;a href=&#34;https://en.wikipedia.org/wiki/Group_(mathematics)&#34;&gt;group&lt;/a&gt; that is being formed. So, if
-[
-M \equiv 0 \pmod{p}
-]
-then&lt;/p&gt;
-&lt;p&gt;[
-S \equiv M^{b} \equiv 0 \pmod{p}
-]&lt;/p&gt;
-&lt;p&gt;And we made $S$ predictable! This is because powers of $M$ are also
-congruent to 0 mod p.&lt;/p&gt;
-&lt;p&gt;This means we can send in a ciphertext
-encrypted with the key &amp;lsquo;0&amp;rsquo; and it should decrypt correctly!&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;from&lt;/span&gt; Crypto.Cipher &lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; AES
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;from&lt;/span&gt; Crypto.Util.number &lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; long_to_bytes
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; hashlib
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# Send in 0 as our key (shared secret)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;key &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; hashlib&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;md5(long_to_bytes(&lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;))&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;digest()
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;cipher &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; AES&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;new(key, AES&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;MODE_ECB)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;message &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; cipher&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;encrypt(&lt;span style=&#34;color:#e6db74&#34;&gt;b&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Initialization Sequence - Code 0&amp;#34;&lt;/span&gt;)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;print(message&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;hex())
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# Returns the following digest. This is our encrypted text.&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# 1af761314a07bf79f31aeb53bc9e1335e1749e1142b326d82a3c29ac37a042bf&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Once we submit the ciphertext to the server, we get our flag! Notice that we entered our public key $M$ as 0.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://crystalsage.github.io/conn.png&#34; alt=&#34;di&#34;&gt;&lt;/p&gt;
-&lt;h1 id=&#34;key-takeaway&#34;&gt;Key takeaway&lt;a href=&#34;#key-takeaway&#34; class=&#34;hanchor&#34; ariaLabel=&#34;Anchor&#34;&gt;&amp;#8983;&lt;/a&gt; &lt;/h1&gt;
-&lt;p&gt;&lt;em&gt;(Pun intended)&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;While the order of operations does not matter mathematically, i.e.&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;$S = A^b = (g^a)^b = (g^b)^a = B^a \pmod{p}$&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;It clearly did matter to us. This vulnerability was only possible because
-we had control over the base (And subsequently, the group that was formed).&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Note&lt;/strong&gt;: Instead of 0, we could have also chosen a value of $M$ that is divisible by $p$, and it would have meant the same thing. (Why?)&lt;/p&gt;
-&lt;h1 id=&#34;exercise-to-the-reader&#34;&gt;Exercise to the reader&lt;a href=&#34;#exercise-to-the-reader&#34; class=&#34;hanchor&#34; ariaLabel=&#34;Anchor&#34;&gt;&amp;#8983;&lt;/a&gt; &lt;/h1&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;The full challenge is here: &lt;a href=&#34;https://gist.github.com/CrystalSage/910c26588dc8337bf8485d93209e0a5f&#34;&gt;Code&lt;/a&gt;. Try solving the challenge yourself by retracing my steps! :)&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;The reader is invited to solve a similar Cryptopals challenge based on parameter injection: &lt;a href=&#34;https://cryptopals.com/sets/5/challenges/34&#34;&gt;Challenge&lt;/a&gt;.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;What&amp;rsquo;s the group that we formed?&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;[\blacksquare\blacksquare\blacksquare]&lt;/p&gt;
+&lt;!-- raw HTML omitted --&gt;
+&lt;!-- raw HTML omitted --&gt;
 </content>
     </item>
     
@@ -1139,8 +1021,7 @@ Reflexivity: a≤a , i.e. every element is related to itself. Antisymmetry: a≤
 &lt;h2 id=&#34;formalizing-the-idea&#34;&gt;Formalizing the idea&lt;/h2&gt;
 &lt;p&gt;Continuing with the umbrella mould, let us state the same thing in a proper manner, so that Wikipedia’s definition fits our example, at least intuitively.&lt;/p&gt;
 &lt;p&gt;Let us define an order on the set of umbrellas. The set is $U$ and the objects of this set are umbrellas.&lt;/p&gt;
-&lt;p&gt;$$U={u_1,u_2,u_3,\cdots,u_n}$$&lt;/p&gt;
-&lt;p&gt;Let’s define an operator ≤
+$$U=\{u_1,u_2,u_3,\cdots,u_n\}$$&lt;p&gt;Let’s define an operator ≤
 on set U which defines a partial order. This operator gives us a comparison between sizes of umbrellas. The operator ≤&lt;/p&gt;
 &lt;p&gt;must satisfy the 3 rules stated in the opening section. Let’s see if we can explain them according to our scenario. (Note: A partially ordered set is also known as a poset.)&lt;/p&gt;
 &lt;ol&gt;
@@ -1231,8 +1112,7 @@ trait bounds were not satisfied
 &lt;h2 id=&#34;further-reading&#34;&gt;Further reading&lt;/h2&gt;
 &lt;p&gt;Ordering is a fascinating topic. Many mathematicians and enthusiasts infinitely better than myself have spent much ink and chalk explaining what it means.&lt;/p&gt;
 &lt;p&gt;For starters, refer to the Order relations (Section 4.4) from Learning To Reason, where the authors offer a brief but completely sufficient explanation of ordering.&lt;/p&gt;
-&lt;p&gt;$$\blacksquare\blacksquare\blacksquare$$&lt;/p&gt;
-</content>
+$$\blacksquare\blacksquare\blacksquare$$</content>
     </item>
     
     <item>
@@ -1345,7 +1225,7 @@ submitting this, it fails. Let&amp;rsquo;s try decrypting this.&lt;/p&gt;
 to be the MD5 hash of the flag. We can crack this using a mask with hashcat
 or a wordlist. The easiest way is to check the online databases for the
 password. After checking some, I found a hit.&lt;/p&gt;
-&lt;img src=&#34;https://crystalsage.github.io/ctf/cts-decrypted.png&#34; alt=&#34;drawing&#34; width=&#34;500&#34;/&gt;
+&lt;!-- raw HTML omitted --&gt;
 &lt;p&gt;This should be our flag. &lt;code&gt;csi-ctf{sequential_flag}&lt;/code&gt; $\blacksquare$&lt;/p&gt;
 &lt;p&gt;If you want to do this the proper way:
 The idea is to flip the cards in correct order. We notice that the
@@ -1384,8 +1264,7 @@ $\blacksquare$&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Note&lt;/strong&gt;: In theory, it&amp;rsquo;s much convenient to use OCR on the image to extract the
 binary digits, but I could not find one reliable OCR service which could do so.
 So I ended up writing them by hand.&lt;/p&gt;
-&lt;hr style=&#34;border:2px solid gray&#34;&gt; &lt;/hr&gt;
-This marks the end of the writeups.
+&lt;!-- raw HTML omitted --&gt;
 </content>
     </item>
     
@@ -1466,9 +1345,7 @@ solving aspect to them.&lt;/p&gt;
 handsomely because he found an internal API key or SSH key in a Github
 commit history, which was accidentally pushed to the repo. So, it&amp;rsquo;s not
 unrealistic at all. There&amp;rsquo;s a lesson to be learned here.&lt;/p&gt;
-&lt;hr style=&#34;border:2px solid gray&#34;&gt; &lt;/hr&gt;
-This series is to be continued in part 3 where we&#39;ll solve more
-challenges...
+&lt;!-- raw HTML omitted --&gt;
 </content>
     </item>
     
@@ -1547,9 +1424,7 @@ the commit messages must be our encoded flag.&lt;/p&gt;
 message from the top is actually our flag, with rot-18 encoding.
 &lt;img alt=&#34;at-flag&#34; src=&#34;https://crystalsage.github.io/ctf/at-flag.png&#34;&gt;&lt;/p&gt;
 &lt;p&gt;The flag is &lt;code&gt;csi-ctf{congratulations_the_flag_is_jira}&lt;/code&gt; $\blacksquare$&lt;/p&gt;
-&lt;hr style=&#34;border:2px solid gray&#34;&gt; &lt;/hr&gt;
-This series is to be continued in the part 2 and 3 where we&#39;ll solve more
-challenges...
+&lt;!-- raw HTML omitted --&gt;
 </content>
     </item>
     

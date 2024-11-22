@@ -4,11 +4,23 @@
   
     <title>Flare on 11  :: /home/bourbon</title>
   
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script>
+  MathJax = {
+    tex: {
+      displayMath: [['\\[', '\\]'], ['$$', '$$']],  
+      inlineMath: [['\$', '\$']]                  
+    }
+  };
+</script>
+
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Writeup for challenge 5 - sshd from Flare-On 11 CTF. " />
 <meta name="keywords" content="" />
-<meta name="robots" content="noodp" />
+
+  <meta name="robots" content="noodp" />
+
 <link rel="canonical" href="https://crystalsage.github.io/posts/flare-11-ch5/" />
 
 
@@ -17,19 +29,57 @@
 
 
 
-<link rel="stylesheet" href="https://crystalsage.github.io/assets/style.css">
 
-  <link rel="stylesheet" href="https://crystalsage.github.io/assets/green.css">
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/buttons.min.2bc533403a27dfe0e93105a92502b42ce4587e2e4a87d9f7d349e51e16e09478.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/code.min.908b624027f3ff8f68f0c699b6aae9b136ff787526eef803f31e0be07f215e86.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/fonts.min.4881f0c525f3ce2a1864fb6e96676396cebe1e6fcef1933e8e1dde7041004fb5.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/footer.min.2e3eb191baee58dd05a9f0104ac1fab0827bca7c64dafe0b2579f934c33a1d69.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/gist.min.a751e8b0abe1ba8bc53ced52a38b19d8950fe78ca29454ea8c2595cf26aad5c0.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/header.min.b6fb4423cf82a9f9d7abc9cd010223fa3d70a6526a3f28f8e17d814c06e18f9e.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/main.min.fe8dc560fccb53a458b0db19ccb7b265764ac46b68596b7e099c6793054dd457.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/menu.min.83637a90d903026bc280d3f82f96ceb06c5fc72b7c1a8d686afb5bbf818a29f7.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/pagination.min.82f6400eae7c7c6dc3c866733c2ec0579e4089608fea69400ff85b3880aa0d3c.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/post.min.fc74ca360273c1d828da3c02b8174eba435607b369d98418ccc6f2243cd4e75d.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/prism.min.9023bbc24533d09e97a51a0a42a5a7bfe4c591ae167c5551fb1d2191d11977c0.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/syntax.min.cc789ed9377260d7949ea4c18781fc58959a89287210fe4edbff44ebfc1511b6.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/terminal.min.8074e2cdbe96bc9f109b195cce06db0fcb4d7fc695ccde7ae48eb09485db3682.css">
+
+  
+  <link rel="stylesheet" href="https://crystalsage.github.io/css/terms.min.b81791663c3790e738e571cdbf802312390d30e4b1d8dc9d814a5b5454d0ac11.css">
 
 
 
 
 
 
-<link rel="apple-touch-icon" href="https://crystalsage.github.io/img/apple-touch-icon-192x192.png">
 
-  <link rel="shortcut icon" href="https://crystalsage.github.io/favicon.png">
-
+<link rel="shortcut icon" href="https://crystalsage.github.io/favicon.png">
+<link rel="apple-touch-icon" href="https://crystalsage.github.io/apple-touch-icon.png">
 
 
 <meta name="twitter:card" content="summary" />
@@ -48,12 +98,10 @@
 <meta property="og:url" content="https://crystalsage.github.io/posts/flare-11-ch5/" />
 <meta property="og:site_name" content="/home/bourbon" />
 
-  
-    <meta property="og:image" content="https://crystalsage.github.io/favicon.png">
-  
+  <meta property="og:image" content="https://crystalsage.github.io/og-image.png">
 
-<meta property="og:image:width" content="2048">
-<meta property="og:image:height" content="1024">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="627">
 
 
   <meta property="article:published_time" content="2024-11-09 00:00:00 &#43;0000 UTC" />
@@ -70,10 +118,10 @@
 
 
 </head>
-<body class="green">
+<body>
 
 
-<div class="container center headings--one-size">
+<div class="container center">
 
   <header class="header">
   <div class="header__inner">
@@ -86,13 +134,10 @@
 
     </div>
     
-      <div class="menu-trigger">menu</div>
-    
-  </div>
-  
-    <nav class="menu">
-  <ul class="menu__inner menu__inner--desktop">
-    
+      <ul class="menu menu--mobile">
+  <li class="menu__trigger">Menu&nbsp;▾</li>
+  <li>
+    <ul class="menu__dropdown">
       
         
           <li><a href="/about">About</a></li>
@@ -103,21 +148,27 @@
         
       
       
-    
+    </ul>
+  </li>
+</ul>
 
     
-  </ul>
-
-  <ul class="menu__inner menu__inner--mobile">
+    
+  </div>
+  
+    <nav class="navigation-menu">
+  <ul class="navigation-menu__inner menu--desktop">
     
       
-        <li><a href="/about">About</a></li>
+        
+          <li><a href="/about" >About</a></li>
+        
       
-    
+        
+          <li><a href="/setup" >Setup</a></li>
+        
       
-        <li><a href="/setup">Setup</a></li>
       
-    
     
   </ul>
 </nav>
@@ -128,19 +179,11 @@
 
   <div class="content">
     
-<div class="post">
+<article class="post">
   <h1 class="post-title">
-    <a href="https://crystalsage.github.io/posts/flare-11-ch5/">Flare on 11</a></h1>
-  <div class="post-meta">
-    
-      <span class="post-date">
-        2024-11-09
-        
-      </span>
-    
-    
-    
-  </div>
+    <a href="https://crystalsage.github.io/posts/flare-11-ch5/">Flare on 11</a>
+  </h1>
+  <div class="post-meta"><time class="post-date">2024-11-09&nbsp;[Updated:  2024-11-09]</time></div>
 
   
   
@@ -149,7 +192,7 @@
   
 
   <div class="post-content"><div>
-        <h1 id="flare-on-11">Flare on 11<a href="#flare-on-11" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+        <h1 id="flare-on-11">Flare on 11<a href="#flare-on-11" class="hanchor" ariaLabel="Anchor">#</a> </h1>
 <p>Flare-On 11 is the 11th revision of the annual Flare-On challenge.
 Flare-on is famous for its difficult Windows oriented reverse engineering challenges.
 The CTF is one of my favourites.</p>
@@ -157,14 +200,14 @@ The CTF is one of my favourites.</p>
 <p>I solved a total of 8 challenges out of 10. I got pretty far and I’m proud! :)
 <img src="/flare11/flare-11-scoreboard.png"></p>
 <p>Challenges 5, 7 and 9 were interesting. Rest of them were pretty simple and I had a really manual way of going about them. In this blogpost, we’ll take a look at challenge 5 specifically.</p>
-<h2 id="challenge-5-sshd">Challenge 5: sshd<a href="#challenge-5-sshd" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<h2 id="challenge-5-sshd">Challenge 5: sshd<a href="#challenge-5-sshd" class="hanchor" ariaLabel="Anchor">#</a> </h2>
 <p>The challenge begins by giving us a pretty huge tar file,
 <code>ssh_container.tar</code>. The name of the tar suggests it is some kind of file system.
 We can take a look at what’s inside with <code>tar xvf ssh_container.tar</code>, and it indeed is a full blown file system.</p>
 <p>Taking a look at <code>/root/flag.txt</code>, it turns out to be a false flag :p
 <img src="/flare11/sshd-false-flag.png">
 If only&hellip;</p>
-<h2 id="coredump">Coredump<a href="#coredump" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<h2 id="coredump">Coredump<a href="#coredump" class="hanchor" ariaLabel="Anchor">#</a> </h2>
 <p>I had to sift through the entire filesystem, but I couldn’t find anything interesting.
 After looking for a while, I found a coredump in one of the directories.
 <img src="/flare11/sshd-coredump.png"></p>
@@ -174,7 +217,7 @@ a SSH daemon that’s also present on the filesystem.</p>
 Doing so tells us that the binary encountered a <code>SIGSEGV</code>.
 We can try printing a backtrace in gdb to find out exactly where the crash happened.</p>
 <p>Interesting! <code>liblzma.so.5.4.1</code> immediately <a href="https://en.wikipedia.org/wiki/XZ_Utils_backdoor">brings back some memories!</a> :p</p>
-<h2 id="liblzmaso541">liblzma.so.5.4.1<a href="#liblzmaso541" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<h2 id="liblzmaso541">liblzma.so.5.4.1<a href="#liblzmaso541" class="hanchor" ariaLabel="Anchor">#</a> </h2>
 <p>This is a shared library that’s also present on the filesystem.
 We can grab a copy and load it in Ghidra.
 Looking around in Ghidra, I eventually stumbled across <code>_INIT_1</code>.</p>
@@ -269,7 +312,7 @@ This is smelling of some kind of a decrypt-execute-encrypt code, where a shellco
 If we consider that this is little endian, we can concatenate this and we get <code>expand 32-byte k</code>.
 This is Salsa20 or ChaCha20! This would mean that the offsets <code>from + 0x4</code> and <code>from + 0x24</code> and probably key and nonce!</p>
 <p>The code then calls the actual <code>RSA_public_decrypt </code> (notice the subtle trailing space) by locating it with <code>dlsym</code> and executing it.</p>
-<h2 id="summary-so-far">Summary so far<a href="#summary-so-far" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<h2 id="summary-so-far">Summary so far<a href="#summary-so-far" class="hanchor" ariaLabel="Anchor">#</a> </h2>
 <p>We essentially have two pieces of the puzzle: Our <code>RSA_public_decrypt</code> hook and the coredump. From the coredump, we can infer that we crashed sometime when checking the stack cookie:
 <img src="/flare11/sshd-crash-location.png"></p>
 <p>From this location in the coredump, we can get enough information about the key and nonce to decrypt the shellcode.</p>
@@ -284,7 +327,7 @@ If we consider that this is little endian, we can concatenate this</p>
 <img src="/flare11/sshd-salsa-state.png"></p>
 <p>ChaCha
 <img src="/flare11/sshd-chacha-state.png"></p>
-<h2 id="key-and-nonce-recovery">Key and nonce recovery<a href="#key-and-nonce-recovery" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<h2 id="key-and-nonce-recovery">Key and nonce recovery<a href="#key-and-nonce-recovery" class="hanchor" ariaLabel="Anchor">#</a> </h2>
 <p>Now that we know that the algorithm is definitely ChaCha20, we know that the key is 32 byte and the nonce is 12 bytes.</p>
 <p>Looking at the disassembly of the function calls in the hook, particulary where <code>from + 0x4</code> and <code>from + 0x24</code> are passed on,</p>
 <pre tabindex="0"><code class="language-x86asm" data-lang="x86asm">   001098c0 LEA      R11,[RBP + 0x24]
@@ -292,7 +335,7 @@ If we consider that this is little endian, we can concatenate this</p>
 </code></pre><p>we see that <code>RBP</code> is being used to index into the struct. We can use this same fact and locate our key and nonce in the coredump. Remember that the ChaCha/Salsa key is 32 bytes and the nonce is 12 bytes. Hence,</p>
 <p>This gives us the <code>key = 943df638a81813e2de6318a507f9a0ba2dbb8a7ba63666d08d11a65ec914d66f</code>
 and the <code>nonce = f236839f4dcd711a52862955</code>. Combined with the <code>0xf96</code> bytes of encrypted shellcode, this decrypts beautifully into x86 shellcode.</p>
-<h2 id="shellcode-analysis">Shellcode analysis<a href="#shellcode-analysis" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<h2 id="shellcode-analysis">Shellcode analysis<a href="#shellcode-analysis" class="hanchor" ariaLabel="Anchor">#</a> </h2>
 <p>We can load this shellcode into Ghidra.</p>
 <p>The shellcode calls a function <code>FUN_00000dc2</code>.
 This function involves some syscalls, and Ghidra doesn’t resolve them properly in the decompiler, so it is much better to look at the listing instead.</p>
@@ -410,9 +453,9 @@ What the <code>in_RAX</code> means is that the register being operated on, as it
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>Seeing the <code>*(param_1 + 0x40) = 0x40;</code> rang a lot of bells for me. This is the ChaCha20 state initialization function (again!). This means that the other function must be ChaCha20 encrypt function.</p>
 <p>We can clean up the decompilation again and the result is pretty satisfying.</p>
-<p><img src="/flare11/sshd-fc-listing-2.png"></p>
+<p><img src="/flare11/sshd-sc-listing-2.png"></p>
 <p>One other incredible gotcha in here that the ChaCha20 is standard except for the nothing-up-my-sleeve constant being used. Standard ChaCha20 uses <code>expand 32-byte k</code> while the binary uses <code>expand-32-byte K</code> (notice the uppercase K). This was really sneaky!</p>
-<h2 id="extracting-all-the-data">Extracting all the data<a href="#extracting-all-the-data" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<h2 id="extracting-all-the-data">Extracting all the data<a href="#extracting-all-the-data" class="hanchor" ariaLabel="Anchor">#</a> </h2>
 <p>Since we know that we receive 32 bytes and then 12 bytes over the TCP socket, this must be the key and the nonce for ChaCha20. The encrypted data must be the data at <code>RBP - 0xec</code>.</p>
 <p>One interesting thing to note is that the <code>RBP</code> inside our shellcode is actually the <code>RSP</code> in the GDB backtrace. This is because of the function prologue that happens when the shellcode gets called:</p>
 <pre tabindex="0"><code class="language-x86asm" data-lang="x86asm">00000000 PUSH     RBP
@@ -540,11 +583,8 @@ What the <code>in_RAX</code> means is that the register being operated on, as it
 </span></span><span style="display:flex;"><span>    chacha20_xor(ctx, data)
 </span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#34;Dec:&#34;</span>, data)
 </span></span></code></pre></div><p><img src="/flare11/sshd-flag.png"></p>
-<div style="padding: 0.5rem;border-top:2px solid white;border-bottom:2px solid white;border-left:2px solid white;border-right:2px solid white;" >
-<b style="color: #78e2a0" >Flag</b><br><b>---</b><br>
-<b>supp1y_cha1n_sund4y@flare-on.com</b>
-</div>
-<h1 id="an-alternate-approach">An alternate approach<a href="#an-alternate-approach" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<!-- raw HTML omitted -->
+<h1 id="an-alternate-approach">An alternate approach<a href="#an-alternate-approach" class="hanchor" ariaLabel="Anchor">#</a> </h1>
 <p>An alternate approach to this challenge in the stage 2 shellcode is to just patch the shellcode to connect to localhost, and then let the binary decrypt the data for you. This saves us some trouble of writing and figuring out of the ChaCha20 works.</p>
 <p>It goes roughly like this:</p>
 <ol>
@@ -555,7 +595,7 @@ What the <code>in_RAX</code> means is that the register being operated on, as it
 <li>The data received should contain the flag.</li>
 </ol>
 <p>This was a pretty fun challenge that is closely related to the XZ backdoor incident. I found <a href="https://securelist.com/xz-backdoor-part-3-hooking-ssh/113007/">this page</a> really useful while analyzing the hook. It talks in details about how the hook is triggered and how the backdoor works and it’s really interesting! :)</p>
-<h1 id="appendix">Appendix<a href="#appendix" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<h1 id="appendix">Appendix<a href="#appendix" class="hanchor" ariaLabel="Anchor">#</a> </h1>
 <p>A fun exercise I did post the challenge it to clean up the decompilation as much as possible. The result is pretty beautiful!</p>
 <p>I found a C implementation of ChaCha20 online and downloaded <a href="https://github.com/Ginurx/chacha20-c/blob/master/chacha20.h">its header file</a>. We can parse this header file and import the data types in Ghidra to get a nice decompilation, especially of the key init function.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> chacha20<span style="color:#f92672">::</span><span style="color:#a6e22e">init</span>(chacha20_context <span style="color:#f92672">*</span>ctx,<span style="color:#66d9ef">uint32_t</span> <span style="color:#f92672">*</span>key,<span style="color:#66d9ef">uint32_t</span> <span style="color:#f92672">*</span>nonce,<span style="color:#66d9ef">uint64_t</span> counter)
@@ -613,39 +653,39 @@ What the <code>in_RAX</code> means is that the register being operated on, as it
 </span></span><span style="display:flex;"><span>  ctx<span style="color:#f92672">-&gt;</span>position <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x40</span>;
 </span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span>;
 </span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><p>$$
+</span></span></code></pre></div>$$
 \blacksquare
 \blacksquare
 \blacksquare
-$$</p>
-
+$$
       </div></div>
 
   
-  
+    
 <div class="pagination">
-    <div class="pagination__title">
-        <span class="pagination__title-h">Read other posts</span>
-        <hr />
-    </div>
-    <div class="pagination__buttons">
-        
-        
-        <span class="button next">
-            <a href="https://crystalsage.github.io/posts/dc_term/">
-                <span class="button__text">Windows Terminal with Double Commander</span>
-                <span class="button__icon">→</span>
-            </a>
-        </span>
-        
-    </div>
+  <div class="pagination__title">
+    <span class="pagination__title-h">Read other posts</span>
+    <hr />
+  </div>
+  <div class="pagination__buttons">
+    
+    
+    
+      <a href="https://crystalsage.github.io/posts/dc_term/" class="button inline next">
+        Windows Terminal with Double Commander
+      </a>
+    
+  </div>
 </div>
+
 
   
 
   
+    
 
-</div>
+  
+</article>
 
   </div>
 
@@ -656,32 +696,17 @@ $$</p>
       <div class="copyright copyright--user">
         <span>Licensed to Bourbon</span>
     
-        <span>:: Theme made by <a href="https://twitter.com/panr">panr</a></span>
+      <span>:: <a href="https://github.com/panr/hugo-theme-terminal" target="_blank">Theme</a> made by <a href="https://github.com/panr" target="_blank">panr</a></span>
       </div>
   </div>
 </footer>
 
 
 
-<script src="https://crystalsage.github.io/assets/main.js"></script>
-<script src="https://crystalsage.github.io/assets/prism.js"></script>
-<script type="text/javascript"
-  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-</script>
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-    tex2jax: {
-      inlineMath: [['$','$'], ['\\(','\\)']],
-      displayMath: [['$$','$$'], ['\[','\]']],
-      processEscapes: true,
-      processEnvironments: true,
-      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
-      TeX: { equationNumbers: { autoNumber: "AMS" },
-           extensions: ["AMSmath.js", "AMSsymbols.js"] }
-    }
-  });
-  </script>
 
+
+
+<script type="text/javascript" src="/bundle.min.js"></script>
 
 
 
