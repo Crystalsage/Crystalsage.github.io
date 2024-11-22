@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+    <title>Flare on 11  :: /home/bourbon</title>
+  
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Writeup for challenge 5 - sshd from Flare-On 11 CTF. " />
+<meta name="keywords" content="" />
+<meta name="robots" content="noodp" />
+<link rel="canonical" href="https://crystalsage.github.io/posts/flare-11-ch5/" />
+
+
+  
+
+
+
+
+<link rel="stylesheet" href="https://crystalsage.github.io/assets/style.css">
+
+  <link rel="stylesheet" href="https://crystalsage.github.io/assets/green.css">
+
+
+
+
+
+
+<link rel="apple-touch-icon" href="https://crystalsage.github.io/img/apple-touch-icon-192x192.png">
+
+  <link rel="shortcut icon" href="https://crystalsage.github.io/favicon.png">
+
+
+
+<meta name="twitter:card" content="summary" />
+
+  
+    <meta name="twitter:site" content="" />
+  
+    <meta name="twitter:creator" content="" />
+
+
+
+<meta property="og:locale" content="en" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Flare on 11 ">
+<meta property="og:description" content="Writeup for challenge 5 - sshd from Flare-On 11 CTF. " />
+<meta property="og:url" content="https://crystalsage.github.io/posts/flare-11-ch5/" />
+<meta property="og:site_name" content="/home/bourbon" />
+
+  
+    <meta property="og:image" content="https://crystalsage.github.io/favicon.png">
+  
+
+<meta property="og:image:width" content="2048">
+<meta property="og:image:height" content="1024">
+
+
+  <meta property="article:published_time" content="2024-11-09 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+<body class="green">
+
+
+<div class="container center headings--one-size">
+
+  <header class="header">
+  <div class="header__inner">
+    <div class="header__logo">
+      <a href="/">
+  <div class="logo">
+    /home/bourbon
+  </div>
+</a>
+
+    </div>
+    
+      <div class="menu-trigger">menu</div>
+    
+  </div>
+  
+    <nav class="menu">
+  <ul class="menu__inner menu__inner--desktop">
+    
+      
+        
+          <li><a href="/about">About</a></li>
+        
+      
+        
+          <li><a href="/setup">Setup</a></li>
+        
+      
+      
+    
+
+    
+  </ul>
+
+  <ul class="menu__inner menu__inner--mobile">
+    
+      
+        <li><a href="/about">About</a></li>
+      
+    
+      
+        <li><a href="/setup">Setup</a></li>
+      
+    
+    
+  </ul>
+</nav>
+
+  
+</header>
+
+
+  <div class="content">
+    
+<div class="post">
+  <h1 class="post-title">
+    <a href="https://crystalsage.github.io/posts/flare-11-ch5/">Flare on 11</a></h1>
+  <div class="post-meta">
+    
+      <span class="post-date">
+        2024-11-09
+        
+      </span>
+    
+    
+    
+  </div>
+
+  
+  
+
+
+  
+
+  <div class="post-content"><div>
+        <h1 id="flare-on-11">Flare on 11<a href="#flare-on-11" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<p>Flare-On 11 is the 11th revision of the annual Flare-On challenge.
+Flare-on is famous for its difficult Windows oriented reverse engineering challenges.
+The CTF is one of my favourites.</p>
+<p>This year was fun, and introduced challenges including a variety of platforms including Verilog and Smart Contracts.</p>
+<p>I solved a total of 8 challenges out of 10. I got pretty far and I’m proud! :)
+<img src="/flare11/flare-11-scoreboard.png"></p>
+<p>Challenges 5, 7 and 9 were interesting. Rest of them were pretty simple and I had a really manual way of going about them. In this blogpost, we’ll take a look at challenge 5 specifically.</p>
+<h2 id="challenge-5-sshd">Challenge 5: sshd<a href="#challenge-5-sshd" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>The challenge begins by giving us a pretty huge tar file,
+<code>ssh_container.tar</code>. The name of the tar suggests it is some kind of file system.
+We can take a look at what’s inside with <code>tar xvf ssh_container.tar</code>, and it indeed is a full blown file system.</p>
+<p>Taking a look at <code>/root/flag.txt</code>, it turns out to be a false flag :p
+<img src="/flare11/sshd-false-flag.png">
+If only&hellip;</p>
+<h2 id="coredump">Coredump<a href="#coredump" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>I had to sift through the entire filesystem, but I couldn’t find anything interesting.
+After looking for a while, I found a coredump in one of the directories.
+<img src="/flare11/sshd-coredump.png"></p>
+<p>Running <code>file</code> on this tells us that this is a coredump generated for the <code>/sbin/sshd</code>,
+a SSH daemon that’s also present on the filesystem.</p>
+<p>We can go ahead and load this coredump along with the binary in <code>gdb</code>.
+Doing so tells us that the binary encountered a <code>SIGSEGV</code>.
+We can try printing a backtrace in gdb to find out exactly where the crash happened.</p>
+<p>Interesting! <code>liblzma.so.5.4.1</code> immediately <a href="https://en.wikipedia.org/wiki/XZ_Utils_backdoor">brings back some memories!</a> :p</p>
+<h2 id="liblzmaso541">liblzma.so.5.4.1<a href="#liblzmaso541" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>This is a shared library that’s also present on the filesystem.
+We can grab a copy and load it in Ghidra.
+Looking around in Ghidra, I eventually stumbled across <code>_INIT_1</code>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">_INIT_1</span>(<span style="color:#66d9ef">void</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">int</span> iVar1;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">long</span> in_FS_OFFSET;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">void</span> <span style="color:#f92672">*</span>local_18;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">long</span> local_10;
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  local_10 <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>(in_FS_OFFSET <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x28</span>);
+</span></span><span style="display:flex;"><span>  local_18 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x0</span>;
+</span></span><span style="display:flex;"><span>  iVar1 <span style="color:#f92672">=</span> <span style="color:#a6e22e">FUN_00108b10</span>(<span style="color:#f92672">&amp;</span>local_18,_strlen,_strlen <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x10</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (iVar1 <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x0</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">FUN_001091b0</span>(local_18,<span style="color:#e6db74">&#34;RSA_public_decrypt&#34;</span>, FUN_00109820,<span style="color:#ae81ff">0x0</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (local_18 <span style="color:#f92672">!=</span> <span style="color:#ae81ff">0x0</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">free</span>(local_18);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (local_10 <span style="color:#f92672">==</span> <span style="color:#f92672">*</span>(in_FS_OFFSET <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x28</span>)) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// WARNING: Subroutine does not return
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#a6e22e">__stack_chk_fail</span>();
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><code>RSA_public_decrypt</code> string looks interesting to us, especially in the context of the XZ backdoor article I linked to.</p>
+<p>We can look inside <code>FUN_00109820</code> and google for the strings inside.
+Doing so leads us to <a href="https://github.com/kubo/plthook">kubo/plthook</a>.
+TL;DR - <code>FUN_00109820</code> installs a hook into <code>RSA_public_decrypt</code>,
+and replaces the function with <code>FUN_00109820</code>.
+What this does is that it replaces the address to the actual function in the PLT of the binary with our hook’s address.
+Thus, we can analyze the hook at <code>FUN_00109820</code>.</p>
+<p>Since we know that <code>FUN_00109820</code> hooks <code>RSA_public_decrypt</code>,
+its function signature is exactly the same as <code>RSA_public_decrypt</code>.
+Knowing this, we can edit the function signature and relabel the variables to make the decompilation a bit more digestible.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">hook_RSA_public_decrypt</span>(<span style="color:#66d9ef">int</span> flen,<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>from,<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>to,RSA <span style="color:#f92672">*</span>rsa,<span style="color:#66d9ef">int</span> padding) {
+</span></span><span style="display:flex;"><span>  __uid_t _Var1;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">int</span> iVar2;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  code <span style="color:#f92672">*</span>pcVar3;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">void</span> <span style="color:#f92672">*</span>__dest;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>pcVar4;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">long</span> in_FS_OFFSET;
+</span></span><span style="display:flex;"><span>  undefined local_108 [<span style="color:#ae81ff">0xc8</span>];
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">long</span> local_40;
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  local_40 <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>(in_FS_OFFSET <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x28</span>);
+</span></span><span style="display:flex;"><span>  _Var1 <span style="color:#f92672">=</span> <span style="color:#a6e22e">getuid</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  pcVar4 <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;RSA_public_decrypt&#34;</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (_Var1 <span style="color:#f92672">==</span> <span style="color:#ae81ff">0x0</span>) {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">*</span>from <span style="color:#f92672">==</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">0x3abf85b8</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">FUN_001093f0</span>(local_108,from <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x4</span>,from <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x24</span>,<span style="color:#ae81ff">0x0</span>);
+</span></span><span style="display:flex;"><span>      __dest <span style="color:#f92672">=</span> <span style="color:#a6e22e">mmap</span>(<span style="color:#ae81ff">0x0</span>,DAT_00132360,<span style="color:#ae81ff">0x7</span>,<span style="color:#ae81ff">0x22</span>,<span style="color:#f92672">-</span><span style="color:#ae81ff">0x1</span>,<span style="color:#ae81ff">0x0</span>);
+</span></span><span style="display:flex;"><span>      pcVar3 <span style="color:#f92672">=</span> <span style="color:#a6e22e">memcpy</span>(__dest,<span style="color:#f92672">&amp;</span>DAT_00123960,DAT_00132360);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">FUN_00109520</span>(local_108,pcVar3,DAT_00132360);
+</span></span><span style="display:flex;"><span>      (<span style="color:#f92672">*</span>pcVar3)();
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">FUN_001093f0</span>(local_108,from <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x4</span>,from <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x24</span>,<span style="color:#ae81ff">0x0</span>);
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">FUN_00109520</span>(local_108,pcVar3,DAT_00132360);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    pcVar4 <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;RSA_public_decrypt &#34;</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  pcVar3 <span style="color:#f92672">=</span> <span style="color:#a6e22e">dlsym</span>(<span style="color:#ae81ff">0x0</span>,pcVar4);
+</span></span><span style="display:flex;"><span>  iVar2 <span style="color:#f92672">=</span> (<span style="color:#f92672">*</span>pcVar3)(flen,from,to,rsa,padding);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (local_40 <span style="color:#f92672">==</span> <span style="color:#f92672">*</span>(in_FS_OFFSET <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x28</span>)) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> iVar2;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// WARNING: Subroutine does not return
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#a6e22e">__stack_chk_fail</span>();
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Looking at this decompilation, we can get a pretty good sense of what’s going on.
+The hook only works if <code>getuid</code> returns zero, i.e. if the root user is executing this.
+This would make sense as the hook gets triggered by <code>sshd</code>, which is most likely to be run by the root user.
+The hook also checks if the from parameter is a very specific value <code>-0x3abf85b8</code>(equivalent to <code>0xc5407a48</code>).
+If so, It calls <code>FUN_001093f0</code> and passes it <code>local_108</code> along with what seems like offsets into the struct pointed to by <code>from</code>.</p>
+<p>We then map <code>DAT_00132360 = 0xf96</code> size of memory,
+and <code>memcpy</code> those many bytes into the mapped memory region.</p>
+<p>The code following it is interesting. <code>FUN_00109520</code> receives <code>local_108</code>,
+our memory region <code>pcVar3</code> and the size <code>0xf96</code>.
+Then the memory region is called.
+This is probably shellcode then! The two following invocations of <code>FUN_001093f0</code> and <code>FUN_00109520</code> are exactly the same as the previous invocations.
+This is smelling of some kind of a decrypt-execute-encrypt code, where a shellcode in memory is decrypted, executed and then encrypted again to prevent reverse engineering.</p>
+<p>But what is the cipher being used? Looking inside <code>FUN_001093f0</code>, we see the following instruction in the disassembly:</p>
+<pre tabindex="0"><code class="language-x86asm" data-lang="x86asm">   0010942b MOV      RDI,0x3320646e61707865
+   0010945d MOV      RDI,0x6b20657479622d32
+</code></pre><p>Converting these constants from hex to an ASCII string results in <code>3 dnapxe</code> and <code>k etyb-2</code>.
+If we consider that this is little endian, we can concatenate this and we get <code>expand 32-byte k</code>.
+This is Salsa20 or ChaCha20! This would mean that the offsets <code>from + 0x4</code> and <code>from + 0x24</code> and probably key and nonce!</p>
+<p>The code then calls the actual <code>RSA_public_decrypt </code> (notice the subtle trailing space) by locating it with <code>dlsym</code> and executing it.</p>
+<h2 id="summary-so-far">Summary so far<a href="#summary-so-far" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>We essentially have two pieces of the puzzle: Our <code>RSA_public_decrypt</code> hook and the coredump. From the coredump, we can infer that we crashed sometime when checking the stack cookie:
+<img src="/flare11/sshd-crash-location.png"></p>
+<p>From this location in the coredump, we can get enough information about the key and nonce to decrypt the shellcode.</p>
+<p>But we’re still missing a part of the puzzle. Is this Salsa20 or ChaCha20? We can get to know this by looking at the suspected state initialization function. You’ll remember from the earlier disassembly where we found the <code>expand 32-byte k</code> constant that the instruction look like this in the decompilation:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">// &#34;3 dnapxe&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>uVar1[<span style="color:#ae81ff">0x10</span>] <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x3320646e61707865</span>;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// &#34;k etyb-2&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>uVar1[<span style="color:#ae81ff">0x11</span>] <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x6b20657479622d32</span>;
+</span></span></code></pre></div><p>Converting these constants from hex to an ASCII string results in <code>3 dnapxe</code> and <code>k etyb-2</code>.
+If we consider that this is little endian, we can concatenate this</p>
+<p>Since the two halves are adjacent in the cipher state, this must be ChaCha20! This is because the states of ChaCha20 and Salsa20 are initialized in different ways. Salsa:
+<img src="/flare11/sshd-salsa-state.png"></p>
+<p>ChaCha
+<img src="/flare11/sshd-chacha-state.png"></p>
+<h2 id="key-and-nonce-recovery">Key and nonce recovery<a href="#key-and-nonce-recovery" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>Now that we know that the algorithm is definitely ChaCha20, we know that the key is 32 byte and the nonce is 12 bytes.</p>
+<p>Looking at the disassembly of the function calls in the hook, particulary where <code>from + 0x4</code> and <code>from + 0x24</code> are passed on,</p>
+<pre tabindex="0"><code class="language-x86asm" data-lang="x86asm">   001098c0 LEA      R11,[RBP + 0x24]
+   001098c4 LEA      R10,[RBP + 0x4]
+</code></pre><p>we see that <code>RBP</code> is being used to index into the struct. We can use this same fact and locate our key and nonce in the coredump. Remember that the ChaCha/Salsa key is 32 bytes and the nonce is 12 bytes. Hence,</p>
+<p>This gives us the <code>key = 943df638a81813e2de6318a507f9a0ba2dbb8a7ba63666d08d11a65ec914d66f</code>
+and the <code>nonce = f236839f4dcd711a52862955</code>. Combined with the <code>0xf96</code> bytes of encrypted shellcode, this decrypts beautifully into x86 shellcode.</p>
+<h2 id="shellcode-analysis">Shellcode analysis<a href="#shellcode-analysis" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>We can load this shellcode into Ghidra.</p>
+<p>The shellcode calls a function <code>FUN_00000dc2</code>.
+This function involves some syscalls, and Ghidra doesn’t resolve them properly in the decompiler, so it is much better to look at the listing instead.</p>
+<pre tabindex="0"><code class="language-x86asm" data-lang="x86asm">   00000dcb  LEA      RSP=&gt;local_16b0,[RSP + -0x1688]
+   00000dd3  MOV      EAX,0xa00020f
+   00000dd8  MOV      DX,0x539
+   00000ddc  CALL     FUN_0000001a
+</code></pre><p>After the function prologue, this pushes some interesting values on the stack.
+<code>0x539</code> is 1337! The function <code>FUN_0000001a</code> wraps two syscalls that connect to a socket. Based on the values passed to the function, I could infer that the connection is being made to host <code>10.0.2.15</code> (<code>0xa00020f</code>) and port <code>1337</code>.
+This must be the attacker’s machine.</p>
+<p>Further in the original function, we encounter 4 <code>recvfrom</code>
+syscalls that load data into various offsets on the stack. See an example:</p>
+<pre tabindex="0"><code class="language-x86asm" data-lang="x86asm">   00000de3 LEA      RSI=&gt;local_12a0,[RBP + -0x1278] ; buf points to RBP - 0x1278
+   00000dea PUSH     0x2d ; recvfrom
+   00000dec POP      RAX
+   00000ded MOV      EDI,EBX
+   00000def PUSH     0x20 ; load 32 bytes
+   00000df1 POP      RDX
+   00000df2 XOR      R10D,R10D
+   00000df5 XOR      R8D,R8D
+   00000df8 XOR      R9D,R9D
+   00000dfb SYSCALL
+</code></pre><p>Based on the four syscalls, we can infer the size of data loaded at
+different offsets:</p>
+<table>
+<thead>
+<tr>
+<th>Address/Offset</th>
+<th>Size in bytes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RBP - 0x1278</td>
+<td>32</td>
+</tr>
+<tr>
+<td>RBP - 0x1258</td>
+<td>12</td>
+</tr>
+<tr>
+<td>RBP - 0x1248</td>
+<td><code>dword ptr RBP - 0xf0</code></td>
+</tr>
+<tr>
+<td>RBP - 0xc8</td>
+<td>4</td>
+</tr>
+</tbody>
+</table>
+<p>Looking further in the code,</p>
+<pre tabindex="0"><code class="language-x86asm" data-lang="x86asm">   00000e99 LEA      RAX=&gt;local_e8,[RBP + -0xc0]
+   00000ea0 LEA      RDX=&gt;local_12a0,[RBP + -0x1278]
+   00000ea7 LEA      RCX=&gt;local_1280,[RBP + -0x1258]
+   00000eae XOR      R8D,R8D
+   00000eb1 CALL     FUN_00000cd2
+   00000eb6 LEA      RAX=&gt;local_e8,[RBP + -0xc0]
+   00000ebd LEA      RDX=&gt;local_1170,[RBP + -0x1148]
+   00000ec4 MOV      ECX,dword ptr [RBP + local_ec]
+   00000eca CALL     FUN_00000d49
+</code></pre><p>We can see that two function calls are being made, and the arguments to the function calls are the data that we receive from the network.</p>
+<p>Taking a look at the first function</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">FUN_00000cd2</span>(<span style="color:#66d9ef">void</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">int</span> iVar1;
+</span></span><span style="display:flex;"><span>  undefined <span style="color:#f92672">*</span>in_RAX;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">long</span> i;
+</span></span><span style="display:flex;"><span>  undefined <span style="color:#f92672">*</span>puVar2;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">int</span> <span style="color:#f92672">*</span>piVar3;
+</span></span><span style="display:flex;"><span>  undefined8 in_R8;
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  puVar2 <span style="color:#f92672">=</span> in_RAX;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xc0</span>; i <span style="color:#f92672">!=</span> <span style="color:#ae81ff">0x0</span>; i <span style="color:#f92672">+=</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">0x1</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">*</span>puVar2 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x0</span>;
+</span></span><span style="display:flex;"><span>    puVar2 <span style="color:#f92672">=</span> puVar2 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x1</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">FUN_00000a93</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">*</span>(in_RAX <span style="color:#f92672">+</span> <span style="color:#ae81ff">0xb0</span>) <span style="color:#f92672">=</span> in_R8;
+</span></span><span style="display:flex;"><span>  piVar3 <span style="color:#f92672">=</span> in_RAX <span style="color:#f92672">+</span> <span style="color:#ae81ff">0xb4</span>;
+</span></span><span style="display:flex;"><span>  iVar1 <span style="color:#f92672">=</span> <span style="color:#a6e22e">FUN_00000f20</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">*</span>piVar3 <span style="color:#f92672">=</span> iVar1 <span style="color:#f92672">+</span> (in_R8 <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">0x20</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">*</span>(in_RAX <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x78</span>) <span style="color:#f92672">=</span> in_R8;
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">*</span>(in_RAX <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x40</span>) <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x40</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The decompilation looks a bit off. Specifically, the <code>in_RAX</code>
+business Ghidra seems to do. We can take care of this however, by modifying the function signature.
+What the <code>in_RAX</code> means is that the register being operated on, as it was passed in the function. We can take care of this by choosing custom storage for function parameters in Ghidra.</p>
+<p><img src="/flare11/sshd-ghidra-fc.png"></p>
+<p>After specifying all of the function parameters, the decompilation looks a lot cleaner:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">FUN_00000cd2</span>(undefined <span style="color:#f92672">*</span>param_1,undefined <span style="color:#f92672">*</span>param_2,undefined <span style="color:#f92672">*</span>param_3,undefined8 param_4)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">int</span> iVar1;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">long</span> i;
+</span></span><span style="display:flex;"><span>  undefined <span style="color:#f92672">*</span>puVar2;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">int</span> <span style="color:#f92672">*</span>piVar3;
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  puVar2 <span style="color:#f92672">=</span> param_1;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xc0</span>; i <span style="color:#f92672">!=</span> <span style="color:#ae81ff">0x0</span>; i <span style="color:#f92672">+=</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">0x1</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">*</span>puVar2 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x0</span>;
+</span></span><span style="display:flex;"><span>    puVar2 <span style="color:#f92672">=</span> puVar2 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x1</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">FUN_00000a93</span>(puVar2,param_4,param_3,param_2,param_1);
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">*</span>(param_1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0xb0</span>) <span style="color:#f92672">=</span> param_4;
+</span></span><span style="display:flex;"><span>  piVar3 <span style="color:#f92672">=</span> param_1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0xb4</span>;
+</span></span><span style="display:flex;"><span>  iVar1 <span style="color:#f92672">=</span> <span style="color:#a6e22e">FUN_00000f20</span>(param_1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x68</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">*</span>piVar3 <span style="color:#f92672">=</span> iVar1 <span style="color:#f92672">+</span> (param_4 <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">0x20</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">*</span>(param_1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x78</span>) <span style="color:#f92672">=</span> param_4;
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">*</span>(param_1 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x40</span>) <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x40</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Seeing the <code>*(param_1 + 0x40) = 0x40;</code> rang a lot of bells for me. This is the ChaCha20 state initialization function (again!). This means that the other function must be ChaCha20 encrypt function.</p>
+<p>We can clean up the decompilation again and the result is pretty satisfying.</p>
+<p><img src="/flare11/sshd-fc-listing-2.png"></p>
+<p>One other incredible gotcha in here that the ChaCha20 is standard except for the nothing-up-my-sleeve constant being used. Standard ChaCha20 uses <code>expand 32-byte k</code> while the binary uses <code>expand-32-byte K</code> (notice the uppercase K). This was really sneaky!</p>
+<h2 id="extracting-all-the-data">Extracting all the data<a href="#extracting-all-the-data" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>Since we know that we receive 32 bytes and then 12 bytes over the TCP socket, this must be the key and the nonce for ChaCha20. The encrypted data must be the data at <code>RBP - 0xec</code>.</p>
+<p>One interesting thing to note is that the <code>RBP</code> inside our shellcode is actually the <code>RSP</code> in the GDB backtrace. This is because of the function prologue that happens when the shellcode gets called:</p>
+<pre tabindex="0"><code class="language-x86asm" data-lang="x86asm">00000000 PUSH     RBP
+00000001 MOV      RBP,RSP
+</code></pre><p>The original function also opens and reads some content inside a file. This filename should be present at <code>RSP - 0x1248</code> in the coredump. If we look in the GDB coredump, we can see that the filename doesn’t exist at <code>RSP - 0x1248</code> but at <code>RSP-0x1288</code>.</p>
+<p><img src="/flare11/sshd-gdb-filename.png"></p>
+<p>We know that the data inside this file is encrypted and sent over the network.</p>
+<pre tabindex="0"><code class="language-x86asm" data-lang="x86asm">   00000ee9 LEA      RSI=&gt;len,[RBP + -0x1148]
+   00000ef0 PUSH     0x2c
+   00000ef2 POP      RAX
+   00000ef3 MOV      EDI,EBX
+   00000ef5 MOV      EDX,dword ptr [RBP + buff]
+   00000efb XOR      R10D,R10D
+   00000efe XOR      R8D,R8D
+   00000f01 XOR      R9D,R9D
+   00000f04 SYSCALL
+</code></pre><p>We can take a look at <code>RBP - 0x1148</code> for the encrypted data then.</p>
+<p>This is a pretty good indicator that the data is all offset by <code>-0x40</code>. Thus we now know the locations of the key and nonce and the encrypted data as well. Let’s get all of the data. The length of the encrypted buffer must also be somewhere on the stack. Let’s just get the first 64 bytes for now.</p>
+<p>Key, nonce and encrypted data.</p>
+<p>Since we know that the ChaCha20 implementation is a bit non-standard, we can write our own implementation (or just let a LLM generate one for us :p)</p>
+<p>Plugging all of the values into this implementation and running the script gives us our flag.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> struct
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> typing <span style="color:#f92672">import</span> List
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ChaCha20Context</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> __init__(self):
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>state: List[int] <span style="color:#f92672">=</span> [<span style="color:#ae81ff">0</span>] <span style="color:#f92672">*</span> <span style="color:#ae81ff">16</span>
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>keystream32: List[int] <span style="color:#f92672">=</span> [<span style="color:#ae81ff">0</span>] <span style="color:#f92672">*</span> <span style="color:#ae81ff">16</span>
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>key: bytes <span style="color:#f92672">=</span> bytes(<span style="color:#ae81ff">32</span>)
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>nonce: bytes <span style="color:#f92672">=</span> bytes(<span style="color:#ae81ff">12</span>)
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>counter: int <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>position: int <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">rotl32</span>(x: int, n: int) <span style="color:#f92672">-&gt;</span> int:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> ((x <span style="color:#f92672">&lt;&lt;</span> n) <span style="color:#f92672">|</span> (x <span style="color:#f92672">&gt;&gt;</span> (<span style="color:#ae81ff">32</span> <span style="color:#f92672">-</span> n))) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xFFFFFFFF</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">pack4</span>(a: bytes) <span style="color:#f92672">-&gt;</span> int:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> struct<span style="color:#f92672">.</span>unpack(<span style="color:#e6db74">&#39;&lt;I&#39;</span>, a)[<span style="color:#ae81ff">0</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">unpack4</span>(src: int) <span style="color:#f92672">-&gt;</span> bytes:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> struct<span style="color:#f92672">.</span>pack(<span style="color:#e6db74">&#39;&lt;I&#39;</span>, src)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">chacha20_init_block</span>(ctx: ChaCha20Context, key: bytes, nonce: bytes):
+</span></span><span style="display:flex;"><span>    ctx<span style="color:#f92672">.</span>key <span style="color:#f92672">=</span> key
+</span></span><span style="display:flex;"><span>    ctx<span style="color:#f92672">.</span>nonce <span style="color:#f92672">=</span> nonce
+</span></span><span style="display:flex;"><span>    magic_constant <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;expand 32-byte K&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    ctx<span style="color:#f92672">.</span>state[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">=</span> pack4(magic_constant[<span style="color:#ae81ff">0</span>:<span style="color:#ae81ff">4</span>])
+</span></span><span style="display:flex;"><span>    ctx<span style="color:#f92672">.</span>state[<span style="color:#ae81ff">1</span>] <span style="color:#f92672">=</span> pack4(magic_constant[<span style="color:#ae81ff">4</span>:<span style="color:#ae81ff">8</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    ctx<span style="color:#f92672">.</span>state[<span style="color:#ae81ff">2</span>] <span style="color:#f92672">=</span> pack4(magic_constant[<span style="color:#ae81ff">8</span>:<span style="color:#ae81ff">12</span>])
+</span></span><span style="display:flex;"><span>    ctx<span style="color:#f92672">.</span>state[<span style="color:#ae81ff">3</span>] <span style="color:#f92672">=</span> pack4(magic_constant[<span style="color:#ae81ff">12</span>:<span style="color:#ae81ff">16</span>])
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">8</span>):
+</span></span><span style="display:flex;"><span>        ctx<span style="color:#f92672">.</span>state[<span style="color:#ae81ff">4</span> <span style="color:#f92672">+</span> i] <span style="color:#f92672">=</span> pack4(key[i<span style="color:#f92672">*</span><span style="color:#ae81ff">4</span>:i<span style="color:#f92672">*</span><span style="color:#ae81ff">4</span><span style="color:#f92672">+</span><span style="color:#ae81ff">4</span>])
+</span></span><span style="display:flex;"><span>    ctx<span style="color:#f92672">.</span>state[<span style="color:#ae81ff">12</span>] <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>    ctx<span style="color:#f92672">.</span>state[<span style="color:#ae81ff">13</span>] <span style="color:#f92672">=</span> pack4(nonce[<span style="color:#ae81ff">0</span>:<span style="color:#ae81ff">4</span>])
+</span></span><span style="display:flex;"><span>    ctx<span style="color:#f92672">.</span>state[<span style="color:#ae81ff">14</span>] <span style="color:#f92672">=</span> pack4(nonce[<span style="color:#ae81ff">4</span>:<span style="color:#ae81ff">8</span>])
+</span></span><span style="display:flex;"><span>    ctx<span style="color:#f92672">.</span>state[<span style="color:#ae81ff">15</span>] <span style="color:#f92672">=</span> pack4(nonce[<span style="color:#ae81ff">8</span>:<span style="color:#ae81ff">12</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">chacha20_block_set_counter</span>(ctx: ChaCha20Context, counter: int):
+</span></span><span style="display:flex;"><span>    ctx<span style="color:#f92672">.</span>state[<span style="color:#ae81ff">12</span>] <span style="color:#f92672">=</span> counter <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xFFFFFFFF</span>
+</span></span><span style="display:flex;"><span>    ctx<span style="color:#f92672">.</span>state[<span style="color:#ae81ff">13</span>] <span style="color:#f92672">=</span> pack4(ctx<span style="color:#f92672">.</span>nonce[<span style="color:#ae81ff">0</span>:<span style="color:#ae81ff">4</span>]) <span style="color:#f92672">+</span> (counter <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">32</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">chacha20_block_next</span>(ctx: ChaCha20Context):
+</span></span><span style="display:flex;"><span>    ctx<span style="color:#f92672">.</span>keystream32 <span style="color:#f92672">=</span> ctx<span style="color:#f92672">.</span>state<span style="color:#f92672">.</span>copy()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">quarter_round</span>(x, a, b, c, d):
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        x[a] <span style="color:#f92672">=</span> (x[a] <span style="color:#f92672">+</span> x[b]) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xFFFFFFFF</span>
+</span></span><span style="display:flex;"><span>        x[d] <span style="color:#f92672">=</span> rotl32(x[d] <span style="color:#f92672">^</span> x[a], <span style="color:#ae81ff">16</span>)
+</span></span><span style="display:flex;"><span>        x[c] <span style="color:#f92672">=</span> (x[c] <span style="color:#f92672">+</span> x[d]) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xFFFFFFFF</span>
+</span></span><span style="display:flex;"><span>        x[b] <span style="color:#f92672">=</span> rotl32(x[b] <span style="color:#f92672">^</span> x[c], <span style="color:#ae81ff">12</span>)
+</span></span><span style="display:flex;"><span>        x[a] <span style="color:#f92672">=</span> (x[a] <span style="color:#f92672">+</span> x[b]) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xFFFFFFFF</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        x[d] <span style="color:#f92672">=</span> rotl32(x[d] <span style="color:#f92672">^</span> x[a], <span style="color:#ae81ff">8</span>)
+</span></span><span style="display:flex;"><span>        x[c] <span style="color:#f92672">=</span> (x[c] <span style="color:#f92672">+</span> x[d]) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xFFFFFFFF</span>
+</span></span><span style="display:flex;"><span>        x[b] <span style="color:#f92672">=</span> rotl32(x[b] <span style="color:#f92672">^</span> x[c], <span style="color:#ae81ff">7</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> _ <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">10</span>):
+</span></span><span style="display:flex;"><span>        quarter_round(ctx<span style="color:#f92672">.</span>keystream32, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">8</span>, <span style="color:#ae81ff">12</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        quarter_round(ctx<span style="color:#f92672">.</span>keystream32, <span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">9</span>, <span style="color:#ae81ff">13</span>)
+</span></span><span style="display:flex;"><span>        quarter_round(ctx<span style="color:#f92672">.</span>keystream32, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">6</span>, <span style="color:#ae81ff">10</span>, <span style="color:#ae81ff">14</span>)
+</span></span><span style="display:flex;"><span>        quarter_round(ctx<span style="color:#f92672">.</span>keystream32, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">7</span>, <span style="color:#ae81ff">11</span>, <span style="color:#ae81ff">15</span>)
+</span></span><span style="display:flex;"><span>        quarter_round(ctx<span style="color:#f92672">.</span>keystream32, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">10</span>, <span style="color:#ae81ff">15</span>)
+</span></span><span style="display:flex;"><span>        quarter_round(ctx<span style="color:#f92672">.</span>keystream32, <span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">6</span>, <span style="color:#ae81ff">11</span>, <span style="color:#ae81ff">12</span>)
+</span></span><span style="display:flex;"><span>        quarter_round(ctx<span style="color:#f92672">.</span>keystream32, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">7</span>, <span style="color:#ae81ff">8</span>, <span style="color:#ae81ff">13</span>)
+</span></span><span style="display:flex;"><span>        quarter_round(ctx<span style="color:#f92672">.</span>keystream32, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">9</span>, <span style="color:#ae81ff">14</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">16</span>):
+</span></span><span style="display:flex;"><span>        ctx<span style="color:#f92672">.</span>keystream32[i] <span style="color:#f92672">=</span> (ctx<span style="color:#f92672">.</span>keystream32[i] <span style="color:#f92672">+</span> ctx<span style="color:#f92672">.</span>state[i]) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xFFFFFFFF</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    ctx<span style="color:#f92672">.</span>state[<span style="color:#ae81ff">12</span>] <span style="color:#f92672">=</span> (ctx<span style="color:#f92672">.</span>state[<span style="color:#ae81ff">12</span>] <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xFFFFFFFF</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> ctx<span style="color:#f92672">.</span>state[<span style="color:#ae81ff">12</span>] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>:
+</span></span><span style="display:flex;"><span>        ctx<span style="color:#f92672">.</span>state[<span style="color:#ae81ff">13</span>] <span style="color:#f92672">=</span> (ctx<span style="color:#f92672">.</span>state[<span style="color:#ae81ff">13</span>] <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xFFFFFFFF</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">assert</span> ctx<span style="color:#f92672">.</span>state[<span style="color:#ae81ff">13</span>] <span style="color:#f92672">!=</span> <span style="color:#ae81ff">0</span>, <span style="color:#e6db74">&#34;Counter overflow&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">chacha20_init_context</span>(ctx: ChaCha20Context, key: bytes, nonce: bytes, counter: int):
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    chacha20_init_block(ctx, key, nonce)
+</span></span><span style="display:flex;"><span>    chacha20_block_set_counter(ctx, counter)
+</span></span><span style="display:flex;"><span>    ctx<span style="color:#f92672">.</span>counter <span style="color:#f92672">=</span> counter
+</span></span><span style="display:flex;"><span>    ctx<span style="color:#f92672">.</span>position <span style="color:#f92672">=</span> <span style="color:#ae81ff">64</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">chacha20_xor</span>(ctx: ChaCha20Context, data: bytearray):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(len(data)):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> ctx<span style="color:#f92672">.</span>position <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">64</span>:
+</span></span><span style="display:flex;"><span>            chacha20_block_next(ctx)
+</span></span><span style="display:flex;"><span>            ctx<span style="color:#f92672">.</span>position <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>        data[i] <span style="color:#f92672">^=</span> (ctx<span style="color:#f92672">.</span>keystream32[ctx<span style="color:#f92672">.</span>position <span style="color:#f92672">//</span> <span style="color:#ae81ff">4</span>] <span style="color:#f92672">&gt;&gt;</span> (<span style="color:#ae81ff">8</span> <span style="color:#f92672">*</span> (ctx<span style="color:#f92672">.</span>position <span style="color:#f92672">%</span> <span style="color:#ae81ff">4</span>))) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xFF</span>
+</span></span><span style="display:flex;"><span>        ctx<span style="color:#f92672">.</span>position <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Example usage</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:
+</span></span><span style="display:flex;"><span>    nonce <span style="color:#f92672">=</span> bytes<span style="color:#f92672">.</span>fromhex(<span style="color:#e6db74">&#34;111111111111111111111111&#34;</span>)
+</span></span><span style="display:flex;"><span>    key<span style="color:#f92672">=</span> bytes<span style="color:#f92672">.</span>fromhex(<span style="color:#e6db74">&#34;8dec9112eb760eda7c7d87a443271c35d9e0cb878993b4d904aef934fa2166d7&#34;</span>)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    plaintext <span style="color:#f92672">=</span> bytes<span style="color:#f92672">.</span>fromhex(<span style="color:#e6db74">&#34;a9f63408422a9e1c0c03a8089470bb8daadc6d7b24ff7f247cda839e92f7071d&#34;</span>)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    ctx <span style="color:#f92672">=</span> ChaCha20Context()
+</span></span><span style="display:flex;"><span>    chacha20_init_context(ctx, key, nonce, <span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    data <span style="color:#f92672">=</span> bytearray(plaintext)
+</span></span><span style="display:flex;"><span>    chacha20_xor(ctx, data)
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#34;Dec:&#34;</span>, data)
+</span></span></code></pre></div><p><img src="/flare11/sshd-flag.png"></p>
+<div style="padding: 0.5rem;border-top:2px solid white;border-bottom:2px solid white;border-left:2px solid white;border-right:2px solid white;" >
+<b style="color: #78e2a0" >Flag</b><br><b>---</b><br>
+<b>supp1y_cha1n_sund4y@flare-on.com</b>
+</div>
+<h1 id="an-alternate-approach">An alternate approach<a href="#an-alternate-approach" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<p>An alternate approach to this challenge in the stage 2 shellcode is to just patch the shellcode to connect to localhost, and then let the binary decrypt the data for you. This saves us some trouble of writing and figuring out of the ChaCha20 works.</p>
+<p>It goes roughly like this:</p>
+<ol>
+<li>Patch the constant IP in the shellcode.</li>
+<li>Encrypt this data using the stage 1 ChaCha20 key and nonce.</li>
+<li>Patch liblzma with this shellcode</li>
+<li>Write a socket client that sends the key, nonce and the encrypted data we located.</li>
+<li>The data received should contain the flag.</li>
+</ol>
+<p>This was a pretty fun challenge that is closely related to the XZ backdoor incident. I found <a href="https://securelist.com/xz-backdoor-part-3-hooking-ssh/113007/">this page</a> really useful while analyzing the hook. It talks in details about how the hook is triggered and how the backdoor works and it’s really interesting! :)</p>
+<h1 id="appendix">Appendix<a href="#appendix" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<p>A fun exercise I did post the challenge it to clean up the decompilation as much as possible. The result is pretty beautiful!</p>
+<p>I found a C implementation of ChaCha20 online and downloaded <a href="https://github.com/Ginurx/chacha20-c/blob/master/chacha20.h">its header file</a>. We can parse this header file and import the data types in Ghidra to get a nice decompilation, especially of the key init function.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> chacha20<span style="color:#f92672">::</span><span style="color:#a6e22e">init</span>(chacha20_context <span style="color:#f92672">*</span>ctx,<span style="color:#66d9ef">uint32_t</span> <span style="color:#f92672">*</span>key,<span style="color:#66d9ef">uint32_t</span> <span style="color:#f92672">*</span>nonce,<span style="color:#66d9ef">uint64_t</span> counter)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">uint32_t</span> uVar1;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">int</span> iVar2;
+</span></span><span style="display:flex;"><span>  undefined8 uVar3;
+</span></span><span style="display:flex;"><span>  ulong i;
+</span></span><span style="display:flex;"><span>  undefined8 <span style="color:#f92672">*</span>puVar4;
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">*</span>ctx<span style="color:#f92672">-&gt;</span>keystream32 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x0</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">*</span>(ctx<span style="color:#f92672">-&gt;</span>state <span style="color:#f92672">+</span> <span style="color:#ae81ff">0xe</span>) <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x0</span>;
+</span></span><span style="display:flex;"><span>  puVar4 <span style="color:#f92672">=</span> ctx<span style="color:#f92672">-&gt;</span>keystream32 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x2</span> <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xfffffffffffffff8</span>;
+</span></span><span style="display:flex;"><span>  i <span style="color:#f92672">=</span> (ctx <span style="color:#f92672">-</span> puVar4) <span style="color:#f92672">+</span> <span style="color:#ae81ff">0xc0U</span> <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">0x3</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (; i <span style="color:#f92672">!=</span> <span style="color:#ae81ff">0x0</span>; i <span style="color:#f92672">-=</span> <span style="color:#ae81ff">0x1</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">*</span>puVar4 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x0</span>;
+</span></span><span style="display:flex;"><span>    puVar4 <span style="color:#f92672">=</span> puVar4 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x1</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  uVar3 <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>(key <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x2</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">*</span>ctx<span style="color:#f92672">-&gt;</span>key <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>key;
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">*</span>(ctx<span style="color:#f92672">-&gt;</span>key <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x8</span>) <span style="color:#f92672">=</span> uVar3;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  uVar3 <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>(key <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x6</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">*</span>(ctx<span style="color:#f92672">-&gt;</span>key <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x10</span>) <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>(key <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x4</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">*</span>(ctx<span style="color:#f92672">-&gt;</span>key <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x18</span>) <span style="color:#f92672">=</span> uVar3;
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">*</span>ctx<span style="color:#f92672">-&gt;</span>nonce <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>nonce;
+</span></span><span style="display:flex;"><span>  uVar1 <span style="color:#f92672">=</span> nonce[<span style="color:#ae81ff">0x2</span>];
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">*</span>ctx<span style="color:#f92672">-&gt;</span>state <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x3320646e61707865</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">*</span>(ctx<span style="color:#f92672">-&gt;</span>nonce <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x8</span>) <span style="color:#f92672">=</span> uVar1;
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">*</span>(ctx<span style="color:#f92672">-&gt;</span>state <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x2</span>) <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x6b20657479622d32</span>;
+</span></span><span style="display:flex;"><span>  ctx<span style="color:#f92672">-&gt;</span>state[<span style="color:#ae81ff">0x4</span>] <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>key;
+</span></span><span style="display:flex;"><span>  ctx<span style="color:#f92672">-&gt;</span>state[<span style="color:#ae81ff">0x5</span>] <span style="color:#f92672">=</span> key[<span style="color:#ae81ff">0x1</span>];
+</span></span><span style="display:flex;"><span>  ctx<span style="color:#f92672">-&gt;</span>state[<span style="color:#ae81ff">0x6</span>] <span style="color:#f92672">=</span> key[<span style="color:#ae81ff">0x2</span>];
+</span></span><span style="display:flex;"><span>  ctx<span style="color:#f92672">-&gt;</span>state[<span style="color:#ae81ff">0x7</span>] <span style="color:#f92672">=</span> key[<span style="color:#ae81ff">0x3</span>];
+</span></span><span style="display:flex;"><span>  ctx<span style="color:#f92672">-&gt;</span>state[<span style="color:#ae81ff">0x8</span>] <span style="color:#f92672">=</span> key[<span style="color:#ae81ff">0x4</span>];
+</span></span><span style="display:flex;"><span>  ctx<span style="color:#f92672">-&gt;</span>state[<span style="color:#ae81ff">0x9</span>] <span style="color:#f92672">=</span> key[<span style="color:#ae81ff">0x5</span>];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  ctx<span style="color:#f92672">-&gt;</span>state[<span style="color:#ae81ff">0xa</span>] <span style="color:#f92672">=</span> key[<span style="color:#ae81ff">0x6</span>];
+</span></span><span style="display:flex;"><span>  uVar1 <span style="color:#f92672">=</span> key[<span style="color:#ae81ff">0x7</span>];
+</span></span><span style="display:flex;"><span>  ctx<span style="color:#f92672">-&gt;</span>state[<span style="color:#ae81ff">0xc</span>] <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x0</span>;
+</span></span><span style="display:flex;"><span>  ctx<span style="color:#f92672">-&gt;</span>state[<span style="color:#ae81ff">0xb</span>] <span style="color:#f92672">=</span> uVar1;
+</span></span><span style="display:flex;"><span>  ctx<span style="color:#f92672">-&gt;</span>state[<span style="color:#ae81ff">0xd</span>] <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>nonce;
+</span></span><span style="display:flex;"><span>  ctx<span style="color:#f92672">-&gt;</span>state[<span style="color:#ae81ff">0xe</span>] <span style="color:#f92672">=</span> nonce[<span style="color:#ae81ff">0x1</span>];
+</span></span><span style="display:flex;"><span>  ctx<span style="color:#f92672">-&gt;</span>state[<span style="color:#ae81ff">0xf</span>] <span style="color:#f92672">=</span> nonce[<span style="color:#ae81ff">0x2</span>];
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">*</span>ctx<span style="color:#f92672">-&gt;</span>nonce <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>nonce;
+</span></span><span style="display:flex;"><span>  uVar1 <span style="color:#f92672">=</span> nonce[<span style="color:#ae81ff">0x2</span>];
+</span></span><span style="display:flex;"><span>  iVar2 <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>ctx<span style="color:#f92672">-&gt;</span>nonce;
+</span></span><span style="display:flex;"><span>  ctx<span style="color:#f92672">-&gt;</span>state[<span style="color:#ae81ff">0xc</span>] <span style="color:#f92672">=</span> counter;
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">*</span>(ctx<span style="color:#f92672">-&gt;</span>nonce <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x8</span>) <span style="color:#f92672">=</span> uVar1;
+</span></span><span style="display:flex;"><span>  ctx<span style="color:#f92672">-&gt;</span>state[<span style="color:#ae81ff">0xd</span>] <span style="color:#f92672">=</span> (counter <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">0x20</span>) <span style="color:#f92672">+</span> iVar2;
+</span></span><span style="display:flex;"><span>  ctx<span style="color:#f92672">-&gt;</span>counter <span style="color:#f92672">=</span> counter;
+</span></span><span style="display:flex;"><span>  ctx<span style="color:#f92672">-&gt;</span>position <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x40</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>$$
+\blacksquare
+\blacksquare
+\blacksquare
+$$</p>
+
+      </div></div>
+
+  
+  
+<div class="pagination">
+    <div class="pagination__title">
+        <span class="pagination__title-h">Read other posts</span>
+        <hr />
+    </div>
+    <div class="pagination__buttons">
+        
+        
+        <span class="button next">
+            <a href="https://crystalsage.github.io/posts/dc_term/">
+                <span class="button__text">Windows Terminal with Double Commander</span>
+                <span class="button__icon">→</span>
+            </a>
+        </span>
+        
+    </div>
+</div>
+
+  
+
+  
+
+</div>
+
+  </div>
+
+  
+    <footer class="footer">
+  <div class="footer__inner">
+    
+      <div class="copyright copyright--user">
+        <span>Licensed to Bourbon</span>
+    
+        <span>:: Theme made by <a href="https://twitter.com/panr">panr</a></span>
+      </div>
+  </div>
+</footer>
+
+
+
+<script src="https://crystalsage.github.io/assets/main.js"></script>
+<script src="https://crystalsage.github.io/assets/prism.js"></script>
+<script type="text/javascript"
+  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\[','\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+           extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    }
+  });
+  </script>
+
+
+
+
+
+
+  
+</div>
+
+</body>
+</html>

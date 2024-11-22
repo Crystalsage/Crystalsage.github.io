@@ -12,6 +12,9 @@
 <link rel="canonical" href="https://crystalsage.github.io/posts/ctf-3/" />
 
 
+  
+
+
 
 
 <link rel="stylesheet" href="https://crystalsage.github.io/assets/style.css">
@@ -154,13 +157,13 @@ Click here to read <a href="https://crystalsage.github.io/posts/ctf-1/">1st part
 <p>In this 3-part series, we will see my method of approaching these challenges
 and how I solved them. The 9 challenges are divided into 3 posts.</p>
 <h1 id="decode-it">Decode It<a href="#decode-it" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
-<p><img src="/ctf/di.png" alt="di"></p>
+<p><img alt="di" src="/ctf/di.png"></p>
 <p>The challenge gives us a pretty clear hint that each line is mapped to <em>the</em> single
 character (The hint is ambiguous, character could either mean the person or
 a character in the flag).</p>
 <p>And so, we are given some lines of text in a PDF file. We can quickly notice
 some things.</p>
-<p><img src="/ctf/di-morse.png" alt="di-morse"></p>
+<p><img alt="di-morse" src="/ctf/di-morse.png"></p>
 <ol>
 <li>
 <p>There are two lines with just brackets. These are obviously the brackets
@@ -196,16 +199,16 @@ extract the dits and dahs from the lines, with some simple Python.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>extract_symbols <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> line: <span style="color:#e6db74">&#34;&#34;</span><span style="color:#f92672">.</span>join([i <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> line <span style="color:#66d9ef">if</span> i <span style="color:#f92672">in</span> (<span style="color:#e6db74">&#34;-&#34;</span>, <span style="color:#e6db74">&#34;.&#34;</span>)])
 </span></span></code></pre></div><p>Once we extract all dits and dahs, we can put them in a morse &ndash;&gt; text converter.
 I happened to have a script on my machine for this.</p>
-<p><img src="/ctf/di-morse-ans.png" alt="di-morse-ans"></p>
+<p><img alt="di-morse-ans" src="/ctf/di-morse-ans.png"></p>
 <p>Which is the text inside the brackets, so the flag is
 <code>csi-ctf{MORSEINTERSTELLAR}</code> $\blacksquare$</p>
 <h1 id="crack-the-sequence">Crack the Sequence<a href="#crack-the-sequence" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
-<p><img src="/ctf/cts.png" alt="cts"></p>
+<p><img alt="cts" src="/ctf/cts.png"></p>
 <p>The challenge description tells us that we need to crack a sequence of four
 cards, and decrypt it. Cool.</p>
 <p>If we click around on some 5 cards randomly, we get an alert box saying that
 the combination is wrong.</p>
-<p><img src="/ctf/cts-wrong.png" alt="ctf-fail"></p>
+<p><img alt="ctf-fail" src="/ctf/cts-wrong.png"></p>
 <p>Let&rsquo;s see what&rsquo;s going on under the hood. On the page&rsquo;s source,  we find the
 following Javascript code.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">store</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>;
@@ -265,10 +268,10 @@ with the first few characters of our resulting sequence.</p>
 </span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    onclick=&#34;</span>[<span style="color:#a6e22e">flip</span>(<span style="color:#a6e22e">event</span>),<span style="color:#a6e22e">card</span>(<span style="color:#e6db74">&#39;3043fde3d&#39;</span>)] <span style="color:#75715e">//8
 </span></span></span></code></pre></div><p>We notice that some of these are empty. So, if we were to flip the cards in
 the order <code>1-5-8-6</code>, it&rsquo;ll form the sequence that we want and we&rsquo;ll get our hash, which is the same sequence.</p>
-<p><img src="/ctf/cts-flag-hashed.png" alt="cts-flag"></p>
+<p><img alt="cts-flag" src="/ctf/cts-flag-hashed.png"></p>
 <p><strong>Challenge Idea/Solution</strong>: An alternate solution to this challenge, if the flag was something else, would be to set a breakpoint where we check if the <code>store</code> is equivalent to the sequence, and (by)pass the check entirely by modifying the <code>store</code> variable to be equal to the hash. Alternate challenge idea!</p>
 <h1 id="one-zero-one">One Zero One<a href="#one-zero-one" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
-<p><img src="/ctf/ozo.png" alt="ozo"></p>
+<p><img alt="ozo" src="/ctf/ozo.png"></p>
 <p>This is easy. We just need to decode the binary. In fact, the hardest part
 of this challenge is to write down the binary in a text editor. The full binary
 is,</p>
@@ -300,7 +303,7 @@ This marks the end of the writeups.
     <div class="pagination__buttons">
         
         <span class="button previous">
-            <a href="https://crystalsage.github.io/posts/partialord/">
+            <a href="https://crystalsage.github.io/posts/partialeq/">
                 <span class="button__icon">←</span>
                 <span class="button__text">Partial ordering and Rust</span>
             </a>

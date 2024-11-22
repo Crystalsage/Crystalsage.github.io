@@ -2,14 +2,17 @@
 <html lang="en">
 <head>
   
-    <title>Partial equality and Rust :: /home/bourbon</title>
+    <title>Partial ordering and Rust :: /home/bourbon</title>
   
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Partial equality in mathematics and how to utilize it in Rust" />
+<meta name="description" content="Partial ordering in mathematics and how to utilize it in Rust." />
 <meta name="keywords" content="" />
 <meta name="robots" content="noodp" />
 <link rel="canonical" href="https://crystalsage.github.io/posts/partialeq/" />
+
+
+  
 
 
 
@@ -40,8 +43,8 @@
 
 <meta property="og:locale" content="en" />
 <meta property="og:type" content="article" />
-<meta property="og:title" content="Partial equality and Rust">
-<meta property="og:description" content="Partial equality in mathematics and how to utilize it in Rust" />
+<meta property="og:title" content="Partial ordering and Rust">
+<meta property="og:description" content="Partial ordering in mathematics and how to utilize it in Rust." />
 <meta property="og:url" content="https://crystalsage.github.io/posts/partialeq/" />
 <meta property="og:site_name" content="/home/bourbon" />
 
@@ -127,7 +130,7 @@
     
 <div class="post">
   <h1 class="post-title">
-    <a href="https://crystalsage.github.io/posts/partialeq/">Partial equality and Rust</a></h1>
+    <a href="https://crystalsage.github.io/posts/partialeq/">Partial ordering and Rust</a></h1>
   <div class="post-meta">
     
       <span class="post-date">
@@ -145,7 +148,125 @@
 
   
 
-  <div class="post-content"></div>
+  <div class="post-content"><div>
+        <blockquote>
+<p>Without order, there is chaos.</p>
+</blockquote>
+<h2 id="introduction">Introduction<a href="#introduction" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>Wikipedia defines a partial order as,</p>
+<blockquote>
+<p>A reflexive, weak, or non-strict partial order is a homogeneous relation ≤ on a set P that is reflexive, antisymmetric, and transitive.</p>
+</blockquote>
+<p>In other words, we have that in a set $P$ , $\forall a,b,c \in P$ , we must have,</p>
+<ol>
+<li><strong>Reflexivity</strong>: a≤a , i.e. every element is related to itself.</li>
+<li><strong>Antisymmetry</strong>: a≤b and b≤a then a=b , i.e. no two distinct elements precede each other.</li>
+<li><strong>Transitivity</strong>: If a≤b and b≤c then a≤c</li>
+</ol>
+<p>Wow! Quite a definition. But what does it actually mean…?</p>
+<h2 id="the-scenario">The scenario<a href="#the-scenario" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>Suppose that you want to buy a new fancy umbrella for you and your friend. These umbrellas differ in size and you would like the one which can fit both you and your friend.</p>
+<p>Instantly, you have a perspective from which you start seeing things. You apply a filter according to your use cases, and judge the objects according to them. In your case, the filter is <strong>size</strong>.</p>
+<p>Defining an <em>order</em> on a set is the same thing!</p>
+<p>Defining an order gives us a sense of comparison between objects of that particular set. In the example stated before, the set is the entire category of umbrellas and the objects are the umbrellas.</p>
+<h2 id="formalizing-the-idea">Formalizing the idea<a href="#formalizing-the-idea" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>Continuing with the umbrella mould, let us state the same thing in a proper manner, so that Wikipedia’s definition fits our example, at least intuitively.</p>
+<p>Let us define an order on the set of umbrellas. The set is $U$ and the objects of this set are umbrellas.</p>
+<p>$$U={u_1,u_2,u_3,\cdots,u_n}$$</p>
+<p>Let’s define an operator ≤
+on set U which defines a partial order. This operator gives us a comparison between sizes of umbrellas. The operator ≤</p>
+<p>must satisfy the 3 rules stated in the opening section. Let’s see if we can explain them according to our scenario. (Note: A partially ordered set is also known as a poset.)</p>
+<ol>
+<li>
+<p>Reflexivity: An umbrella ua is related to itself. In terms of the size, this would mean that the umbrella is similarly sized to say, an exact copy of ua .</p>
+</li>
+<li>
+<p>Antisymmetry: If two umbrellas are approximately equally sized, it’s confusing at a cursory glance whether if one really is smaller than the other. The situation can then be thought of as a scenario where both ua≤ub and ub≤ua are ’true’. So ua=ub must be true.</p>
+</li>
+<li>
+<p>Transitivity: This is pretty obvious. Among a small, a medium and a large umbrella, there’s a clear hierarchy. If ua≤ub and ub≤uc then ua≤uc.</p>
+</li>
+</ol>
+<h2 id="ordering-in-rust">Ordering in Rust<a href="#ordering-in-rust" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>Ordering a data structure in Rust allows us to do abstract comparisons between objects of the same data structure. Let’s continue the umbrella saga.</p>
+<p>Suppose we create a struct for describing an umbrella. The size field is of the Size type, which is user-defined.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">enum</span> <span style="color:#a6e22e">Size</span>{
+</span></span><span style="display:flex;"><span>  Small,
+</span></span><span style="display:flex;"><span>  Medium,
+</span></span><span style="display:flex;"><span>  Large,
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">Umbrella</span>{
+</span></span><span style="display:flex;"><span>  size : <span style="color:#a6e22e">Size</span>,
+</span></span><span style="display:flex;"><span>  cost : <span style="color:#66d9ef">u16</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Now, we would like to say that an umbrella is ‘better’ (for us) if the size is maximum. As a side effect, we would also love that the cost gets minimized. In other words, we’d like to define a clear notion of comparison.</p>
+<p>In Rust, we can implement some traits, described below.</p>
+<ul>
+<li><code>PartialOrd</code> : This trait implements the partial_cmp method where we describe what fields will be compared.</li>
+<li><code>PartialEq</code> : This defines equality between objects.</li>
+</ul>
+<p>Let’s do this.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">impl</span> PartialOrd <span style="color:#66d9ef">for</span> Umbrella {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">partial_cmp</span>(<span style="color:#f92672">&amp;</span>self, other: <span style="color:#66d9ef">&amp;</span><span style="color:#a6e22e">Self</span>) -&gt; Option<span style="color:#f92672">&lt;</span>Ordering<span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>        self.size.partial_cmp(<span style="color:#f92672">&amp;</span>other.size)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">impl</span> PartialEq <span style="color:#66d9ef">for</span> Umbrella {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">eq</span>(<span style="color:#f92672">&amp;</span>self, other: <span style="color:#66d9ef">&amp;</span><span style="color:#a6e22e">Self</span>) -&gt; <span style="color:#66d9ef">bool</span> {
+</span></span><span style="display:flex;"><span>        self.size <span style="color:#f92672">==</span> other.size
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>but we run into a problem as soon as we run this.</p>
+<pre tabindex="0"><code>error[E0599]: the method `partial_cmp` exists for enum `Size`, but its 
+trait bounds were not satisfied
+</code></pre><p>Oops! We forgot a really important thing here. We never defined a partial order on the <code>Size</code> enum in the first place, so the compiler doesn’t know how to compare its members. Let’s fix this.</p>
+<p>We can define the traits described above for the <code>enum</code> as well. But, we’ll take a shortcut this time. We can use the <code>#derive</code> attribute to tell the compiler to infer the traits onto the data type without manually defining them.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#75715e">// Small &lt; Medium &lt; Large is inferred due to discriminants.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// Implement `PartialOrd` and `PartialEq`
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#75715e">#[derive(PartialOrd, PartialEq)]</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">enum</span> <span style="color:#a6e22e">Size</span>{
+</span></span><span style="display:flex;"><span>  Small,
+</span></span><span style="display:flex;"><span>  Medium,
+</span></span><span style="display:flex;"><span>  Large,
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Note that variants ordered in this way are ordered by their discriminants, which are like indices. So an enum member at the top has a lower index than the one below it and is considered lesser. (See here)</p>
+<p>Neat! Let’s try running this now.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">main</span>(){
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> u1 <span style="color:#f92672">=</span> Umbrella{ size: <span style="color:#a6e22e">Size</span>::Small, cost: <span style="color:#ae81ff">20</span>};
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> u2 <span style="color:#f92672">=</span> Umbrella{ size: <span style="color:#a6e22e">Size</span>::Medium, cost: <span style="color:#ae81ff">20</span>};
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> u3 <span style="color:#f92672">=</span> Umbrella{ size: <span style="color:#a6e22e">Size</span>::Medium, cost: <span style="color:#ae81ff">30</span>};
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">let</span> u4 <span style="color:#f92672">=</span> Umbrella{ size: <span style="color:#a6e22e">Size</span>::Large, cost: <span style="color:#ae81ff">40</span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  assert!(u1 <span style="color:#f92672">&lt;</span> u2);
+</span></span><span style="display:flex;"><span>  assert!(u1 <span style="color:#f92672">&lt;</span> u3);
+</span></span><span style="display:flex;"><span>  assert!(u1 <span style="color:#f92672">&lt;</span> u2 <span style="color:#f92672">&amp;&amp;</span> u2 <span style="color:#f92672">&lt;</span> u3);
+</span></span><span style="display:flex;"><span>  assert!(u4 <span style="color:#f92672">==</span> u3);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  println!(<span style="color:#e6db74">&#34;Passed all checks!&#34;</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ cargo run
+</span></span><span style="display:flex;"><span>Finished dev <span style="color:#f92672">[</span>unoptimized + debuginfo<span style="color:#f92672">]</span> target<span style="color:#f92672">(</span>s<span style="color:#f92672">)</span> in 0.00s
+</span></span><span style="display:flex;"><span>Running <span style="color:#e6db74">`</span>target/debug/partialeq<span style="color:#e6db74">`</span>
+</span></span></code></pre></div><p>Passed all checks!</p>
+<p>Awesome! We just implemented a partial order on a custom data type. The entire code can be found here: Code</p>
+<h2 id="exercise-to-the-reader">Exercise to the reader<a href="#exercise-to-the-reader" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>The reader is invited to solve the following problems.</p>
+<ul>
+<li>
+<p>What happens if the size of an umbrella is unknown? How will you rewrite the code to handle the situation?</p>
+</li>
+<li>
+<p>You’ll find that u2 is actually better than u3 because you can get a medium sized umbrella at lesser price. Recall that we never used the cost field in our code. Rewrite the code so we can find larger umbrellas at equal or lesser price.</p>
+</li>
+</ul>
+<h2 id="further-reading">Further reading<a href="#further-reading" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>Ordering is a fascinating topic. Many mathematicians and enthusiasts infinitely better than myself have spent much ink and chalk explaining what it means.</p>
+<p>For starters, refer to the Order relations (Section 4.4) from Learning To Reason, where the authors offer a brief but completely sufficient explanation of ordering.</p>
+<p>$$\blacksquare\blacksquare\blacksquare$$</p>
+
+      </div></div>
 
   
   
@@ -155,6 +276,13 @@
         <hr />
     </div>
     <div class="pagination__buttons">
+        
+        <span class="button previous">
+            <a href="https://crystalsage.github.io/posts/dhke/">
+                <span class="button__icon">←</span>
+                <span class="button__text">A case of parameter injection MiTM on DHKE</span>
+            </a>
+        </span>
         
         
         <span class="button next">

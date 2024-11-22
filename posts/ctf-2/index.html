@@ -12,6 +12,9 @@
 <link rel="canonical" href="https://crystalsage.github.io/posts/ctf-2/" />
 
 
+  
+
+
 
 
 <link rel="stylesheet" href="https://crystalsage.github.io/assets/style.css">
@@ -153,7 +156,7 @@
 <p>In this 3-part series, we will see my method of approaching these challenges
 and how I solved them. The 9 challenges are divided into 3 posts.</p>
 <h1 id="attack-on-bank">Attack on Bank<a href="#attack-on-bank" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
-<p><img src="/ctf/AOB.png" alt="here"></p>
+<p><img alt="here" src="/ctf/AOB.png"></p>
 <p>The challenge description gives us info about the encrypted text (Also notice
 how ECB abbreviation gives us a hint about 128-bit AES-ECB being the cryptosystem).
 We also get an unique ID for the bank, which should be the decryption key, if my guess is correct.</p>
@@ -161,11 +164,11 @@ We also get an unique ID for the bank, which should be the decryption key, if my
 <p>Cool. This is easy. We can use what we assume to be the key as the key, and
 decrypt the text. I used my favorite tool, <a href="https://gchq.github.io/CyberChef/">CyberChef</a>
 for this.</p>
-<p><img src="/ctf/aob-flag.png" alt="aob-flag"></p>
+<p><img alt="aob-flag" src="/ctf/aob-flag.png"></p>
 <p>We first decoded the base64 encoded plaintext, and decrypted the text using the
 key, and a blank IV. This gets us our flag! <code>csi-ctf{pR0videncE_$4ys_He110}</code> $\blacksquare$</p>
 <h1 id="js-nerds">JS Nerds<a href="#js-nerds" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
-<p><img src="/ctf/jsn.png" alt="jsn"></p>
+<p><img alt="jsn" src="/ctf/jsn.png"></p>
 <p>We get login page right off the bat. I was initially thrown off by the obvious
 hints towards a Blind SQL injection. <em>You can&rsquo;t see me</em> is really
 suggestive. To test this if there&rsquo;s any SQLi involved at all,
@@ -192,18 +195,18 @@ password using a wordlist. But I didn&rsquo;t happen to have my machine with me,
 so I had to use <a href="https://crackstation.net/">crackstation</a> to do this. Fortunately,
 crackstation had this hash in their database, which reveals the password to be
 <code>adminz</code>.</p>
-<p><img src="/ctf/jsn-hash.png" alt="jsn-hash"></p>
+<p><img alt="jsn-hash" src="/ctf/jsn-hash.png"></p>
 <p>We can log in to the site with our credentials now to get the flag.</p>
-<p><img src="/ctf/jsn-flag.png" alt="jsn-flag"></p>
+<p><img alt="jsn-flag" src="/ctf/jsn-flag.png"></p>
 <p>Bread! <code>csi-ctf{eXploIted_wEb}</code> $\blacksquare$</p>
 <h1 id="computer-engineering">Computer Engineering<a href="#computer-engineering" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
-<p><img src="/ctf/ce1.png" alt="ce-1"></p>
+<p><img alt="ce-1" src="/ctf/ce1.png"></p>
 <p>We get another Github page. Except this time, there is nothing in
 the 6 commits. We do notice the 6 branches though.</p>
-<p><img src="/ctf/ce2.png" alt="ce-2"></p>
+<p><img alt="ce-2" src="/ctf/ce2.png"></p>
 <p>There are 6 branches, let&rsquo;s visit CS first. There are 3 commits in
 there, one of which gives us the flag.</p>
-<p><img src="/ctf/ce3.png" alt="ce-3"></p>
+<p><img alt="ce-3" src="/ctf/ce3.png"></p>
 <p>Flag! <code>csi-ctf{this_is_the_flag_codecocomo}</code> $\blacksquare$</p>
 <p>This challenge was really more of a &ldquo;click 50 times to get the flag&rdquo; challenge.
 These types of challenges where flags are hidden in commit histories and

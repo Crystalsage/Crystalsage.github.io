@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+    <title>Experiments with LCG :: /home/bourbon</title>
+  
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="A braindump of my experiments with Linear Congruential Generators." />
+<meta name="keywords" content="" />
+<meta name="robots" content="noodp" />
+<link rel="canonical" href="https://crystalsage.github.io/posts/lcg/" />
+
+
+  
+
+
+
+
+<link rel="stylesheet" href="https://crystalsage.github.io/assets/style.css">
+
+  <link rel="stylesheet" href="https://crystalsage.github.io/assets/green.css">
+
+
+
+
+
+
+<link rel="apple-touch-icon" href="https://crystalsage.github.io/img/apple-touch-icon-192x192.png">
+
+  <link rel="shortcut icon" href="https://crystalsage.github.io/favicon.png">
+
+
+
+<meta name="twitter:card" content="summary" />
+
+  
+    <meta name="twitter:site" content="" />
+  
+    <meta name="twitter:creator" content="" />
+
+
+
+<meta property="og:locale" content="en" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Experiments with LCG">
+<meta property="og:description" content="A braindump of my experiments with Linear Congruential Generators." />
+<meta property="og:url" content="https://crystalsage.github.io/posts/lcg/" />
+<meta property="og:site_name" content="/home/bourbon" />
+
+  
+    <meta property="og:image" content="https://crystalsage.github.io/favicon.png">
+  
+
+<meta property="og:image:width" content="2048">
+<meta property="og:image:height" content="1024">
+
+
+  <meta property="article:published_time" content="2022-12-31 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+<body class="green">
+
+
+<div class="container center headings--one-size">
+
+  <header class="header">
+  <div class="header__inner">
+    <div class="header__logo">
+      <a href="/">
+  <div class="logo">
+    /home/bourbon
+  </div>
+</a>
+
+    </div>
+    
+      <div class="menu-trigger">menu</div>
+    
+  </div>
+  
+    <nav class="menu">
+  <ul class="menu__inner menu__inner--desktop">
+    
+      
+        
+          <li><a href="/about">About</a></li>
+        
+      
+        
+          <li><a href="/setup">Setup</a></li>
+        
+      
+      
+    
+
+    
+  </ul>
+
+  <ul class="menu__inner menu__inner--mobile">
+    
+      
+        <li><a href="/about">About</a></li>
+      
+    
+      
+        <li><a href="/setup">Setup</a></li>
+      
+    
+    
+  </ul>
+</nav>
+
+  
+</header>
+
+
+  <div class="content">
+    
+<div class="post">
+  <h1 class="post-title">
+    <a href="https://crystalsage.github.io/posts/lcg/">Experiments with LCG</a></h1>
+  <div class="post-meta">
+    
+      <span class="post-date">
+        2022-12-31
+        
+      </span>
+    
+    
+    
+  </div>
+
+  
+  
+
+
+  
+
+  <div class="post-content"><div>
+        <h1 id="introduction">Introduction<a href="#introduction" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<p>Pseudo-random number generators have always been my favorite thing to study as a pastime. A beautiful amalgam of information theory, cryptography and computing simply makes this a desirable candidate for study.</p>
+<p>A while ago, I stumbled upon <a href="https://en.wikipedia.org/wiki/Linear_congruential_generator">Linear Congruential generators</a>. Such pragmatical utililty despite the functional simplicity is rare to find, especially in cryptography.</p>
+<p>Seeing how LCGs aren&rsquo;t a common topic discussed anywhere, I decided to do some experiments of my own. We&rsquo;ll begin the article with a short overview. More enlightening references can be found in the Wikipedia article.</p>
+<h1 id="overview">Overview<a href="#overview" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<p>Linear Congruential generators are pseudo-random number generators that use a recurrent piecewise linear equation defined as follows:</p>
+<p>$$
+X_{n+1} = (aX_n + c) \pmod{m}
+$$</p>
+<p>Where:</p>
+<ul>
+<li>$X$ is a sequence of pseudo-random values,</li>
+<li>$m$ is the modulus,</li>
+<li>$a$ is the multiplier,</li>
+<li>$c$ is the increment,</li>
+<li>$X_0$ is a seed.</li>
+</ul>
+<p>The last four values are pre-defined constants. Each specifiction uses different
+values.</p>
+<p><strong>Note</strong>: Since the whole calculation is modulo $m$, the whole generator has
+a <em>period</em>. Meaning that a sequence of specific numbers will simply keep
+repeating after the generator has exhausted.</p>
+<h1 id="experiments">Experiments<a href="#experiments" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<p>Since image manipulation is a favorite topic of mine to explore through both literature and code, I decided to explore LCGs through images. I experimented with two different scenarios. The reader is invited to read through them, and suggest more experimental ideas.</p>
+<h2 id="randomized-images">Randomized images<a href="#randomized-images" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>Since LCGs generate pseudo-random numbers, I thought it would be interesting to explore how random images are generated. The images would be random in the sense that each pixel would have a randomized RGB components. Let&rsquo;s take a brisk walk through the experiment.</p>
+<h3 id="setup">Setup<a href="#setup" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h3>
+<p>The code is available here: <a href="https://github.com/Crystalsage/lcg-images">Link</a>.</p>
+<p>As a foundational activity, I set my sights on writing a simple but sufficient LCG implementation. I&rsquo;d use no other language than Rust for
+anything in life. You can take a look at the implementation in <a href="https://github.com/Crystalsage/lcg-images/blob/main/src/lcg.rs">lcg.rs</a>.</p>
+<p>The code contains two important functions implmented on the LCG data struct: <code>init()</code>, which initializes the generator with a seed, and <code>next()</code>, which yields the next random number. As said in the code, the constants are the same as those used for the glibc implementation. The choice of seed is left to us. I decided to use the current system time encoded as a UNIX timestamp as a seed, which is a fairly common practice.</p>
+<p>The wrapper method, <code>get_random_numbers</code> yields a sequence of <code>n</code> random numbers. It&rsquo;s used throughout the experiments.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">get_random_numbers</span>(n: <span style="color:#66d9ef">i64</span>) -&gt; Vec<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">u64</span><span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> random_nums: Vec<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">u64</span><span style="color:#f92672">&gt;</span> <span style="color:#f92672">=</span> Vec::new();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Timestamp as a seed.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">let</span> x0 <span style="color:#f92672">=</span> get_time_as_unix_timestamp().as_secs();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> lcg: <span style="color:#a6e22e">LCG</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">LCG</span>::init(x0, A, C, M);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> _ <span style="color:#66d9ef">in</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">..</span>n {
+</span></span><span style="display:flex;"><span>        random_nums.push(lcg.next())
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> random_nums;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The code above initializes a LCG and gets <code>n</code> random numbers from the generator. Simple enough.</p>
+<p>Another technical aspect worth mentioning is the <a href="https://en.wikipedia.org/wiki/Netpbm">Netbpm image format</a>. The image format is simple enough so that we can generate new images without dealing with file format intricacies. It is as follows:</p>
+<pre tabindex="0"><code>P6 &lt;WIDTH&gt; &lt;HEIGHT&gt; &lt;ALPHA&gt;
+......
+......
+......
+</code></pre><p>where the dots are the pixel values each having RGB components.</p>
+<h3 id="experiment">Experiment<a href="#experiment" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h3>
+<p>I decided to carry out the experiment in two different ways.</p>
+<ol>
+<li>Color of each pixel is randomly picked from a palette of colors.</li>
+<li>Color of each pixel is truly randomized. This means that the color may
+vary between <code>0x000000</code>-<code>0xFFFFFF</code>.</li>
+</ol>
+<p>Let&rsquo;s dive into the first approach.</p>
+<p>First we define the color palette. I picked up the <a href="https://github.com/morhetz/gruvbox">Gruvbox color palette</a> because why not.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#66d9ef">BRIGHT_RED</span> :<span style="color:#a6e22e">Color32</span>       <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xFF3449FB</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#66d9ef">BRIGHT_GREEN</span> :<span style="color:#a6e22e">Color32</span>     <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xFF26BBB8</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#66d9ef">BRIGHT_YELLOW</span>:<span style="color:#a6e22e">Color32</span>     <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xFF2FBDFA</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#66d9ef">BRIGHT_BLUE</span> :<span style="color:#a6e22e">Color32</span>      <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xFF98A583</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#66d9ef">BRIGHT_PURPLE</span>:<span style="color:#a6e22e">Color32</span>     <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xFF9B86D3</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#66d9ef">BRIGHT_AQUA</span> :<span style="color:#a6e22e">Color32</span>      <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xFF7CC08E</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#66d9ef">BRIGHT_ORANGE</span> :<span style="color:#a6e22e">Color32</span>    <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xFF1980FE</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#66d9ef">COLOR_BACKGROUND</span>: <span style="color:#a6e22e">Color32</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xFF181818</span>;
+</span></span></code></pre></div><p>Then, we generate the image as follows:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">let</span> random_nums <span style="color:#f92672">=</span> lcg::get_random_numbers(<span style="color:#66d9ef">WIDTH</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">HEIGHT</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> y <span style="color:#66d9ef">in</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">..</span><span style="color:#66d9ef">HEIGHT</span> <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">usize</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> x <span style="color:#66d9ef">in</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">..</span><span style="color:#66d9ef">WIDTH</span> <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">usize</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">let</span> color <span style="color:#f92672">=</span> color_palette[(random_nums[j <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">usize</span>] <span style="color:#f92672">%</span> color_palette.len() <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">u64</span>) <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">usize</span>];
+</span></span><span style="display:flex;"><span>        image[y][x] <span style="color:#f92672">=</span> color;
+</span></span><span style="display:flex;"><span>        j <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>First, we generate <code>WIDTH * HEIGHT</code> amount of random numbers. The image would contain <code>WIDTH * HEIGHT</code> amount of pixels so we need those many numbers.</p>
+<p>Then, for every pixel of the image, we pick from the color palette a random color. The color is random as the random number is used as an index modulo the palette length.</p>
+<p>Then, we simply assign that color to that pixel.</p>
+<p>Once all the pixels have a value, we can write those pixels to an image file.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">save_image_as_ppm</span>(image: <span style="color:#a6e22e">Image</span>) -&gt; <span style="color:#a6e22e">std</span>::io::Result<span style="color:#f92672">&lt;</span>()<span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>   <span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> file <span style="color:#f92672">=</span> File::create(<span style="color:#66d9ef">FILE_PATH</span>)<span style="color:#f92672">?</span>;
+</span></span><span style="display:flex;"><span>   file.write_all(format!(<span style="color:#e6db74">&#34;P6</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">{}</span><span style="color:#e6db74"> </span><span style="color:#e6db74">{}</span><span style="color:#e6db74"> 255</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, <span style="color:#66d9ef">WIDTH</span>, <span style="color:#66d9ef">HEIGHT</span>).as_bytes())<span style="color:#f92672">?</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>   <span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> all_bytes: Vec<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">u8</span><span style="color:#f92672">&gt;</span> <span style="color:#f92672">=</span> Vec::new();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>   <span style="color:#66d9ef">for</span> y <span style="color:#66d9ef">in</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">..</span><span style="color:#66d9ef">HEIGHT</span> <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">usize</span> {
+</span></span><span style="display:flex;"><span>       <span style="color:#66d9ef">for</span> x <span style="color:#66d9ef">in</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">..</span><span style="color:#66d9ef">WIDTH</span> <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">usize</span> {
+</span></span><span style="display:flex;"><span>           <span style="color:#66d9ef">let</span> pixel: <span style="color:#66d9ef">i64</span> <span style="color:#f92672">=</span> image[y][x];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>           <span style="color:#75715e">// Extract red component
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>           all_bytes.push(((pixel<span style="color:#f92672">&amp;</span><span style="color:#ae81ff">0x0000FF</span>) <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">8</span><span style="color:#f92672">*</span><span style="color:#ae81ff">0</span>) <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">u8</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>           <span style="color:#75715e">// Extract green component
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>           all_bytes.push(((pixel<span style="color:#f92672">&amp;</span><span style="color:#ae81ff">0x00FF00</span>) <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">8</span><span style="color:#f92672">*</span><span style="color:#ae81ff">1</span>) <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">u8</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>           <span style="color:#75715e">// Extract blue component
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>           all_bytes.push(((pixel<span style="color:#f92672">&amp;</span><span style="color:#ae81ff">0xFF0000</span>) <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">8</span><span style="color:#f92672">*</span><span style="color:#ae81ff">2</span>) <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">u8</span>);
+</span></span><span style="display:flex;"><span>       }
+</span></span><span style="display:flex;"><span>   }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>   file.write_all(<span style="color:#f92672">&amp;</span>all_bytes).unwrap();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>   Ok(())
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Notice that Netbpm uses reversed notation for the pixel components. The component order is <code>BGR</code> instead of RGB.</p>
+<p><strong>The result:</strong></p>
+<p>The output is a <code>.ppm</code> image which looks like this:
+<img alt="lcg-image-out" src="/lcg/lcg-image-gruvbox-zoomed-out.png"></p>
+<p>Interesting! Let&rsquo;s zoom in.</p>
+<p><img alt="lcg-image-in" src="/lcg/lcg-image-gruvbox-zoomed-in.png"></p>
+<p>Not as random as thought it&rsquo;d be, eh? We see that the colors repeat after a while. This probably means that the underlying number modulo color palette length is the same for some definite, short period.</p>
+<p>Makes sense! Since we are doing modulo calculations again on the generated number, the period gets even shortened, and the pattern emerges.</p>
+<h4 id="second-variant">Second variant<a href="#second-variant" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h4>
+<p>For the second variant of this experiment, we ditch the palette entirely. Let&rsquo;s change our pixel generation logic a bit.</p>
+<p>Instead of picking from a palette, we simply extract the lower 3 bytes of the randomly generated number. There&rsquo;s a variation of this where we simply use the number modulo 0xFFFFFF.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">let</span> random_nums <span style="color:#f92672">=</span> lcg::get_random_numbers(<span style="color:#66d9ef">WIDTH</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">HEIGHT</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> y <span style="color:#66d9ef">in</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">..</span><span style="color:#66d9ef">HEIGHT</span> <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">usize</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> x <span style="color:#66d9ef">in</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">..</span><span style="color:#66d9ef">WIDTH</span> <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">usize</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// let color = (random_nums[j] % 0xFFFFFF) as i64;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">let</span> color <span style="color:#f92672">=</span> (random_nums[j] <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xFFFFFF</span>) <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">i64</span>;
+</span></span><span style="display:flex;"><span>        image[y][x] <span style="color:#f92672">=</span> color;
+</span></span><span style="display:flex;"><span>        j <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><strong>The result:</strong></p>
+<p>The output is a <code>.ppm</code> image which looks like this:
+<img alt="lcg-image-random-out" src="/lcg/lcg-image-random-out.png"></p>
+<p>Just what we ordered! Noisy images are just what we needed and expected. Since the image is noisy, we may claim that LCG indeed generates random numbers successfully.</p>
+<p>It is however, questionable if a pattern exists in the resulting image. Since we no longer do a modulo calculation in the logical AND variation, the pattern simply vanishes (as zooming would explain). But the regularly irregular columns in the image seem interesting.</p>
+<h1 id="image-encryption">Image encryption<a href="#image-encryption" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<p>For my second experiment, I wanted to explore image encryption with LCGs. Since LCGs are pseudo-random number generators (PRNG), it is a good question to ask how they can be used for encryption.</p>
+<p>Personally, I went the XOR route. Meaning that each pixel of the image is XORd with a random number. There are different strategies for this as well, as we will explore.</p>
+<h3 id="setup-1">Setup<a href="#setup-1" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h3>
+<p>The code is at <a href="https://github.com/Crystalsage/lcg-enc/">lcg-enc</a> repository.</p>
+<p>The LCG implementation for this experiment is the same as the last one. No changes.</p>
+<p>The test image I used is the famous AES-ECB Tux.</p>
+<p><img alt="test-tux" src="/lcg/lcg-enc-normal-tux.png"></p>
+<p>This image is often used as a proof of concept for testing encryption algorithms. For illustration, here&rsquo;s how the image looks after encryption with AES-ECB.</p>
+<p><img alt="test-tux" src="/lcg/lcg-enc-tux-aes.png"></p>
+<p>A minor technical difference arises in this experiment, in the form of image formats. Since we now need to read images instead of just generating them, we would like to have a proper decoder. Fortunately, Rust&rsquo;s handy <a href="https://crates.io/crates/image">image crate</a> takes care of everything for us.</p>
+<h3 id="experiment-1">Experiment<a href="#experiment-1" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h3>
+<p>We&rsquo;ll need to do the following things to encrypt the image.</p>
+<pre tabindex="0"><code>1. Read all the pixels of the image to be encrypted.
+2. Generate the WIDTH * HEIGHT amount of random numbers from the LCG.
+3. XOR each pixel of the image with a number amongst the random numbers generated in step 2.
+4. Write all encrypted pixels to a file and save the image.
+</code></pre><p>Fortunately the image crate takes all the complexity of image formats away from us. We do each step as follows:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">read_image</span>() -&gt; <span style="color:#a6e22e">image</span>::DynamicImage {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> image::open(<span style="color:#66d9ef">IMAGE_PATH</span>).unwrap();
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>This reads, parses and returns a <code>Image</code> struct that we can use. The <code>Image</code> struct has several defined methods on it that we find useful.</p>
+<p>Once read, we generate the random numbers:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">let</span> random_numbers: Vec<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">u64</span><span style="color:#f92672">&gt;</span> <span style="color:#f92672">=</span> lcg::get_random_numbers(image.width() <span style="color:#f92672">*</span> image.height() <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">i64</span>);
+</span></span></code></pre></div><p>Then we encrypt the image.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">generate_encrypted_image</span>(image: <span style="color:#a6e22e">DynamicImage</span>, random_numbers: Vec<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">u64</span><span style="color:#f92672">&gt;</span>) -&gt; <span style="color:#a6e22e">ImageBuffer</span><span style="color:#f92672">&lt;</span>Rgba<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">u8</span><span style="color:#f92672">&gt;</span>, Vec<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">u8</span><span style="color:#f92672">&gt;&gt;</span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> enc_image: <span style="color:#a6e22e">RgbaImage</span> <span style="color:#f92672">=</span> ImageBuffer::new(image.width(), image.height());
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> j: <span style="color:#66d9ef">usize</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (x, y, enc_pixel) <span style="color:#66d9ef">in</span> enc_image.enumerate_pixels_mut() {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">let</span> pixel <span style="color:#f92672">=</span> image.get_pixel(x, y);
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">*</span>enc_pixel <span style="color:#f92672">=</span> xor_pixel(pixel, random_numbers[j]);
+</span></span><span style="display:flex;"><span>        j <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> enc_image;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>We iterate through all the pixels of a new image buffer. The encrypted pixel is simply the xor of the pixel in the normal image and the random number.</p>
+<p>The <code>xor_pixel</code> method simply returns as pixel encoded as RGBA. Note the XOR. We&rsquo;ll let the alpha channel stay as it is for now.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">xor_pixel</span>(pixel: <span style="color:#a6e22e">Rgba</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">u8</span><span style="color:#f92672">&gt;</span>, random_number: <span style="color:#66d9ef">u64</span>) -&gt; <span style="color:#a6e22e">Rgba</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">u8</span><span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>    image::Rgba([
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">// Red 
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>                pixel[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">^</span> random_number <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">u8</span>,
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">// Blue
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>                pixel[<span style="color:#ae81ff">1</span>] <span style="color:#f92672">^</span> random_number <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">u8</span>,
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">// Green
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>                pixel[<span style="color:#ae81ff">2</span>] <span style="color:#f92672">^</span> random_number <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">u8</span>,
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">// Alpha
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>                <span style="color:#ae81ff">255</span>
+</span></span><span style="display:flex;"><span>    ])
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><strong>The result:</strong></p>
+<p>We get an encrypted PNG file.
+<img alt="lcg-enc-image-pixel" src="/lcg/lcg-enc-image-pixel.png"></p>
+<p>Now that&rsquo;s not bad, is it? You can still make out the penguin but the image itself is sufficiently encrypted.</p>
+<h4 id="a-variation">A variation<a href="#a-variation" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h4>
+<p>Now let&rsquo;s alter our image encryption a bit and do a variant.</p>
+<p>Here, instead of encrypting the whole pixel with the same value, we use different random numbers for each of the RGBA components.</p>
+<p>Thus, we&rsquo;ll first need 4 times the random numbers:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">let</span> random_numbers: Vec<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">u64</span><span style="color:#f92672">&gt;</span> <span style="color:#f92672">=</span> lcg::get_random_numbers((image.width() <span style="color:#f92672">*</span> image.height() <span style="color:#f92672">*</span> <span style="color:#ae81ff">4</span>) <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">i64</span>);
+</span></span></code></pre></div><p>Then we encrypt the image.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">generate_encrypted_image</span>(image: <span style="color:#a6e22e">DynamicImage</span>, random_numbers: Vec<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">u64</span><span style="color:#f92672">&gt;</span>) -&gt; <span style="color:#a6e22e">ImageBuffer</span><span style="color:#f92672">&lt;</span>Rgba<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">u8</span><span style="color:#f92672">&gt;</span>, Vec<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">u8</span><span style="color:#f92672">&gt;&gt;</span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> enc_image: <span style="color:#a6e22e">RgbaImage</span> <span style="color:#f92672">=</span> ImageBuffer::new(image.width(), image.height());
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> j: <span style="color:#66d9ef">usize</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (x, y, enc_pixel) <span style="color:#66d9ef">in</span> enc_image.enumerate_pixels_mut() {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">let</span> pixel <span style="color:#f92672">=</span> image.get_pixel(x, y);
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">*</span>enc_pixel <span style="color:#f92672">=</span> xor_all_components_pixel(pixel, <span style="color:#f92672">&amp;</span>random_numbers[j<span style="color:#f92672">..</span>j<span style="color:#f92672">+</span><span style="color:#ae81ff">4</span>]);
+</span></span><span style="display:flex;"><span>        j <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> enc_image;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The encryption procedure is same, save for the variation of the pixel XOR subroutine. We now pass a slice of 4 random numbers. The <code>xor_all_components_pixel</code> subroutine is like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">xor_all_components_pixel</span>(pixel: <span style="color:#a6e22e">Rgba</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">u8</span><span style="color:#f92672">&gt;</span>, random_numbers: <span style="color:#66d9ef">&amp;</span>[<span style="color:#66d9ef">u64</span>]) -&gt; <span style="color:#a6e22e">Rgba</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">u8</span><span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> encrypt_alpha: <span style="color:#66d9ef">bool</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span>;
+</span></span><span style="display:flex;"><span>    image::Rgba([
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">// Red 
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>                pixel[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">^</span> random_numbers[<span style="color:#ae81ff">0</span>] <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">u8</span>,
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">// Blue
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>                pixel[<span style="color:#ae81ff">1</span>] <span style="color:#f92672">^</span> random_numbers[<span style="color:#ae81ff">1</span>] <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">u8</span>,
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">// Green
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>                pixel[<span style="color:#ae81ff">2</span>] <span style="color:#f92672">^</span> random_numbers[<span style="color:#ae81ff">2</span>] <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">u8</span>,
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">// Alpha
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>                <span style="color:#66d9ef">match</span> encrypt_alpha {
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">true</span> <span style="color:#f92672">=&gt;</span> <span style="color:#ae81ff">255</span> <span style="color:#f92672">^</span> random_numbers[<span style="color:#ae81ff">3</span>] <span style="color:#66d9ef">as</span> <span style="color:#66d9ef">u8</span>,
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">false</span> <span style="color:#f92672">=&gt;</span> <span style="color:#ae81ff">255</span>
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>    ])
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The code is pretty self-explanatory. <code>encrypt_alpha</code> is a switch that you can use to decide whether if you want to encrypt the alpha channel as well. Note that we use the entire slice.</p>
+<p><strong>The result:</strong></p>
+<p>We get an encrypted PNG file.
+<img alt="lcg-enc-image-rgb" src="/lcg/lcg-enc-image-rgb.png"></p>
+<p>A good question to ask is if this variation offers us more encryption than the first one, where we just used the same number for the entire pixel. Personally, I didn&rsquo;t notice much of a difference. Why? I do not know. Maybe information theory has an answer. Both approaches seem exactly similar if you look at it from a randomness perspective.</p>
+<p>Here&rsquo;s the same encryption method with the alpha channel encrypted.
+<img alt="lcg-enc-image-rgba" src="/lcg/lcg-enc-image-rgba.png"></p>
+<p>Makes the penguin pop out even more. An interesting thing to note is that we lost the color palette of the original, unencrypted image here. This is actually better.</p>
+<h1 id="conclusion">Conclusion<a href="#conclusion" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<p>There&rsquo;s no conclusion. This was purely for recreational purposes.</p>
+<p>$$
+\blacksquare
+\blacksquare
+\blacksquare
+$$</p>
+
+      </div></div>
+
+  
+  
+<div class="pagination">
+    <div class="pagination__title">
+        <span class="pagination__title-h">Read other posts</span>
+        <hr />
+    </div>
+    <div class="pagination__buttons">
+        
+        <span class="button previous">
+            <a href="https://crystalsage.github.io/posts/dc_term/">
+                <span class="button__icon">←</span>
+                <span class="button__text">Windows Terminal with Double Commander</span>
+            </a>
+        </span>
+        
+        
+        <span class="button next">
+            <a href="https://crystalsage.github.io/posts/smt/">
+                <span class="button__text">SMT solvers for fun and CTFs</span>
+                <span class="button__icon">→</span>
+            </a>
+        </span>
+        
+    </div>
+</div>
+
+  
+
+  
+
+</div>
+
+  </div>
+
+  
+    <footer class="footer">
+  <div class="footer__inner">
+    
+      <div class="copyright copyright--user">
+        <span>Licensed to Bourbon</span>
+    
+        <span>:: Theme made by <a href="https://twitter.com/panr">panr</a></span>
+      </div>
+  </div>
+</footer>
+
+
+
+<script src="https://crystalsage.github.io/assets/main.js"></script>
+<script src="https://crystalsage.github.io/assets/prism.js"></script>
+<script type="text/javascript"
+  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\[','\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+           extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    }
+  });
+  </script>
+
+
+
+
+
+
+  
+</div>
+
+</body>
+</html>
